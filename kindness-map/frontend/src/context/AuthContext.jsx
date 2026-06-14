@@ -31,7 +31,6 @@ export const AuthProvider = ({ children }) => {
 
   const fetchUserData = useCallback(async () => {
     const token = localStorage.getItem('kindness_token');
-    const localUserStr = localStorage.getItem('kindness_user');
 
     if (!token) {
       setUser(null);
@@ -45,28 +44,16 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const res = await api.get('/auth/me');
-      let freshUser = res.data.user;
-      
-      // BẢO TỒN NGUỒN CHÂN LÝ ĐỊA PHƯƠNG: Ưu tiên giữ lại Avatar/Tên mà người dùng vừa Up thành công!
-      if (localUserStr) {
-        try {
-          const localObj = JSON.parse(localUserStr);
-          freshUser = { ...freshUser, fullName: localObj.fullName || freshUser.fullName, avatar: localObj.avatar || freshUser.avatar };
-        } catch (e) {}
-      }
+      // DB là nguồn dữ liệu duy nhất và chính xác — không dùng localStorage để override
+      const freshUser = res.data.user;
       
       setUser(freshUser);
       setUserBadges(res.data.badges || getFallbackBadges(freshUser.role, freshUser.level));
       setUserPosts(res.data.posts || []);
       setIsAuthenticated(true);
-      
-      localStorage.setItem('kindness_user', JSON.stringify(freshUser));
     } catch (error) {
-      if (localUserStr) {
-        const parsed = JSON.parse(localUserStr);
-        setUser(parsed);
-        setIsAuthenticated(true);
-      }
+      // Nếu mất mạng, vẫn giữ trạng thái cũ không logout
+      console.error('fetchUserData error:', error);
     } finally {
       setLoading(false);
     }
@@ -82,7 +69,6 @@ export const AuthProvider = ({ children }) => {
       const loggedUser = res.data.user;
       
       localStorage.setItem('kindness_token', res.data.token);
-      localStorage.setItem('kindness_user', JSON.stringify(loggedUser));
       
       setUser(loggedUser);
       setIsAuthenticated(true);
@@ -104,7 +90,6 @@ export const AuthProvider = ({ children }) => {
       const newUser = res.data.user;
 
       localStorage.setItem('kindness_token', res.data.token);
-      localStorage.setItem('kindness_user', JSON.stringify(newUser));
 
       setUser(newUser);
       setIsAuthenticated(true);
@@ -122,7 +107,6 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('kindness_token');
-    localStorage.removeItem('kindness_user');
     setUser(null);
     setUserBadges([]);
     setUserPosts([]);

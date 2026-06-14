@@ -115,24 +115,18 @@ export const UserProfile = () => {
     
     try {
       const res = await api.put('/auth/profile', { fullName, avatar });
+      // Cập nhật token mới (chứa avatar/fullName mới) vào localStorage
       if (res.data.token) {
         localStorage.setItem('kindness_token', res.data.token);
       }
       
-      // Đồng bộ local nhanh
-      const updatedUser = { ...user, fullName, avatar };
-      localStorage.setItem('kindness_user', JSON.stringify(updatedUser));
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'kindness_user',
-        newValue: JSON.stringify(updatedUser)
-      }));
-
+      // Tải lại dữ liệu user từ DB — đây là nguồn sự thật duy nhất
       await fetchUserData();
       setEditModalOpen(false);
-      addToast('✨ Cập nhật hồ sơ thành công!', 'Họ tên và Avatar của bạn đã được thay đổi rạng ngời trên toàn Website.', 'success');
+      addToast('✨ Cập nhật thành công!', 'Avatar và tên của bạn đã được lưu vào Database và sẽ hiển thị ở mọi trình duyệt.', 'success');
     } catch (error) {
       console.error('Update profile error:', error);
-      addToast('Không thể cập nhật', 'Có lỗi xảy ra, vui lòng thử lại sau.', 'warning');
+      addToast('Không thể cập nhật', error.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại sau.', 'warning');
     } finally {
       setSaving(false);
     }
