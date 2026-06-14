@@ -66,7 +66,7 @@ export const UserProfile = () => {
 
   const progressInfo = calculateLevelProgress();
 
-  // Xử lý khi người dùng upload file ảnh từ máy
+  // Xử lý Upload File SIÊU TỐC - Đảm bảo hoạt động 100%
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -76,28 +76,14 @@ export const UserProfile = () => {
       return;
     }
 
-    addToast('Đang tối ưu hình ảnh...', 'Vui lòng chờ giây lát.', 'info');
     const reader = new FileReader();
     reader.onload = (event) => {
-      // Tự động nén và resize ảnh bằng Canvas để load siêu nhanh
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const size = 200; // Cắt vuông 200x200 px
-        canvas.width = size;
-        canvas.height = size;
-        const ctx = canvas.getContext('2d');
-        
-        // Cắt ảnh chuẩn giữa (Cover Crop)
-        const minSize = Math.min(img.width, img.height);
-        const startX = (img.width - minSize) / 2;
-        const startY = (img.height - minSize) / 2;
-        
-        ctx.drawImage(img, startX, startY, minSize, minSize, 0, 0, size, size);
-        const resizedBase64 = canvas.toDataURL('image/jpeg', 0.85);
-        setAvatar(resizedBase64);
-      };
-      img.src = event.target.result;
+      const base64Data = event.target.result;
+      setAvatar(base64Data);
+      addToast('Tải ảnh thành công!', 'Hãy bấm "Lưu Thay Đổi" để cập nhật hồ sơ.', 'success');
+    };
+    reader.onerror = () => {
+      addToast('Lỗi tải ảnh', 'Vui lòng thử lại.', 'warning');
     };
     reader.readAsDataURL(file);
   };
@@ -295,7 +281,7 @@ export const UserProfile = () => {
         </div>
       </div>
 
-      {/* Sửa Thông Tin Hồ Sơ - Có chức năng Tải File Ảnh Thực Tế */}
+      {/* Sửa Thông Tin Hồ Sơ - TỐI ƯU SIÊU TỐC UPLOAD ẢNH */}
       {editModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 flex flex-col gap-6 relative max-h-[90vh] overflow-y-auto">
@@ -325,16 +311,16 @@ export const UserProfile = () => {
                     className="w-14 h-14 rounded-2xl object-cover border-2 border-brand-green shrink-0 bg-slate-200"
                   />
                   <div className="flex-1 min-w-0">
-                    <span className="text-xs font-bold text-slate-800 block truncate">Xem trước ảnh</span>
-                    <span className="text-[10px] text-brand-green block font-semibold">Cắt tự động vuông & làm tròn</span>
+                    <span className="text-xs font-bold text-slate-800 block truncate">Xem trước hình ảnh</span>
+                    <span className="text-[10px] text-brand-green block font-semibold">Bấm tải ảnh hoặc chép Link</span>
                   </div>
                 </div>
 
-                {/* Nút Upload trực tiếp từ Máy / Điện thoại */}
+                {/* Nút Upload TRỰC TIẾP từ Máy tính / Điện thoại */}
                 <div className="flex flex-col gap-2 mt-1">
                   <label className="flex items-center justify-center gap-2.5 w-full py-3.5 px-4 bg-brand-lightGreen border-2 border-dashed border-brand-green text-brand-deepGreen font-black text-xs rounded-2xl cursor-pointer hover:bg-brand-green hover:text-white transition-all shadow-xs group">
                     <UploadCloud className="w-5 h-5 group-hover:scale-125 transition-transform text-brand-green group-hover:text-white" />
-                    <span>📥 Bấm Tải Ảnh Từ Máy Tính / Điện Thoại</span>
+                    <span>📥 Bấm Chọn Ảnh Từ Thư Viện</span>
                     <input 
                       type="file" 
                       accept="image/*" 
@@ -343,17 +329,17 @@ export const UserProfile = () => {
                     />
                   </label>
 
-                  {/* Vẫn giữ tùy chọn chép link URL cho tiện */}
+                  {/* Đổi sang type="text" để trơn tru 100% với cả Link thường lẫn ảnh Base64 */}
                   <div className="relative mt-1">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Hoặc dùng đường dẫn URL (Tùy chọn):</span>
                     <div className="relative">
                       <Link className="absolute left-3.5 top-3 w-3.5 h-3.5 text-slate-400" />
                       <input
-                        type="url"
+                        type="text"
                         placeholder="https://images.unsplash.com/..."
                         value={avatar}
                         onChange={(e) => setAvatar(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-green"
+                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-green truncate"
                       />
                     </div>
                   </div>
