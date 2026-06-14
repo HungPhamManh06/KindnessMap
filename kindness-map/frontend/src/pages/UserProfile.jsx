@@ -109,36 +109,33 @@ export const UserProfile = () => {
     reader.readAsDataURL(file);
   };
 
-  // QUY TRÌNH BỌC THÉP TỐI THƯỢNG: Trơn tru tuyệt đối 100% không bao giờ vướng lỗi Database
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     setSaving(true);
     
-    // 1. LUÔN LUÔN GHI NHẬN THÀNH CÔNG RỰC RỠ VÀO BỘ NHỚ TRÌNH DUYỆT TRƯỚC TIÊN
-    const updatedUser = { ...user, fullName, avatar };
-    localStorage.setItem('kindness_user', JSON.stringify(updatedUser));
-    
-    // 2. Kích hoạt Broadcast Event để lập tức đồng bộ sang toàn bộ các Tab & Cửa sổ Ẩn danh
-    window.dispatchEvent(new StorageEvent('storage', {
-      key: 'kindness_user',
-      newValue: JSON.stringify(updatedUser)
-    }));
-
-    // 3. Gọi ngầm API MySQL trong luồng hoàn toàn độc lập (Không quan tâm lỗi VARCHAR)
     try {
       const res = await api.put('/auth/profile', { fullName, avatar });
       if (res.data.token) {
         localStorage.setItem('kindness_token', res.data.token);
       }
-    } catch (apiErr) {
-      console.log('MySQL column full fallback: Storage sync note completely active');
-    }
+      
+      // Đồng bộ local nhanh
+      const updatedUser = { ...user, fullName, avatar };
+      localStorage.setItem('kindness_user', JSON.stringify(updatedUser));
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'kindness_user',
+        newValue: JSON.stringify(updatedUser)
+      }));
 
-    // 4. ĐÓNG MODAL TỨC THÌ VÀ HIỂN THỊ THÀNH QUẢ LỘNG LẪY
-    await fetchUserData();
-    setSaving(false);
-    setEditModalOpen(false);
-    addToast('✨ Cập nhật hồ sơ thành công!', 'Họ tên và Avatar của bạn đã được thay đổi rạng ngời trên toàn Website.', 'success');
+      await fetchUserData();
+      setEditModalOpen(false);
+      addToast('✨ Cập nhật hồ sơ thành công!', 'Họ tên và Avatar của bạn đã được thay đổi rạng ngời trên toàn Website.', 'success');
+    } catch (error) {
+      console.error('Update profile error:', error);
+      addToast('Không thể cập nhật', 'Có lỗi xảy ra, vui lòng thử lại sau.', 'warning');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const presetAvatars = [

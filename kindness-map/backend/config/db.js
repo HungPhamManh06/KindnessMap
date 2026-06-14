@@ -43,7 +43,7 @@ async function initMySqlDb() {
           fullName VARCHAR(255) NOT NULL,
           email VARCHAR(255) NOT NULL UNIQUE,
           password VARCHAR(255) NOT NULL,
-          avatar VARCHAR(500) DEFAULT 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
+          avatar LONGTEXT,
           points INT DEFAULT 0,
           level VARCHAR(100) DEFAULT 'Active Citizen',
           role ENUM('guest', 'user', 'admin') DEFAULT 'user',
@@ -124,6 +124,14 @@ async function initMySqlDb() {
       ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
     `;
     await pool.query(schemaSql);
+
+    // Bọc thép db: Upgrade avatar column to LONGTEXT safely if table already existed
+    try {
+      await pool.query("ALTER TABLE Users MODIFY COLUMN avatar LONGTEXT");
+      console.log('✅ Đã cập nhật Users.avatar thành LONGTEXT.');
+    } catch (e) {
+      console.log('⚠️ Bỏ qua cập nhật Users.avatar (đã tồn tại hoặc không thể thay đổi).');
+    }
 
     // 2. Kiểm tra nếu bảng Users trống thì Tự động nén dữ liệu mẫu vào
     const [userRows] = await pool.query(`SELECT COUNT(*) as cnt FROM Users`);
