@@ -119,6 +119,7 @@ const login = async (req, res) => {
 
 const getMe = async (req, res) => {
   try {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     const user = await queryGet(
       `SELECT id, fullName, email, avatar, points, level, role, createdAt FROM Users WHERE id = ?`,
       [req.user.id]
@@ -158,7 +159,15 @@ const updateProfile = async (req, res) => {
       `UPDATE Users SET fullName = ?, avatar = ? WHERE id = ?`,
       [fullName, avatar, req.user.id]
     );
-    res.status(200).json({ message: 'Cập nhật hồ sơ thành công!' });
+    
+    // Sign a new token with updated payload
+    const token = jwt.sign(
+      { id: req.user.id, email: req.user.email, fullName, role: req.user.role, avatar },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+    
+    res.status(200).json({ message: 'Cập nhật hồ sơ thành công!', token });
   } catch (error) {
     console.error('UpdateProfile error:', error);
     res.status(500).json({ message: 'Có lỗi khi cập nhật hồ sơ.' });

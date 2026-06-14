@@ -70,7 +70,10 @@ export const UserProfile = () => {
     e.preventDefault();
     try {
       setSaving(true);
-      await api.put('/auth/profile', { fullName, avatar });
+      const res = await api.put('/auth/profile', { fullName, avatar });
+      if (res.data.token) {
+        localStorage.setItem('kindness_token', res.data.token);
+      }
       await fetchUserData();
       setEditModalOpen(false);
       addToast('Cập nhật thành công!', 'Hồ sơ của bạn đã được thay đổi.', 'success');
