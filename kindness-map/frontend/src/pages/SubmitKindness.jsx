@@ -192,159 +192,22 @@ export const SubmitKindness = () => {
             </div>
           )}
 
-          {/* 1. Title Input */}
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-extrabold text-slate-800 flex items-center justify-between">
-              <span>1. Tiêu đề câu chuyện *</span>
-              <span className="text-slate-400 font-normal">Tối đa 150 ký tự</span>
-            </label>
-            <input
-              type="text"
-              required
-              maxLength={150}
-              placeholder="Ví dụ: Cùng nhóm bạn thu gom rác thải nhựa tại Công viên Thống Nhất..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white transition-all"
-            />
-          </div>
+               {/* Định Vị Tọa Độ Bằng Google Maps */}
+              <div className="h-72 w-full rounded-3xl overflow-hidden border border-slate-200 shadow-md relative">
+                <div className="absolute top-2 left-2 z-10 bg-white/90 backdrop-blur-md px-3 py-1 rounded-xl text-[10px] font-black text-brand-green shadow-sm">
+                  💡 Bấm trực tiếp chuột vào Bản đồ Google để gắn tọa độ
+                </div>
 
-          {/* 2. Category Selection */}
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-extrabold text-slate-800">
-              2. Chọn danh mục hoạt động *
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {categories.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => setCategory(cat)}
-                  className={`py-3 px-4 rounded-2xl text-xs font-extrabold border transition-all text-center ${
-                    category === cat
-                      ? 'bg-brand-lightGreen border-brand-green text-brand-deepGreen shadow-sm ring-2 ring-brand-green/20'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 3. Description Input */}
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-extrabold text-slate-800 flex items-center justify-between">
-              <span>3. Kể lại câu chuyện hoặc cảm nghĩ của bạn *</span>
-              <span className="text-slate-400 font-normal">Càng chi tiết càng truyền cảm hứng</span>
-            </label>
-            <textarea
-              required
-              rows={5}
-              placeholder="Chia sẻ về hoàn cảnh, những người cùng tham gia và cảm xúc sau khi thực hiện hành động này..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white transition-all leading-relaxed"
-            />
-          </div>
-
-          {/* 4. Image URL or Pick Quick Template */}
-          <div className="flex flex-col gap-3">
-            <label className="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
-              <ImageIcon className="w-4 h-4 text-brand-green" />
-              <span>4. Hình ảnh minh họa (Đường dẫn URL hoặc chọn Mẫu nhanh dưới đây) *</span>
-            </label>
-
-            <input
-              type="url"
-              placeholder="https://images.unsplash.com/photo-..."
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white transition-all"
-            />
-
-            {/* Quick pre-selected image templates */}
-            <div className="flex flex-col gap-1.5 mt-1">
-              <span className="text-[11px] font-bold text-slate-500">Hoặc chọn hình ảnh phù hợp theo mẫu có sẵn:</span>
-              <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
-                {imageTemplates.map((tpl, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => setImageUrl(tpl.url)}
-                    className={`relative rounded-xl overflow-hidden cursor-pointer border-2 transition-all ${
-                      imageUrl === tpl.url ? 'border-brand-green ring-2 ring-brand-green/30 scale-105' : 'border-slate-200 opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    <img src={tpl.url} alt={tpl.name} className="w-full h-16 object-cover" />
-                    <div className="absolute inset-x-0 bottom-0 bg-slate-900/80 text-[9px] text-white font-extrabold text-center py-0.5 truncate px-1">
-                      {tpl.name}
-                    </div>
-                  </div>
-                ))}
+                <MapComponent 
+                  posts={[{
+                    id: 'picker',
+                    latitude: pickedLatLng[0],
+                    longitude: pickedLatLng[1],
+                    title: 'Vị trí Việc Tốt của bạn',
+                    category: category,
+                    imageUrl: imageUrl
+                  }]}
+                  selectedCenter={pickedLatLng}
+                  className="h-full w-full"
+                />
               </div>
-            </div>
-          </div>
-
-          {/* 5. Interactive Map Location Picker */}
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <label className="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-rose-500" />
-                <span>5. Vị trí Bản Đồ (Bấm trực tiếp lên bản đồ để chọn tọa độ) *</span>
-              </label>
-              <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-200">
-                Tọa độ chọn: {pickedLatLng[0].toFixed(4)}, {pickedLatLng[1].toFixed(4)}
-              </span>
-            </div>
-
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Nhập tên địa danh / khu vực (Ví dụ: Hồ Tây, Hà Nội)"
-                value={locationName}
-                onChange={(e) => setLocationName(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-brand-green mb-3"
-              />
-              
-              <div className="h-72 w-full rounded-2xl overflow-hidden border border-slate-200 shadow-md">
-                <MapContainer center={pickedLatLng} zoom={13} className="h-full w-full" scrollWheelZoom={true}>
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <LocationPickerMarker position={pickedLatLng} setPosition={setPickedLatLng} />
-                </MapContainer>
-              </div>
-            </div>
-          </div>
-
-          {/* Submit Action */}
-          <div className="pt-6 border-t border-slate-100 flex items-center justify-end gap-4">
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="px-6 py-4 rounded-2xl text-slate-600 hover:text-slate-900 font-extrabold text-xs hover:bg-slate-100 transition-colors"
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              disabled={submitting || !title || !description}
-              className="px-10 py-4 rounded-2xl bg-gradient-to-r from-brand-green to-brand-teal text-white font-black text-xs shadow-xl shadow-brand-green/30 hover:opacity-95 active:scale-98 transition-all flex items-center gap-2 disabled:opacity-60"
-            >
-              {submitting ? (
-                <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <Send className="w-4 h-4" />
-                  <span>Gửi & Ghim Lên Bản Đồ</span>
-                </>
-              )}
-            </button>
-          </div>
-
-        </form>
-      )}
-
-    </div>
-  );
-};
