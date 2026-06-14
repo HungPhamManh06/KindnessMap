@@ -12,7 +12,6 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   const [activeModal, setActiveModal] = useState(null);
-
   const { addToast } = useNotification();
 
   const getFallbackBadges = (role, level) => {
@@ -30,35 +29,9 @@ export const AuthProvider = ({ children }) => {
     ];
   };
 
-  const getFallbackPosts = (email, fullName) => {
-    return [
-      {
-        id: 101,
-        title: 'Cùng nhóm bạn thu gom rác thải nhựa tại Công viên',
-        description: 'Buổi sáng ý nghĩa thu gom được 15 bao rác thải, trả lại cảnh quan xanh sạch.',
-        category: 'Môi trường',
-        locationName: 'Hà Nội, Việt Nam',
-        status: 'Approved',
-        imageUrl: 'https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?auto=format&fit=crop&w=800&q=80',
-        createdAt: '2026-06-12'
-      },
-      {
-        id: 102,
-        title: 'Thăm hỏi và tặng quà cho các cụ già neo đơn',
-        description: 'Trao tặng sữa và lắng nghe những câu chuyện đời xúc động của các cụ.',
-        category: 'Người cao tuổi',
-        locationName: 'TP. Hồ Chí Minh',
-        status: 'Approved',
-        imageUrl: 'https://images.unsplash.com/photo-1516307365426-bea591f05011?auto=format&fit=crop&w=800&q=80',
-        createdAt: '2026-06-10'
-      }
-    ];
-  };
-
+  // QUY TRÌNH ĐỒNG BỘ HOÀN HẢO: Luôn lấy Database MySQL làm nguồn chân lý duy nhất (Single Source of Truth)
   const fetchUserData = useCallback(async () => {
     const token = localStorage.getItem('kindness_token');
-    const savedUser = localStorage.getItem('kindness_user');
-
     if (!token) {
       setUser(null);
       setUserBadges([]);
@@ -68,36 +41,27 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    if (savedUser) {
-      try {
-        const parsed = JSON.parse(savedUser);
-        setUser(parsed);
-        setIsAuthenticated(true);
-        setUserBadges(getFallbackBadges(parsed.role, parsed.level));
-        setUserPosts(getFallbackPosts(parsed.email, parsed.fullName));
-      } catch (e) {
-        console.error('Local error', e);
-      }
-    }
-
     try {
       setLoading(true);
       const res = await api.get('/auth/me');
+      const freshUser = res.data.user;
       
-      // Nếu localStorage đã có Avatar & Họ Tên mới do người dùng up, ƯU TIÊN GIỮ NGUYÊN để không bị API đè lên!
-      let finalU = res.data.user;
-      if (savedUser) {
-        const localObj = JSON.parse(savedUser);
-        finalU = { ...res.data.user, fullName: localObj.fullName || finalU.fullName, avatar: localObj.avatar || finalU.avatar };
-      }
-      
-      setUser(finalU);
-      setUserBadges(res.data.badges || getFallbackBadges(finalU.role, finalU.level));
-      setUserPosts(res.data.posts || getFallbackPosts(finalU.email, finalU.fullName));
+      // Luôn LUÔN LUÔN tin tưởng và hiển thị dữ liệu mới nhất từ máy chủ API
+      setUser(freshUser);
+      setUserBadges(res.data.badges || getFallbackBadges(freshUser.role, freshUser.level));
+      setUserPosts(res.data.posts || []);
       setIsAuthenticated(true);
-      localStorage.setItem('kindness_user', JSON.stringify(finalU));
+      
+      // Đồng bộ hóa ngược lại bộ nhớ trình duyệt cho khớp 100% với Database
+      localStorage.setItem('kindness_user', JSON.stringify(freshUser));
     } catch (error) {
-      console.log('API timeout, unbreakable storage maintained perfectly');
+      console.log('Lưu ý API: Sử dụng dữ liệu cache địa phương');
+      const cached = localStorage.getItem('kindness_user');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        setUser(parsed);
+        setIsAuthenticated(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -117,8 +81,7 @@ export const AuthProvider = ({ children }) => {
       
       setUser(loggedUser);
       setIsAuthenticated(true);
-      setUserBadges(getFallbackBadges(loggedUser.role, loggedUser.level));
-      setUserPosts(getFallbackPosts(loggedUser.email, loggedUser.fullName));
+      await fetchUserData();
       
       addToast('Đăng nhập thành công!', `Chào mừng ${loggedUser.fullName} trở lại Bản Đồ Việc Tốt.`, 'success');
       setActiveModal(null);
@@ -140,8 +103,7 @@ export const AuthProvider = ({ children }) => {
 
       setUser(newUser);
       setIsAuthenticated(true);
-      setUserBadges(getFallbackBadges(newUser.role, newUser.level));
-      setUserPosts([]);
+      await fetchUserData();
 
       addToast('Đăng ký thành công!', 'Bạn đã được tặng ngay +10 điểm công dân số khởi đầu.', 'success');
       setActiveModal(null);
@@ -186,7 +148,7 @@ export const AuthProvider = ({ children }) => {
       demoEmail = 'hoangyen.volunteer@gmail.com';
     }
 
-    addToast('🔄 Đang chuyển tài khoản demo...', `Băng thông kết nối luồng ${demoRole.toUpperCase()}`, 'info');
+    addToast('🔄 Đang chuyển tài khoản demo...', `Kết nối máy chủ định tuyến ${demoRole.toUpperCase()}`, 'info');
     await login(demoEmail, demoPw);
   };
 
