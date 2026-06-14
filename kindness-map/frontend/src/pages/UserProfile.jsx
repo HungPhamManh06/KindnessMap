@@ -6,7 +6,7 @@ import { useNotification } from '../context/NotificationContext';
 import { BadgeIcon } from '../components/BadgeIcon';
 import { 
   User, Mail, Trophy, Star, Clock, MapPin, Edit3, 
-  CheckCircle2, AlertTriangle, PlusCircle, ArrowRight, Shield, Award 
+  CheckCircle2, AlertTriangle, PlusCircle, ArrowRight, Shield, Award, UploadCloud, Link 
 } from 'lucide-react';
 
 export const UserProfile = () => {
@@ -65,6 +65,42 @@ export const UserProfile = () => {
   };
 
   const progressInfo = calculateLevelProgress();
+
+  // Xử lý khi người dùng upload file ảnh từ máy
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      addToast('Tệp không hợp lệ', 'Vui lòng chọn file hình ảnh (JPG, PNG).', 'warning');
+      return;
+    }
+
+    addToast('Đang tối ưu hình ảnh...', 'Vui lòng chờ giây lát.', 'info');
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      // Tự động nén và resize ảnh bằng Canvas để load siêu nhanh
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = 200; // Cắt vuông 200x200 px
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        
+        // Cắt ảnh chuẩn giữa (Cover Crop)
+        const minSize = Math.min(img.width, img.height);
+        const startX = (img.width - minSize) / 2;
+        const startY = (img.height - minSize) / 2;
+        
+        ctx.drawImage(img, startX, startY, minSize, minSize, 0, 0, size, size);
+        const resizedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+        setAvatar(resizedBase64);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
@@ -259,10 +295,10 @@ export const UserProfile = () => {
         </div>
       </div>
 
-      {/* Edit Profile Popup Modal */}
+      {/* Sửa Thông Tin Hồ Sơ - Có chức năng Tải File Ảnh Thực Tế */}
       {editModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 flex flex-col gap-6 relative">
+          <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 flex flex-col gap-6 relative max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-black text-slate-900">Sửa Thông Tin Hồ Sơ</h3>
 
             <form onSubmit={handleUpdateProfile} className="flex flex-col gap-4">
@@ -277,18 +313,54 @@ export const UserProfile = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">Ảnh đại diện (Avatar URL)</label>
-                <input
-                  type="url"
-                  required
-                  value={avatar}
-                  onChange={(e) => setAvatar(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-green"
-                />
+              {/* Advanced Avatar Upload Section */}
+              <div className="flex flex-col gap-2">
+                <label className="block text-xs font-semibold text-slate-600">Ảnh đại diện (Avatar)</label>
+                
+                {/* Image Live Preview Bar */}
+                <div className="flex items-center gap-4 p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                  <img 
+                    src={avatar} 
+                    alt="Preview" 
+                    className="w-14 h-14 rounded-2xl object-cover border-2 border-brand-green shrink-0 bg-slate-200"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-bold text-slate-800 block truncate">Xem trước ảnh</span>
+                    <span className="text-[10px] text-brand-green block font-semibold">Cắt tự động vuông & làm tròn</span>
+                  </div>
+                </div>
+
+                {/* Nút Upload trực tiếp từ Máy / Điện thoại */}
+                <div className="flex flex-col gap-2 mt-1">
+                  <label className="flex items-center justify-center gap-2.5 w-full py-3.5 px-4 bg-brand-lightGreen border-2 border-dashed border-brand-green text-brand-deepGreen font-black text-xs rounded-2xl cursor-pointer hover:bg-brand-green hover:text-white transition-all shadow-xs group">
+                    <UploadCloud className="w-5 h-5 group-hover:scale-125 transition-transform text-brand-green group-hover:text-white" />
+                    <span>📥 Bấm Tải Ảnh Từ Máy Tính / Điện Thoại</span>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleFileChange} 
+                      className="hidden"
+                    />
+                  </label>
+
+                  {/* Vẫn giữ tùy chọn chép link URL cho tiện */}
+                  <div className="relative mt-1">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Hoặc dùng đường dẫn URL (Tùy chọn):</span>
+                    <div className="relative">
+                      <Link className="absolute left-3.5 top-3 w-3.5 h-3.5 text-slate-400" />
+                      <input
+                        type="url"
+                        placeholder="https://images.unsplash.com/..."
+                        value={avatar}
+                        onChange={(e) => setAvatar(e.target.value)}
+                        className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-green"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3 mt-2">
                 <button
                   type="button"
                   onClick={() => setEditModalOpen(false)}
@@ -299,7 +371,7 @@ export const UserProfile = () => {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="px-6 py-2.5 rounded-xl bg-brand-green text-white font-extrabold text-xs shadow-md"
+                  className="px-6 py-2.5 rounded-xl bg-brand-green text-white font-black text-xs shadow-md hover:opacity-95"
                 >
                   {saving ? 'Đang lưu...' : 'Lưu Thay Đổi'}
                 </button>
