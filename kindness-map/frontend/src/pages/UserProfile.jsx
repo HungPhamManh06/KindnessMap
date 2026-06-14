@@ -27,7 +27,6 @@ export const UserProfile = () => {
     );
   }
 
-  // Calculate Level progress helper
   const calculateLevelProgress = () => {
     let currentLevel = user.level;
     let nextLevel = 'Kindness Ambassador';
@@ -66,45 +65,54 @@ export const UserProfile = () => {
 
   const progressInfo = calculateLevelProgress();
 
-  // GIẢI PHÁP BỌC THÉP 2 LỚP - ĐẢM BẢO UP ẢNH THÀNH CÔNG 100% VĨNH VIỄN
-  const handleFileChange = async (e) => {
+  // Xử Lý Upload Ảnh Khéo Léo Báo Lỗi Trình Duyệt
+  const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    addToast('Đang tối ưu hình ảnh...', 'Vui lòng chờ giây lát.', 'info');
+    addToast('Đang kiểm tra tệp hình ảnh...', 'Vui lòng chờ giây lát.', 'info');
 
-    try {
-      // Lớp 1: Dùng siêu công nghệ createImageBitmap của HTML5 giải mã mọi định dạng
-      const bitmap = await createImageBitmap(file);
-      const canvas = document.createElement('canvas');
-      const size = 180;
-      canvas.width = size;
-      canvas.height = size;
-      const ctx = canvas.getContext('2d');
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target.result;
       
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, size, size);
-      
-      const minDim = Math.min(bitmap.width, bitmap.height);
-      const startX = (bitmap.width - minDim) / 2;
-      const startY = (bitmap.height - minDim) / 2;
-      
-      ctx.drawImage(bitmap, startX, startY, minDim, minDim, 0, 0, size, size);
-      const base64Url = canvas.toDataURL('image/jpeg', 0.85);
-      setAvatar(base64Url);
-      addToast('Tải ảnh thành công!', 'Hình ảnh đã sẵn sàng rực rỡ, hãy bấm Lưu Thay Đổi.', 'success');
-    } catch (err) {
-      // Lớp 2 (Bọc thép Fallback): Nếu gặp file siêu dị, chuyển sang đọc thẳng tệp thô Raw Base64
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setAvatar(event.target.result);
-        addToast('Tải ảnh thành công!', 'Đã đọc trực tiếp dữ liệu gốc, hãy bấm Lưu Thay Đổi.', 'success');
+      // Tự động phát hiện nếu người dùng up tệp định dạng TIFF/RAW (SUkq...)
+      if (base64.includes('SUkq') || file.name.toLowerCase().endsWith('.tiff')) {
+        addToast('⚠️ Định dạng ảnh chưa được trình duyệt hỗ trợ', 'Tệp TIFF/RAW không hiển thị được trên Website. Vui lòng chọn ảnh JPG hoặc PNG thông thường!', 'warning');
+        return;
+      }
+
+      // Nén và làm sắc nét bằng Canvas cho ảnh hợp lệ
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const size = 180;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, size, size);
+        
+        const minDim = Math.min(img.width, img.height);
+        const startX = (img.width - minDim) / 2;
+        const startY = (img.height - minDim) / 2;
+        
+        ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, size, size);
+        const optimizedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+        
+        setAvatar(optimizedBase64);
+        addToast('Tải ảnh thành công!', 'Hình ảnh đã hiển thị tuyệt đẹp, hãy bấm Lưu Thay Đổi.', 'success');
       };
-      reader.onerror = () => {
-        addToast('Lỗi đọc file', 'Tệp ảnh bị hỏng hoặc bị trình duyệt từ chối, vui lòng chọn ảnh khác.', 'warning');
+      img.onerror = () => {
+        addToast('⚠️ Định dạng ảnh không hợp lệ', 'Trình duyệt từ chối đọc tệp này. Vui lòng chọn bức ảnh JPG hoặc PNG khác!', 'warning');
       };
-      reader.readAsDataURL(file);
-    }
+      img.src = base64;
+    };
+    reader.onerror = () => {
+      addToast('Lỗi đọc file', 'Không thể mở tệp, vui lòng chọn file khác.', 'warning');
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleUpdateProfile = async (e) => {
@@ -116,13 +124,12 @@ export const UserProfile = () => {
       setEditModalOpen(false);
       addToast('Cập nhật thành công!', 'Hồ sơ của bạn đã được thay đổi lộng lẫy.', 'success');
     } catch (error) {
-      addToast('Không thể cập nhật', 'Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau.', 'warning');
+      addToast('Không thể cập nhật', 'Có lỗi kết nối máy chủ, vui lòng kiểm tra mạng hoặc thử lại.', 'warning');
     } finally {
       setSaving(false);
     }
   };
 
-  // Mẫu Preset Avatars Nhanh
   const presetAvatars = [
     { label: '👨 Mẫu 1', url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80' },
     { label: '👩 Mẫu 2', url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80' },
@@ -308,7 +315,7 @@ export const UserProfile = () => {
         </div>
       </div>
 
-      {/* Sửa Thông Tin Hồ Sơ - GIẢI PHÁP BỌC THÉP ULTIMATE */}
+      {/* Sửa Thông Tin Hồ Sơ - THÔNG MINH PHÁT HIỆN TIFF/RAW */}
       {editModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 animate-fade-in">
           <div className="bg-white rounded-3xl max-w-md w-full p-8 shadow-2xl border border-slate-100 flex flex-col gap-6 relative max-h-[90vh] overflow-y-auto">
@@ -339,7 +346,7 @@ export const UserProfile = () => {
                   />
                   <div className="flex-1 min-w-0">
                     <span className="text-xs font-bold text-slate-800 block truncate">Xem trước hình ảnh</span>
-                    <span className="text-[10px] text-brand-green block font-semibold">Tự động thích ứng mọi định dạng</span>
+                    <span className="text-[10px] text-brand-green block font-semibold">Khuyên dùng file ảnh .JPG hoặc .PNG</span>
                   </div>
                 </div>
 
@@ -347,7 +354,7 @@ export const UserProfile = () => {
                 <div className="flex flex-col gap-2 mt-1">
                   <label className="flex items-center justify-center gap-2.5 w-full py-3.5 px-4 bg-brand-lightGreen border-2 border-dashed border-brand-green text-brand-deepGreen font-black text-xs rounded-2xl cursor-pointer hover:bg-brand-green hover:text-white transition-all shadow-xs group">
                     <UploadCloud className="w-5 h-5 group-hover:scale-125 transition-transform text-brand-green group-hover:text-white" />
-                    <span>📥 Bấm Chọn Ảnh Từ Thư Viện (JPG/PNG)</span>
+                    <span>📥 Bấm Chọn Ảnh JPG / PNG Từ Máy</span>
                     <input 
                       type="file" 
                       accept="image/*" 
@@ -358,7 +365,7 @@ export const UserProfile = () => {
 
                   {/* Thanh chọn nhanh Mẫu 1-4 cực tiện */}
                   <div className="flex flex-col gap-1 mt-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Hoặc bấm chọn nhanh 4 mẫu có sẵn:</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Hoặc bấm chọn nhanh 4 mẫu cực xịn:</span>
                     <div className="grid grid-cols-4 gap-2">
                       {presetAvatars.map((pa, idx) => (
                         <button
