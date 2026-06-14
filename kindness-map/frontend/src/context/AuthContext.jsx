@@ -29,23 +29,10 @@ export const AuthProvider = ({ children }) => {
     ];
   };
 
-  // BROADCAST CHANNEL: Lắng nghe và đồng bộ tức thì các Tab Web đang mở
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === 'kindness_user' && e.newValue) {
-        try {
-          const freshObj = JSON.parse(e.newValue);
-          setUser(freshObj);
-          setIsAuthenticated(true);
-        } catch (err) { console.error(err); }
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
   const fetchUserData = useCallback(async () => {
     const token = localStorage.getItem('kindness_token');
+    const localUserStr = localStorage.getItem('kindness_user');
+
     if (!token) {
       setUser(null);
       setUserBadges([]);
@@ -58,7 +45,15 @@ export const AuthProvider = ({ children }) => {
     try {
       setLoading(true);
       const res = await api.get('/auth/me');
-      const freshUser = res.data.user;
+      let freshUser = res.data.user;
+      
+      // BẢO TỒN NGUỒN CHÂN LÝ ĐỊA PHƯƠNG: Ưu tiên giữ lại Avatar/Tên mà người dùng vừa Up thành công!
+      if (localUserStr) {
+        try {
+          const localObj = JSON.parse(localUserStr);
+          freshUser = { ...freshUser, fullName: localObj.fullName || freshUser.fullName, avatar: localObj.avatar || freshUser.avatar };
+        } catch (e) {}
+      }
       
       setUser(freshUser);
       setUserBadges(res.data.badges || getFallbackBadges(freshUser.role, freshUser.level));
@@ -67,9 +62,8 @@ export const AuthProvider = ({ children }) => {
       
       localStorage.setItem('kindness_user', JSON.stringify(freshUser));
     } catch (error) {
-      const cached = localStorage.getItem('kindness_user');
-      if (cached) {
-        const parsed = JSON.parse(cached);
+      if (localUserStr) {
+        const parsed = JSON.parse(localUserStr);
         setUser(parsed);
         setIsAuthenticated(true);
       }
