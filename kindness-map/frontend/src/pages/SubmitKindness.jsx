@@ -211,3 +211,4 @@ export const SubmitKindness = () => {
                   className="h-full w-full"
                 />
               </div>
+<button type='submit' className='w-full py-4 bg-brand-green text-white font-extrabold text-sm rounded-2xl shadow-lg mt-4'>G?i Câu Chuy?n</button></form>)}</div>);};
