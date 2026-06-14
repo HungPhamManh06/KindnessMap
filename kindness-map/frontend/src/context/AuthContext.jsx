@@ -15,7 +15,6 @@ export const AuthProvider = ({ children }) => {
 
   const { addToast } = useNotification();
 
-  // Bộ Mẫu Huy Hiệu & Bài Viết Dự Phòng (Fallback) khi mạng API bị trễ
   const getFallbackBadges = (role, level) => {
     if (role === 'admin') {
       return [
@@ -69,7 +68,6 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    // TẦNG LƯU TRỮ BỌC THÉP: Khởi tạo ngay trạng thái từ localStorage để Web mượt tức thì 100%
     if (savedUser) {
       try {
         const parsed = JSON.parse(savedUser);
@@ -82,18 +80,24 @@ export const AuthProvider = ({ children }) => {
       }
     }
 
-    // Gọi ngầm API cập nhật dữ liệu mới nhất
     try {
       setLoading(true);
       const res = await api.get('/auth/me');
-      setUser(res.data.user);
-      setUserBadges(res.data.badges || getFallbackBadges(res.data.user.role, res.data.user.level));
-      setUserPosts(res.data.posts || getFallbackPosts(res.data.user.email, res.data.user.fullName));
+      
+      // Nếu localStorage đã có Avatar & Họ Tên mới do người dùng up, ƯU TIÊN GIỮ NGUYÊN để không bị API đè lên!
+      let finalU = res.data.user;
+      if (savedUser) {
+        const localObj = JSON.parse(savedUser);
+        finalU = { ...res.data.user, fullName: localObj.fullName || finalU.fullName, avatar: localObj.avatar || finalU.avatar };
+      }
+      
+      setUser(finalU);
+      setUserBadges(res.data.badges || getFallbackBadges(finalU.role, finalU.level));
+      setUserPosts(res.data.posts || getFallbackPosts(finalU.email, finalU.fullName));
       setIsAuthenticated(true);
-      localStorage.setItem('kindness_user', JSON.stringify(res.data.user));
+      localStorage.setItem('kindness_user', JSON.stringify(finalU));
     } catch (error) {
-      console.log('API timeout, keeping Unbreakable Storage active');
-      // Dù API rớt mạng, TUYỆT ĐỐI KHÔNG ĐĂNG XUẤT người dùng!
+      console.log('API timeout, unbreakable storage maintained perfectly');
     } finally {
       setLoading(false);
     }
