@@ -22,8 +22,8 @@ app.use(cors({
   origin: '*', // allow any origin in development
   credentials: true
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Serve uploads or static mock images
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
