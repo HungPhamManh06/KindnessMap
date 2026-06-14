@@ -1,260 +1,228 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { GoogleMap, Marker, InfoWindow, Circle, useJsApiLoader } from '@react-google-maps/api';
-import { MapPin, ExternalLink, Flame, Key, Check, ArrowRight, Sparkles, Layers } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Flame, ExternalLink, MapPin, Flag } from 'lucide-react';
 
-const libraries = ['places', 'visualization'];
+// Fix Leaflet default icon paths (vite/webpack issue)
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
 
-const containerStyle = {
-  width: '100%',
-  height: '100%',
-  borderRadius: '24px'
-};
-
-const defaultCenter = { lat: 16.0544, lng: 108.2022 }; // Trung tâm Đà Nẵng / Việt Nam
-
-// Chọn icon màu Google Maps chuẩn theo Danh mục Việc Tốt
-const getMarkerIconUrl = (category) => {
+// Icon màu theo danh mục
+const getCategoryColor = (category) => {
   switch (category) {
-    case 'Môi trường': return 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
-    case 'Trồng cây': return 'http://maps.google.com/mapfiles/ms/icons/green-dot.png';
-    case 'Hiến máu': return 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
-    case 'Người cao tuổi': return 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png';
-    case 'Giáo dục': return 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png';
-    case 'Tình nguyện': return 'http://maps.google.com/mapfiles/ms/icons/purple-dot.png';
-    default: return 'http://maps.google.com/mapfiles/ms/icons/lightblue-dot.png';
+    case 'Môi trường': return '#16a34a';
+    case 'Trồng cây':  return '#15803d';
+    case 'Hiến máu':   return '#dc2626';
+    case 'Người cao tuổi': return '#ca8a04';
+    case 'Giáo dục':   return '#2563eb';
+    case 'Tình nguyện': return '#7c3aed';
+    default:           return '#0891b2';
   }
 };
 
-export const MapComponent = ({ posts = [], selectedCenter = null, className = "h-[550px] w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200" }) => {
-  const navigate = useNavigate();
-  const mapRef = useRef(null);
-  
-  const [heatmapMode, setHeatmapMode] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [apiKeyInput, setApiKeyInput] = useState('');
-  const [showKeyPrompt, setShowKeyPrompt] = useState(false);
+const createColoredIcon = (color) => L.divIcon({
+  className: '',
+  html: `<div style="
+    width:28px;height:28px;border-radius:50% 50% 50% 0;
+    background:${color};border:3px solid #fff;
+    box-shadow:0 2px 8px rgba(0,0,0,0.35);
+    transform:rotate(-45deg);
+  "></div>`,
+  iconSize: [28, 28],
+  iconAnchor: [14, 28],
+  popupAnchor: [0, -28],
+});
 
-  // Load Key từ bộ nhớ trình duyệt hoặc biến môi trường
-  const [storedApiKey, setStoredApiKey] = useState(() => {
-    return localStorage.getItem('google_maps_api_key') || '';
-  });
+// Icon cờ đỏ cho Hoàng Sa / Trường Sa
+const vietnamFlagIcon = L.divIcon({
+  className: '',
+  html: `<div style="
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+  ">
+    <div style="
+      width:28px;height:18px;background:#DA251D;border-radius:3px;
+      border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.4);
+      display:flex;align-items:center;justify-content:center;
+      font-size:12px;
+    ">⭐</div>
+    <div style="width:2px;height:10px;background:#666;"></div>
+  </div>`,
+  iconSize: [28, 30],
+  iconAnchor: [14, 30],
+  popupAnchor: [0, -30],
+});
 
-  // Tải Lõi Google Maps API
-  const { isLoaded, loadError } = useJsApiLoader({
-    id: 'google-map-script',
-    googleMapsApiKey: storedApiKey || 'DEMO_KEY', // Nguồn Key động
-    libraries: libraries
-  });
-
-  const handleSaveKey = (e) => {
-    e.preventDefault();
-    if (!apiKeyInput.trim()) return;
-    localStorage.setItem('google_maps_api_key', apiKeyInput.trim());
-    setStoredApiKey(apiKeyInput.trim());
-    setShowKeyPrompt(false);
-    window.location.reload(); // Tải lại để Google áp dụng Key mới ngay lập tức
-  };
-
-  const onMapLoad = useCallback((map) => {
-    mapRef.current = map;
-  }, []);
-
+// Component tự động pan tới selectedCenter
+const FlyToCenter = ({ center }) => {
+  const map = useMap();
   useEffect(() => {
-    if (selectedCenter && mapRef.current) {
-      mapRef.current.panTo({ lat: parseFloat(selectedCenter[0]), lng: parseFloat(selectedCenter[1]) });
-      mapRef.current.setZoom(15);
+    if (center) {
+      map.flyTo([parseFloat(center[0]), parseFloat(center[1])], 14, { duration: 1 });
     }
-  }, [selectedCenter]);
+  }, [center, map]);
+  return null;
+};
 
-  // Các điểm nóng tập trung nhiều Việc Tốt (Google Circles Heatmap)
-  const heatmapHotspots = [
-    { name: 'Khu vực Hồ Tây, Hà Nội', lat: 21.0583, lng: 105.8159, radius: 1500, count: 28 },
-    { name: 'Cầu Giấy & Đống Đa, Hà Nội', lat: 21.0382, lng: 105.7826, radius: 2000, count: 45 },
-    { name: 'Quận 1, TP. Hồ Chí Minh', lat: 10.7769, lng: 106.7009, radius: 2500, count: 62 },
-    { name: 'Tân Bình, TP. Hồ Chí Minh', lat: 10.7925, lng: 106.6541, radius: 1800, count: 31 },
-    { name: 'Trung tâm Đà Nẵng', lat: 16.0544, lng: 108.2022, radius: 2200, count: 39 },
-    { name: 'Đại học Cần Thơ', lat: 10.0333, lng: 105.7833, radius: 1600, count: 22 },
-  ];
+// Các điểm nóng heatmap
+const heatmapHotspots = [
+  { name: 'Khu vực Hồ Tây, Hà Nội',        lat: 21.0583, lng: 105.8159, radius: 8000,  count: 28 },
+  { name: 'Cầu Giấy & Đống Đa, Hà Nội',    lat: 21.0382, lng: 105.7826, radius: 10000, count: 45 },
+  { name: 'Quận 1, TP. Hồ Chí Minh',        lat: 10.7769, lng: 106.7009, radius: 12000, count: 62 },
+  { name: 'Tân Bình, TP. Hồ Chí Minh',      lat: 10.7925, lng: 106.6541, radius: 9000,  count: 31 },
+  { name: 'Trung tâm Đà Nẵng',              lat: 16.0544, lng: 108.2022, radius: 11000, count: 39 },
+  { name: 'Đại học Cần Thơ',                lat: 10.0333, lng: 105.7833, radius: 7000,  count: 22 },
+];
+
+// Quần đảo chủ quyền Việt Nam
+const vietnamIslands = [
+  { name: 'Quần đảo Hoàng Sa',  lat: 16.5,   lng: 111.9,  note: 'Hoàng Sa - Chủ quyền Việt Nam' },
+  { name: 'Quần đảo Trường Sa', lat: 10.0,   lng: 114.5,  note: 'Trường Sa - Chủ quyền Việt Nam' },
+];
+
+export const MapComponent = ({
+  posts = [],
+  selectedCenter = null,
+  className = 'h-[550px] w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200',
+}) => {
+  const navigate = useNavigate();
+  const [heatmapMode, setHeatmapMode] = useState(false);
 
   return (
-    <div className={`relative flex flex-col gap-2 ${className}`}>
-      
-      {/* Khung Thanh Cấu Hình Google API Key & Chế độ Heatmap */}
-      <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-        <button
-          onClick={() => setShowKeyPrompt(!showKeyPrompt)}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-slate-900/90 hover:bg-slate-900 text-white font-bold text-xs shadow-lg backdrop-blur-md transition-all"
-        >
-          <Key className="w-3.5 h-3.5 text-amber-400" />
-          <span>{storedApiKey ? '✨ Đã Gắn Google Key' : '🔑 Cấu Hình Google Key'}</span>
-        </button>
+    <div className={`relative ${className}`}>
 
+      {/* Nút điều khiển */}
+      <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2">
         <button
           onClick={() => setHeatmapMode(!heatmapMode)}
           className={`flex items-center gap-1.5 px-4 py-2 rounded-2xl font-bold text-xs shadow-xl backdrop-blur-md transition-all duration-300 ${
-            heatmapMode 
-              ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white shadow-rose-500/25 scale-105' 
+            heatmapMode
+              ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white scale-105'
               : 'bg-white/95 text-slate-700 hover:bg-white border border-slate-100 hover:scale-105'
           }`}
         >
           <Flame className={`w-4 h-4 ${heatmapMode ? 'animate-bounce text-yellow-200' : 'text-rose-500'}`} />
-          <span>{heatmapMode ? '🔥 Đang Xem Mật Độ Circles' : '📊 Xem Heatmap Việc Tốt'}</span>
+          <span>{heatmapMode ? '🔥 Đang Xem Mật Độ' : '📊 Xem Heatmap Việc Tốt'}</span>
         </button>
       </div>
 
-      {/* Modal Popup Nhập API Key Trực Tiếp Siêu Đẳng Cấp */}
-      {showKeyPrompt && (
-        <div className="absolute inset-x-4 top-16 z-20 p-6 rounded-3xl bg-white shadow-2xl border border-slate-200 animate-fade-in max-w-lg mx-auto flex flex-col gap-4">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-            <h4 className="font-black text-sm text-slate-900 flex items-center gap-2">
-              <Key className="w-4 h-4 text-brand-green" /> Cấu Hình Google Maps JavaScript API Key
-            </h4>
-            <span className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-md font-bold">Chính thức</span>
-          </div>
+      {/* Badge chủ quyền */}
+      <div className="absolute bottom-4 left-4 z-[1000] bg-red-600/90 text-white text-[10px] font-black px-3 py-1.5 rounded-xl shadow-lg backdrop-blur-md flex items-center gap-1.5">
+        <span>🇻🇳</span>
+        <span>Hoàng Sa & Trường Sa thuộc Việt Nam</span>
+      </div>
 
-          <form onSubmit={handleSaveKey} className="flex flex-col gap-3">
-            <input
-              type="text"
-              placeholder="Nhập chuỗi Key của bạn (Bắt đầu bằng AIzaSy...)"
-              value={apiKeyInput}
-              onChange={(e) => setApiKeyInput(e.target.value)}
-              className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-brand-green"
-            />
-            <p className="text-[11px] text-slate-500 leading-relaxed font-medium">
-              Bạn có thể lấy Google Key miễn phí trên trang quản trị <strong>Google Cloud Console</strong> để kích hoạt đầy đủ mọi chức năng bản đồ.
-            </p>
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => { localStorage.removeItem('google_maps_api_key'); setStoredApiKey(''); setShowKeyPrompt(false); window.location.reload(); }}
-                className="px-4 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs transition-colors"
-              >
-                Xóa Key
-              </button>
-              <button
-                type="submit"
-                className="px-5 py-2 rounded-xl bg-brand-green text-white font-black text-xs shadow-md"
-              >
-                Lưu & Kích Hoạt Key
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+      <MapContainer
+        center={[16.0544, 108.2022]}
+        zoom={6}
+        minZoom={4}
+        maxZoom={18}
+        style={{ width: '100%', height: '100%' }}
+        scrollWheelZoom={true}
+      >
+        {/* 
+          Tile: CartoDB Positron — sạch, nhãn tiếng Anh, không có chữ Trung Quốc,
+          hiển thị tên quốc tế trung lập cho Hoàng Sa / Trường Sa.
+        */}
+        <TileLayer
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          subdomains="abcd"
+          maxZoom={20}
+        />
 
-      {/* Thông Báo Khởi Tạo Khung Bản Đồ */}
-      {!storedApiKey && (
-        <div className="absolute bottom-4 left-4 z-10 p-3.5 rounded-2xl bg-amber-500/90 text-white font-bold text-xs shadow-lg backdrop-blur-md max-w-xs flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-yellow-200 shrink-0 animate-spin" />
-          <span>Đang chạy ở Chế độ Google Demo. Bạn có thể bấm "Cấu Hình Google Key" ở góc trên để gắn Key thật của bạn!</span>
-        </div>
-      )}
+        {/* Tự động pan khi có selectedCenter */}
+        {selectedCenter && <FlyToCenter center={selectedCenter} />}
 
-      {/* LÕI GOOGLE MAPS INTERACTIVE */}
-      {loadError ? (
-        <div className="h-full w-full bg-rose-50 flex items-center justify-center text-rose-600 font-bold text-xs p-8 text-center rounded-3xl">
-          ⚠️ Không thể tải Bản Đồ Google Maps. Vui lòng kiểm tra lại cấu hình Key hoặc kết nối mạng của bạn!
-        </div>
-      ) : !isLoaded ? (
-        <div className="h-full w-full bg-slate-100 animate-pulse flex items-center justify-center text-slate-500 font-bold text-xs rounded-3xl">
-          🗺️ Đang khởi tạo bộ khung Google Maps JavaScript API...
-        </div>
-      ) : (
-        <div className="h-full w-full relative flex-1">
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={selectedCenter ? { lat: parseFloat(selectedCenter[0]), lng: parseFloat(selectedCenter[1]) } : defaultCenter}
-            zoom={selectedCenter ? 15 : 6}
-            onLoad={onMapLoad}
-            options={{
-              streetViewControl: false,
-              mapTypeControl: true,
-              fullscreenControl: true,
-              zoomControl: true,
-              styles: [
-                // Khung Bản Đồ Google phong cách Xanh mướt Hiện Đại (Modern Brand Theme override)
-                { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#E0F2FE' }] },
-                { featureType: 'landscape.man_made', elementType: 'geometry', stylers: [{ color: '#F1F5F9' }] },
-                { featureType: 'poi.park', elementType: 'geometry', stylers: [{ color: '#DCFCE7' }] }
-              ]
-            }}
-          >
-            {/* Chế Độ Marker Bình Thường */}
-            {!heatmapMode && posts.map((post) => {
-              const lat = parseFloat(post.latitude);
-              const lng = parseFloat(post.longitude);
-              if (isNaN(lat) || isNaN(lng)) return null;
-
-              return (
-                <Marker
-                  key={post.id}
-                  position={{ lat, lng }}
-                  icon={getMarkerIconUrl(post.category)}
-                  onClick={() => setSelectedPost(post)}
-                />
-              );
-            })}
-
-            {/* Google Popups (InfoWindow Detail Cards) */}
-            {selectedPost && !heatmapMode && (
-              <InfoWindow
-                position={{ lat: parseFloat(selectedPost.latitude), lng: parseFloat(selectedPost.longitude) }}
-                onCloseClick={() => setSelectedPost(null)}
-              >
-                <div className="flex flex-col gap-2 max-w-xs w-64 p-1">
-                  <span className="inline-block self-start px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-brand-lightGreen text-brand-deepGreen border border-brand-green/20">
-                    {selectedPost.category}
+        {/* Markers bài viết */}
+        {!heatmapMode && posts.map((post) => {
+          const lat = parseFloat(post.latitude);
+          const lng = parseFloat(post.longitude);
+          if (isNaN(lat) || isNaN(lng)) return null;
+          return (
+            <Marker
+              key={post.id}
+              position={[lat, lng]}
+              icon={createColoredIcon(getCategoryColor(post.category))}
+            >
+              <Popup maxWidth={280} className="kindness-popup">
+                <div className="flex flex-col gap-2 w-64 p-1">
+                  <span className="inline-block self-start px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    {post.category}
                   </span>
-                  <img
-                    src={selectedPost.imageUrl || 'https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?auto=format&fit=crop&w=800&q=80'}
-                    alt={selectedPost.title}
-                    className="w-full h-32 object-cover rounded-2xl shadow-xs"
-                  />
-                  <h4 className="font-black text-xs text-slate-900 leading-snug line-clamp-2 mt-1">
-                    {selectedPost.title}
+                  {post.imageUrl && (
+                    <img
+                      src={post.imageUrl}
+                      alt={post.title}
+                      className="w-full h-32 object-cover rounded-xl"
+                    />
+                  )}
+                  <h4 className="font-black text-xs text-slate-900 leading-snug line-clamp-2">
+                    {post.title}
                   </h4>
                   <p className="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
-                    {selectedPost.description}
+                    {post.description}
                   </p>
                   <div className="flex items-center justify-between text-[10px] text-slate-400 font-medium pt-1 border-t border-slate-100">
-                    <span>👤 {selectedPost.authorName || 'Người dùng'}</span>
-                    <span>📍 {selectedPost.locationName || 'Việt Nam'}</span>
+                    <span>👤 {post.authorName || 'Người dùng'}</span>
+                    <span>📍 {post.locationName || 'Việt Nam'}</span>
                   </div>
-
                   <button
-                    onClick={() => navigate(`/stories?id=${selectedPost.id}`)}
-                    className="w-full mt-2 py-2 rounded-xl bg-brand-green text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-brand-green/20 hover:opacity-95"
+                    onClick={() => navigate(`/stories?id=${post.id}`)}
+                    className="w-full mt-1 py-2 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md hover:opacity-90 transition-opacity"
                   >
-                    <span>Xem Chi Tiết & Thảo Luận</span>
+                    <span>Xem Chi Tiết</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </button>
                 </div>
-              </InfoWindow>
-            )}
+              </Popup>
+            </Marker>
+          );
+        })}
 
-            {/* Chế Độ Xem Điểm Nóng (Google Heatmap Circles Overlay) */}
-            {heatmapMode && heatmapHotspots.map((spot, idx) => (
-              <Circle
-                key={idx}
-                center={{ lat: spot.lat, lng: spot.lng }}
-                radius={spot.radius * 5}
-                options={{
-                  fillColor: spot.count > 40 ? '#F43F5E' : '#10B981',
-                  fillOpacity: 0.45,
-                  strokeColor: spot.count > 40 ? '#E11D48' : '#059669',
-                  strokeWeight: 2
-                }}
-                onClick={() => {
-                  alert(`🔥 Khu Vực Nóng: ${spot.name}\nĐã vinh danh hơn ${spot.count} hành động Việc Tốt trong bán kính!`);
-                }}
-              />
-            ))}
+        {/* Heatmap Circles */}
+        {heatmapMode && heatmapHotspots.map((spot, idx) => (
+          <Circle
+            key={idx}
+            center={[spot.lat, spot.lng]}
+            radius={spot.radius}
+            pathOptions={{
+              fillColor: spot.count > 40 ? '#F43F5E' : '#10B981',
+              fillOpacity: 0.4,
+              color: spot.count > 40 ? '#E11D48' : '#059669',
+              weight: 2,
+            }}
+          >
+            <Popup>
+              <div className="text-xs font-bold text-slate-900">
+                🔥 {spot.name}<br/>
+                <span className="text-slate-500 font-medium">Hơn {spot.count} hành động Việc Tốt</span>
+              </div>
+            </Popup>
+          </Circle>
+        ))}
 
-          </GoogleMap>
-        </div>
-      )}
-
+        {/* Markers Hoàng Sa & Trường Sa — Chủ quyền Việt Nam */}
+        {vietnamIslands.map((island, idx) => (
+          <Marker
+            key={`island-${idx}`}
+            position={[island.lat, island.lng]}
+            icon={vietnamFlagIcon}
+          >
+            <Popup>
+              <div className="text-xs font-black text-red-700 flex flex-col gap-1">
+                <span>🇻🇳 {island.name}</span>
+                <span className="font-medium text-slate-600">{island.note}</span>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
     </div>
   );
 };
