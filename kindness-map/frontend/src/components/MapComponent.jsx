@@ -221,8 +221,11 @@ export const MapComponent = ({
             const text = feature.get('name');
             
             if (type === 'territory') {
+              // Ẩn nhãn khi zoom quá nhỏ để tránh đè lên các nhãn quốc gia/châu lục khác
+              if (zoom < 4.2) return null;
+              
               // Scale size dynamically and naturally with zoom level
-              const size = Math.min(16, Math.max(11, zoom * 0.8 + 7));
+              const size = Math.min(16, Math.max(9, zoom * 1.2 + 5));
               return new Style({
                 text: new Text({
                   text: text,
