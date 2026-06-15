@@ -200,14 +200,45 @@ export const MapComponent = ({
         const territoryLayer = new VectorLayer({
           source: territorySource,
           zIndex: 1000,
-          style: new Style({
-            text: new Text({
-              font: 'bold 12px Inter, Arial, sans-serif',
-              fill: new Fill({ color: '#0f172a' }),
-              stroke: new Stroke({ color: '#ffffff', width: 3 }),
-              offsetY: 15,
-            })
-          })
+          style: (feature, resolution) => {
+            const zoom = map.getView().getZoomForResolution(resolution);
+            const type = feature.get('type');
+            const text = feature.get('name');
+            
+            if (type === 'territory') {
+              const size = zoom > 6 ? 16 : 14;
+              return new Style({
+                text: new Text({
+                  text: text,
+                  font: `bold ${size}px Inter, Arial, sans-serif`,
+                  fill: new Fill({ color: '#dc2626' }),
+                  stroke: new Stroke({ color: '#ffffff', width: 4 }),
+                  offsetY: 0,
+                })
+              });
+            } else {
+              // Chỉ hiển thị các đảo chi tiết khi zoom đủ lớn (VD: >= 6)
+              if (zoom < 6) return null;
+              
+              const radius = Math.min(5, Math.max(3, zoom - 5));
+              const fontSize = Math.min(13, Math.max(10, zoom * 1.2));
+              
+              return new Style({
+                image: new CircleStyle({
+                  radius: radius,
+                  fill: new Fill({ color: '#dc2626' }),
+                  stroke: new Stroke({ color: '#ffffff', width: 1.5 })
+                }),
+                text: new Text({
+                  text: text,
+                  font: `600 ${fontSize}px Inter, Arial, sans-serif`,
+                  fill: new Fill({ color: '#0f172a' }),
+                  stroke: new Stroke({ color: '#ffffff', width: 3 }),
+                  offsetY: -(radius + 8),
+                })
+              });
+            }
+          }
         });
         map.addLayer(territoryLayer);
 
@@ -216,40 +247,6 @@ export const MapComponent = ({
             const res = await fetch(url);
             const data = await res.json();
             const features = new GeoJSON().readFeatures(data, { featureProjection: 'EPSG:3857' });
-            features.forEach(f => {
-              const type = f.get('type');
-              const text = f.get('name');
-              
-              if (type === 'territory') {
-                f.setStyle(new Style({
-                  text: new Text({
-                    text: text,
-                    font: '900 16px Inter, Arial, sans-serif',
-                    fill: new Fill({ color: '#dc2626' }), // Bold Red
-                    stroke: new Stroke({ color: '#ffffff', width: 5 }),
-                    backgroundFill: new Fill({ color: 'rgba(255, 255, 255, 0.6)' }),
-                    padding: [6, 10, 6, 10],
-                    offsetY: 0,
-                  })
-                }));
-              } else {
-                // Island/Reef
-                f.setStyle(new Style({
-                  image: new CircleStyle({
-                    radius: 3,
-                    fill: new Fill({ color: '#dc2626' }),
-                    stroke: new Stroke({ color: '#ffffff', width: 1.5 })
-                  }),
-                  text: new Text({
-                    text: text,
-                    font: '600 11px Inter, Arial, sans-serif',
-                    fill: new Fill({ color: '#0f172a' }),
-                    stroke: new Stroke({ color: '#ffffff', width: 3 }),
-                    offsetY: -10,
-                  })
-                }));
-              }
-            });
             territorySource.addFeatures(features);
           } catch (e) {
             console.error('Failed to load territory', e);
