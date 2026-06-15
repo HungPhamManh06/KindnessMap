@@ -72,7 +72,22 @@ const OpenLayersLocationPicker = ({ position, setPosition }) => {
             'Sansha', 'Woody Island', 'Yongxing Dao', 'Paracel Islands', 'Spratly Islands',
             'South China Sea', 'Macclesfield Bank', 'Scarborough Shoal', 'Zhongjian Dao', 'Triton Island',
             'Đảo Phú Lâm', 'Thành phố Tam Sa', 'Hoang Sa', 'Truong Sa', 'Pattle Island', 'Duncan Island',
-            'Quần đảo Hoàng Sa', 'Quần đảo Trường Sa'
+            'Quần đảo Hoàng Sa', 'Quần đảo Trường Sa', 'Itu Aba', 'Taiping Dao', 'Tai Ping Dao',
+            'Thitu Island', 'Pag-asa', 'West York Island', 'Likas Island', 'Northeast Cay', 'Parola',
+            'Southwest Cay', 'Pugad', 'Loaita Island', 'Kota', 'Nanshan Island', 'Lawak',
+            'Sand Cay', 'Bailan', 'Namyit Island', 'Binago', 'Sin Cowe Island', 'Rurok',
+            'Swallow Reef', 'Layang-Layang', 'Amboyna Cay', 'Kalantiyaw', 'Flat Island', 'Patag',
+            'Lankiam Cay', 'Panata', 'Cuarteron Reef', 'Calderon', 'Kagitingan', 'Gaven Reefs', 'Burgos',
+            'Hughes Reef', 'Chigua', 'Johnson South Reef', 'Mabini', 'Panganiban', 'Subi Reef', 'Zamora',
+            'Second Thomas Shoal', 'Ayungin', 'Reed Bank', 'Recto', 'Half Moon Shoal', 'Hasa-Hasa',
+            'Sabina Shoal', 'Escoda', 'Nansha Qundao', 'Xisha Qundao', 'Zhongsha Qundao', 'Dongsha Qundao',
+            'Shi Dao', 'Qilian Yu', 'Huayang Jiao', 'Nanxun Jiao', 'Chigua Jiao', 'Dongmen Jiao',
+            'Zhen\'ao Jiao', 'Macclesfield', 'Nansha', 'Xisha', 'Zhongsha', 'Dongsha', 'Triton',
+            'Vanguard Bank', 'Rifleman Bank', 'Prince of Wales Bank', 'Grainger Bank', 'Alexandra Bank',
+            'Southwest Bank', 'Prince Consort Bank', 'Owen Shoal', 'Bombay Castle', 'Orleana Shoal',
+            'Kingston Shoal', 'Coronation Bank', 'Eldad Reef', 'Petley Reef', 'Erica Reef', 'Mariveles Reef',
+            'Dallas Reef', 'Ardasier Reef', 'Commodore Reef', 'Barque Canada Reef', 'Investigator Shoal',
+            'Louisa Reef', 'Royal Charlotte Reef', 'Discovery Great Reef', 'Nanhai', 'South Sea'
           ];
           styleJson.layers.forEach(layer => {
             if (layer.type === 'symbol' && layer.layout && layer.layout['text-field']) {

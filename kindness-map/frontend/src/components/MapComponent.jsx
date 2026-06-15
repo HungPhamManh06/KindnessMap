@@ -159,7 +159,22 @@ export const MapComponent = ({
           'Sansha', 'Woody Island', 'Yongxing Dao', 'Paracel Islands', 'Spratly Islands',
           'South China Sea', 'Macclesfield Bank', 'Scarborough Shoal', 'Zhongjian Dao', 'Triton Island',
           'Đảo Phú Lâm', 'Thành phố Tam Sa', 'Hoang Sa', 'Truong Sa', 'Pattle Island', 'Duncan Island',
-          'Quần đảo Hoàng Sa', 'Quần đảo Trường Sa' // We render our own custom labels for these
+          'Quần đảo Hoàng Sa', 'Quần đảo Trường Sa', 'Itu Aba', 'Taiping Dao', 'Tai Ping Dao',
+          'Thitu Island', 'Pag-asa', 'West York Island', 'Likas Island', 'Northeast Cay', 'Parola',
+          'Southwest Cay', 'Pugad', 'Loaita Island', 'Kota', 'Nanshan Island', 'Lawak',
+          'Sand Cay', 'Bailan', 'Namyit Island', 'Binago', 'Sin Cowe Island', 'Rurok',
+          'Swallow Reef', 'Layang-Layang', 'Amboyna Cay', 'Kalantiyaw', 'Flat Island', 'Patag',
+          'Lankiam Cay', 'Panata', 'Cuarteron Reef', 'Calderon', 'Kagitingan', 'Gaven Reefs', 'Burgos',
+          'Hughes Reef', 'Chigua', 'Johnson South Reef', 'Mabini', 'Panganiban', 'Subi Reef', 'Zamora',
+          'Second Thomas Shoal', 'Ayungin', 'Reed Bank', 'Recto', 'Half Moon Shoal', 'Hasa-Hasa',
+          'Sabina Shoal', 'Escoda', 'Nansha Qundao', 'Xisha Qundao', 'Zhongsha Qundao', 'Dongsha Qundao',
+          'Shi Dao', 'Qilian Yu', 'Huayang Jiao', 'Nanxun Jiao', 'Chigua Jiao', 'Dongmen Jiao',
+          'Zhen\'ao Jiao', 'Macclesfield', 'Nansha', 'Xisha', 'Zhongsha', 'Dongsha', 'Triton',
+          'Vanguard Bank', 'Rifleman Bank', 'Prince of Wales Bank', 'Grainger Bank', 'Alexandra Bank',
+          'Southwest Bank', 'Prince Consort Bank', 'Owen Shoal', 'Bombay Castle', 'Orleana Shoal',
+          'Kingston Shoal', 'Coronation Bank', 'Eldad Reef', 'Petley Reef', 'Erica Reef', 'Mariveles Reef',
+          'Dallas Reef', 'Ardasier Reef', 'Commodore Reef', 'Barque Canada Reef', 'Investigator Shoal',
+          'Louisa Reef', 'Royal Charlotte Reef', 'Discovery Great Reef', 'Nanhai', 'South Sea'
         ];
 
         if (styleJson.layers) {
@@ -206,35 +221,36 @@ export const MapComponent = ({
             const text = feature.get('name');
             
             if (type === 'territory') {
-              const size = zoom > 6 ? 16 : 14;
+              // Chỉnh size vừa phải, tự nhiên hơn
+              const size = zoom > 6 ? 13 : 11.5;
               return new Style({
                 text: new Text({
                   text: text,
                   font: `bold ${size}px Inter, Arial, sans-serif`,
-                  fill: new Fill({ color: '#dc2626' }),
-                  stroke: new Stroke({ color: '#ffffff', width: 4 }),
+                  fill: new Fill({ color: '#b91c1c' }), // Màu đỏ trầm hơn một chút
+                  stroke: new Stroke({ color: '#ffffff', width: 3 }),
                   offsetY: 0,
                 })
               });
             } else {
-              // Chỉ hiển thị các đảo chi tiết khi zoom đủ lớn (VD: >= 6)
-              if (zoom < 6) return null;
+              // Chỉ hiển thị các đảo chi tiết khi zoom đủ lớn (VD: >= 6.5)
+              if (zoom < 6.5) return null;
               
-              const radius = Math.min(5, Math.max(3, zoom - 5));
-              const fontSize = Math.min(13, Math.max(10, zoom * 1.2));
+              const radius = Math.min(4, Math.max(2.5, zoom - 5.5));
+              const fontSize = Math.min(12, Math.max(9, zoom * 1.1));
               
               return new Style({
                 image: new CircleStyle({
                   radius: radius,
-                  fill: new Fill({ color: '#dc2626' }),
+                  fill: new Fill({ color: '#b91c1c' }),
                   stroke: new Stroke({ color: '#ffffff', width: 1.5 })
                 }),
                 text: new Text({
                   text: text,
                   font: `600 ${fontSize}px Inter, Arial, sans-serif`,
-                  fill: new Fill({ color: '#0f172a' }),
-                  stroke: new Stroke({ color: '#ffffff', width: 3 }),
-                  offsetY: -(radius + 8),
+                  fill: new Fill({ color: '#1e293b' }),
+                  stroke: new Stroke({ color: '#ffffff', width: 2.5 }),
+                  offsetY: -(radius + 7),
                 })
               });
             }
