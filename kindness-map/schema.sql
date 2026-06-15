@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS Posts (
     locationName VARCHAR(300) DEFAULT 'Hà Nội, Việt Nam',
     status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
     isFeatured BOOLEAN DEFAULT FALSE,
+    pointsAwarded BOOLEAN DEFAULT FALSE, -- TRUE nếu bài này đã từng cộng điểm cho tác giả, tránh cộng điểm trùng khi duyệt lại
     userId INT NOT NULL,
     createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE

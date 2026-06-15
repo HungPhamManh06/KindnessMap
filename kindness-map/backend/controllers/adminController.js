@@ -66,14 +66,21 @@ const getAllPosts = async (req, res) => {
 const moderatePost = async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, isFeatured } = req.body; // status: 'Approved' | 'Rejected'
+    const { status, isFeatured, rejectionReason } = req.body; // status: 'Approved' | 'Rejected'
+    const cleanRejectionReason = typeof rejectionReason === 'string' ? rejectionReason.trim().slice(0, 500) : '';
 
     const post = await queryGet(`SELECT * FROM Posts WHERE id = ?`, [id]);
     if (!post) return res.status(404).json({ message: 'Không tìm thấy bài viết.' });
 
-    await queryRun(`UPDATE Posts SET status = ?, isFeatured = ? WHERE id = ?`, [status, isFeatured ? 1 : 0, id]);
+    const hasAlreadyAwardedPoints = Number(post.pointsAwarded || 0) === 1;
+    const shouldAwardPoints = status === 'Approved' && !hasAlreadyAwardedPoints;
 
-    if (status === 'Approved' && post.status !== 'Approved') {
+    await queryRun(
+      `UPDATE Posts SET status = ?, isFeatured = ?, pointsAwarded = CASE WHEN ? = 1 THEN 1 ELSE pointsAwarded END WHERE id = ?`,
+      [status, isFeatured ? 1 : 0, shouldAwardPoints ? 1 : 0, id]
+    );
+
+    if (shouldAwardPoints) {
       const awardPts = getPointForCategory(post.category);
       await queryRun(`UPDATE Users SET points = points + ? WHERE id = ?`, [awardPts, post.userId]);
 
@@ -95,10 +102,16 @@ const moderatePost = async (req, res) => {
         `INSERT INTO Notifications (userId, title, message, type) VALUES (?, ?, ?, ?)`,
         [post.userId, 'Bài viết được phê duyệt!', `Bài viết "${post.title}" của bạn đã được duyệt và hiển thị trên Bản Đồ Việc Tốt. Bạn nhận được +${awardPts} điểm công dân.`, 'success']
       );
-    } else if (status === 'Rejected') {
+    } else if (status === 'Approved' && post.status !== 'Approved') {
       await queryRun(
         `INSERT INTO Notifications (userId, title, message, type) VALUES (?, ?, ?, ?)`,
-        [post.userId, 'Bài viết không được phê duyệt', `Bài viết "${post.title}" của bạn chưa đáp ứng đủ tiêu chí cộng đồng hoặc cần xác thực thêm.`, 'warning']
+        [post.userId, 'Bài viết được hiển thị lại!', `Bài viết "${post.title}" đã được phê duyệt lại. Điểm của bài này đã được cộng trước đó nên hệ thống không cộng thêm để tránh trùng điểm.`, 'success']
+      );
+    } else if (status === 'Rejected') {
+      const reasonText = cleanRejectionReason || 'Bài viết chưa đáp ứng đủ tiêu chí cộng đồng hoặc cần xác thực thêm.';
+      await queryRun(
+        `INSERT INTO Notifications (userId, title, message, type) VALUES (?, ?, ?, ?)`,
+        [post.userId, 'Bài viết không được phê duyệt', `Bài viết "${post.title}" chưa được duyệt. Lý do: ${reasonText}`, 'warning']
       );
     }
 

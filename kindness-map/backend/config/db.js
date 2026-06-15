@@ -77,6 +77,7 @@ async function initMySqlDb() {
           locationName VARCHAR(300) DEFAULT 'Hà Nội, Việt Nam',
           status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
           isFeatured BOOLEAN DEFAULT FALSE,
+          pointsAwarded BOOLEAN DEFAULT FALSE,
           userId INT NOT NULL,
           createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
@@ -133,6 +134,20 @@ async function initMySqlDb() {
       console.log('⚠️ Bỏ qua cập nhật Users.avatar (đã tồn tại hoặc không thể thay đổi).');
     }
 
+    // Migration an toàn: đánh dấu bài đã từng cộng điểm để tránh cộng điểm lặp khi duyệt lại
+    try {
+      await pool.query("ALTER TABLE Posts ADD COLUMN pointsAwarded BOOLEAN DEFAULT FALSE");
+      await pool.query("UPDATE Posts SET pointsAwarded = 1 WHERE status = 'Approved' AND pointsAwarded = 0");
+      console.log('✅ Đã thêm Posts.pointsAwarded để chống cộng điểm trùng.');
+    } catch (e) {
+      console.log('⚠️ Bỏ qua thêm Posts.pointsAwarded (đã tồn tại).');
+      try {
+        await pool.query("UPDATE Posts SET pointsAwarded = 1 WHERE status = 'Approved' AND pointsAwarded = 0");
+      } catch (innerError) {
+        console.log('⚠️ Không thể đồng bộ Posts.pointsAwarded cho dữ liệu cũ.');
+      }
+    }
+
     // 2. Kiểm tra nếu bảng Users trống thì Tự động nén dữ liệu mẫu vào
     const [userRows] = await pool.query(`SELECT COUNT(*) as cnt FROM Users`);
     if (userRows[0].cnt === 0) {
@@ -185,7 +200,7 @@ async function initMySqlDb() {
         ['Tặng quà và thăm hỏi các cụ già neo đơn', 'Cuối tuần qua, chúng mình đã mang những món quà nhỏ gồm sữa và bánh ấm đến thăm các cụ ở viện dưỡng lão.', 'https://images.unsplash.com/photo-1516307365426-bea591f05011?auto=format&fit=crop&w=800&q=80', 'Người cao tuổi', 10.7925, 106.6541, 'Tân Bình, TP. Hồ Chí Minh', 'Approved', 1, 4]
       ];
       for (const p of posts) {
-        await pool.execute(`INSERT INTO Posts (title, description, imageUrl, category, latitude, longitude, locationName, status, isFeatured, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, p);
+        await pool.execute(`INSERT INTO Posts (title, description, imageUrl, category, latitude, longitude, locationName, status, isFeatured, pointsAwarded, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)`, p);
       }
 
       console.log('🎉 Đã khởi tạo và tải dữ liệu Việc tốt thành công rực rỡ vào Aiven MySQL!');

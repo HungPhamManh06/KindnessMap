@@ -29,6 +29,15 @@ const STATUS_CONFIG = {
   },
 };
 
+const REJECTION_REASONS = [
+  'Thông tin minh chứng chưa đủ rõ ràng',
+  'Nội dung chưa phù hợp tiêu chuẩn cộng đồng',
+  'Địa điểm hoặc tọa độ chưa chính xác',
+  'Hình ảnh chưa liên quan hoặc chất lượng thấp',
+  'Bài viết có dấu hiệu trùng lặp/spam',
+  'Khác',
+];
+
 const getPointForCategory = (category) => {
   switch (category) {
     case 'Môi trường':
@@ -69,6 +78,14 @@ export const AdminDashboard = () => {
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [postSortBy, setPostSortBy] = useState('newest');
   const [selectedPostIds, setSelectedPostIds] = useState([]);
+  const [rejectDialog, setRejectDialog] = useState({
+    open: false,
+    mode: 'single',
+    postId: null,
+    postTitle: '',
+    reason: REJECTION_REASONS[0],
+    details: '',
+  });
 
   // Users Data
   const [usersList, setUsersList] = useState([]);
@@ -132,10 +149,10 @@ export const AdminDashboard = () => {
     }
   };
 
-  const handleModeratePost = async (postId, newStatus, isFeatured = false) => {
+  const handleModeratePost = async (postId, newStatus, isFeatured = false, rejectionReason = '') => {
     try {
       setActionLoading(true);
-      await api.put(`/admin/posts/${postId}/moderate`, { status: newStatus, isFeatured });
+      await api.put(`/admin/posts/${postId}/moderate`, { status: newStatus, isFeatured, rejectionReason });
       addToast('Đã xử lý bài viết!', `Trạng thái mới: ${newStatus}`, 'success');
       await fetchAdminData();
     } catch (error) {
@@ -145,7 +162,7 @@ export const AdminDashboard = () => {
     }
   };
 
-  const handleBulkModerate = async (newStatus) => {
+  const handleBulkModerate = async (newStatus, rejectionReason = '') => {
     if (selectedPostIds.length === 0) return;
     const label = newStatus === 'Approved' ? 'duyệt' : 'từ chối';
     const ok = window.confirm(`Bạn chắc chắn muốn ${label} ${selectedPostIds.length} bài viết đã chọn?`);
@@ -154,7 +171,7 @@ export const AdminDashboard = () => {
     try {
       setActionLoading(true);
       await Promise.all(
-        selectedPostIds.map((id) => api.put(`/admin/posts/${id}/moderate`, { status: newStatus, isFeatured: false }))
+        selectedPostIds.map((id) => api.put(`/admin/posts/${id}/moderate`, { status: newStatus, isFeatured: false, rejectionReason }))
       );
       addToast('Xử lý hàng loạt thành công!', `Đã ${label} ${selectedPostIds.length} bài viết.`, 'success');
       setSelectedPostIds([]);
@@ -163,6 +180,42 @@ export const AdminDashboard = () => {
       addToast('Lỗi xử lý hàng loạt', error.response?.data?.message || 'Một vài bài viết chưa được cập nhật.', 'warning');
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const openRejectDialog = ({ mode = 'single', post = null } = {}) => {
+    setRejectDialog({
+      open: true,
+      mode,
+      postId: post?.id || null,
+      postTitle: post?.title || '',
+      reason: REJECTION_REASONS[0],
+      details: '',
+    });
+  };
+
+  const closeRejectDialog = () => {
+    setRejectDialog((prev) => ({ ...prev, open: false }));
+  };
+
+  const buildRejectionReason = () => {
+    const reason = rejectDialog.reason === 'Khác' ? '' : rejectDialog.reason;
+    const details = rejectDialog.details.trim();
+    return [reason, details].filter(Boolean).join('. ');
+  };
+
+  const handleConfirmReject = async () => {
+    const rejectionReason = buildRejectionReason();
+    if (!rejectionReason) {
+      addToast('Thiếu lý do từ chối', 'Vui lòng chọn hoặc nhập lý do để người dùng biết cần cải thiện gì.', 'warning');
+      return;
+    }
+
+    closeRejectDialog();
+    if (rejectDialog.mode === 'bulk') {
+      await handleBulkModerate('Rejected', rejectionReason);
+    } else if (rejectDialog.postId) {
+      await handleModeratePost(rejectDialog.postId, 'Rejected', false, rejectionReason);
     }
   };
 
@@ -520,7 +573,7 @@ export const AdminDashboard = () => {
                     Duyệt hàng loạt
                   </button>
                   <button
-                    onClick={() => handleBulkModerate('Rejected')}
+                    onClick={() => openRejectDialog({ mode: 'bulk' })}
                     disabled={actionLoading}
                     className="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-black hover:opacity-90 disabled:opacity-60"
                   >
@@ -579,6 +632,11 @@ export const AdminDashboard = () => {
                               ⭐ Nổi bật
                             </span>
                           )}
+                          {Number(p.pointsAwarded || 0) === 1 && (
+                            <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-700 text-[10px] font-black uppercase border border-blue-200">
+                              💠 Đã cộng điểm
+                            </span>
+                          )}
                         </div>
 
                         <h3 className="font-extrabold text-base text-slate-900 mt-1.5 leading-snug">
@@ -617,10 +675,10 @@ export const AdminDashboard = () => {
 
                         {p.status !== 'Rejected' && (
                           <button
-                            onClick={() => handleModeratePost(p.id, 'Rejected')}
+                            onClick={() => openRejectDialog({ mode: 'single', post: p })}
                             disabled={actionLoading}
                             className="px-3.5 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl font-bold text-xs flex items-center gap-1 border border-rose-200 transition-colors disabled:opacity-60"
-                            title="Từ chối bài viết"
+                            title="Từ chối bài viết kèm lý do gửi cho tác giả"
                           >
                             <X className="w-4 h-4" /> Từ Chối
                           </button>
@@ -1087,6 +1145,79 @@ export const AdminDashboard = () => {
                 ))}
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {rejectDialog.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+            <div className="p-6 bg-gradient-to-r from-rose-600 to-red-500 text-white relative">
+              <button
+                onClick={closeRejectDialog}
+                className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
+                aria-label="Đóng hộp thoại từ chối"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center mb-3">
+                <AlertTriangle className="w-7 h-7" />
+              </div>
+              <h3 className="text-xl font-black">
+                {rejectDialog.mode === 'bulk' ? `Từ chối ${selectedPostIds.length} bài đã chọn` : 'Từ chối bài viết'}
+              </h3>
+              <p className="text-xs text-rose-100 mt-1 leading-relaxed">
+                {rejectDialog.mode === 'bulk'
+                  ? 'Lý do này sẽ được gửi cho tất cả tác giả của các bài viết đã chọn.'
+                  : `Tác giả bài “${rejectDialog.postTitle}” sẽ nhận thông báo kèm lý do cụ thể.`}
+              </p>
+            </div>
+
+            <div className="p-6 flex flex-col gap-4">
+              <div>
+                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Lý do chính</label>
+                <select
+                  value={rejectDialog.reason}
+                  onChange={(e) => setRejectDialog((prev) => ({ ...prev, reason: e.target.value }))}
+                  className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500"
+                >
+                  {REJECTION_REASONS.map((reason) => (
+                    <option key={reason} value={reason}>{reason}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Ghi chú bổ sung cho người dùng</label>
+                <textarea
+                  rows="4"
+                  value={rejectDialog.details}
+                  onChange={(e) => setRejectDialog((prev) => ({ ...prev, details: e.target.value }))}
+                  placeholder="VD: Vui lòng bổ sung ảnh trước/sau hoạt động, mô tả số người tham gia hoặc chọn lại vị trí chính xác trên bản đồ..."
+                  className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 resize-none"
+                />
+              </div>
+
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 leading-relaxed">
+                <strong>Xem trước thông báo:</strong> Bài viết chưa được duyệt. Lý do: {buildRejectionReason() || '...' }
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  onClick={closeRejectDialog}
+                  className="px-5 py-3 rounded-2xl bg-slate-100 text-slate-700 text-xs font-black hover:bg-slate-200"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleConfirmReject}
+                  disabled={actionLoading}
+                  className="px-5 py-3 rounded-2xl bg-rose-600 text-white text-xs font-black hover:bg-rose-700 disabled:opacity-60 flex items-center gap-2"
+                >
+                  <X className="w-4 h-4" /> Xác Nhận Từ Chối
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
