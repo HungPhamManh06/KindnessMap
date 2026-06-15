@@ -67,9 +67,28 @@ const OpenLayersLocationPicker = ({ position, setPosition }) => {
         const styleJson = await response.json();
         
         if (styleJson.layers) {
+          const BANNED_NAMES = [
+            'Kalayaan', 'Zhubi', 'Fiery Cross', 'Mischief Reef', 'Meiji Jiao', 'Yongshu Jiao', 'Zhubi Jiao',
+            'Sansha', 'Woody Island', 'Yongxing Dao', 'Paracel Islands', 'Spratly Islands',
+            'South China Sea', 'Macclesfield Bank', 'Scarborough Shoal', 'Zhongjian Dao', 'Triton Island',
+            'Đảo Phú Lâm', 'Thành phố Tam Sa', 'Hoang Sa', 'Truong Sa', 'Pattle Island', 'Duncan Island',
+            'Quần đảo Hoàng Sa', 'Quần đảo Trường Sa'
+          ];
           styleJson.layers.forEach(layer => {
-            if (layer.layout && layer.layout['text-field']) {
+            if (layer.type === 'symbol' && layer.layout && layer.layout['text-field']) {
               layer.layout['text-field'] = ['coalesce', ['get', 'name:vi'], ['get', 'name:en'], ['get', 'name']];
+              
+              const banFilter = ['!', ['in', ['get', 'name:en'], ['literal', BANNED_NAMES]]];
+              const banFilterVi = ['!', ['in', ['get', 'name:vi'], ['literal', BANNED_NAMES]]];
+              const banFilterName = ['!', ['in', ['get', 'name'], ['literal', BANNED_NAMES]]];
+              
+              if (!layer.filter) {
+                layer.filter = ['all', banFilter, banFilterVi, banFilterName];
+              } else if (layer.filter[0] === 'all') {
+                layer.filter.push(banFilter, banFilterVi, banFilterName);
+              } else {
+                layer.filter = ['all', layer.filter, banFilter, banFilterVi, banFilterName];
+              }
             }
           });
         }

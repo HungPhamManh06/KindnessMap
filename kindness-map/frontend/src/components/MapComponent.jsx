@@ -9,8 +9,9 @@ import Polygon from 'ol/geom/Polygon';
 import Point from 'ol/geom/Point';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource } from 'ol/source';
+import { Style, Icon, Text, Fill, Stroke, Circle as CircleStyle } from 'ol/style';
 import GeoJSON from 'ol/format/GeoJSON';
-import { Style, Fill, Stroke, Text } from 'ol/style';
+import { Translate } from 'ol/interaction';
 import { apply } from 'ol-mapbox-style';
 import { fromLonLat } from 'ol/proj';
 import api from '../services/api';
@@ -152,11 +153,32 @@ export const MapComponent = ({
         const response = await fetch(STYLE_URL);
         const styleJson = await response.json();
         
-        // Force Vietnamese language on MapTiler vector tiles
+        // Force Vietnamese language on MapTiler vector tiles and filter foreign labels
+        const BANNED_NAMES = [
+          'Kalayaan', 'Zhubi', 'Fiery Cross', 'Mischief Reef', 'Meiji Jiao', 'Yongshu Jiao', 'Zhubi Jiao',
+          'Sansha', 'Woody Island', 'Yongxing Dao', 'Paracel Islands', 'Spratly Islands',
+          'South China Sea', 'Macclesfield Bank', 'Scarborough Shoal', 'Zhongjian Dao', 'Triton Island',
+          'Đảo Phú Lâm', 'Thành phố Tam Sa', 'Hoang Sa', 'Truong Sa', 'Pattle Island', 'Duncan Island',
+          'Quần đảo Hoàng Sa', 'Quần đảo Trường Sa' // We render our own custom labels for these
+        ];
+
         if (styleJson.layers) {
           styleJson.layers.forEach(layer => {
-            if (layer.layout && layer.layout['text-field']) {
+            if (layer.type === 'symbol' && layer.layout && layer.layout['text-field']) {
               layer.layout['text-field'] = ['coalesce', ['get', 'name:vi'], ['get', 'name:en'], ['get', 'name']];
+              
+              // Add a filter to hide banned names
+              const banFilter = ['!', ['in', ['get', 'name:en'], ['literal', BANNED_NAMES]]];
+              const banFilterVi = ['!', ['in', ['get', 'name:vi'], ['literal', BANNED_NAMES]]];
+              const banFilterName = ['!', ['in', ['get', 'name'], ['literal', BANNED_NAMES]]];
+              
+              if (!layer.filter) {
+                layer.filter = ['all', banFilter, banFilterVi, banFilterName];
+              } else if (layer.filter[0] === 'all') {
+                layer.filter.push(banFilter, banFilterVi, banFilterName);
+              } else {
+                layer.filter = ['all', layer.filter, banFilter, banFilterVi, banFilterName];
+              }
             }
           });
         }
@@ -195,15 +217,36 @@ export const MapComponent = ({
             const data = await res.json();
             const features = new GeoJSON().readFeatures(data, { featureProjection: 'EPSG:3857' });
             features.forEach(f => {
-              f.setStyle(new Style({
-                text: new Text({
-                  text: f.get('name'),
-                  font: 'bold 13px Inter, Arial, sans-serif',
-                  fill: new Fill({ color: '#1e293b' }),
-                  stroke: new Stroke({ color: '#ffffff', width: 4 }),
-                  offsetY: 0,
-                })
-              }));
+              const type = f.get('type');
+              const text = f.get('name');
+              
+              if (type === 'territory') {
+                f.setStyle(new Style({
+                  text: new Text({
+                    text: text,
+                    font: 'bold 14px Inter, Arial, sans-serif',
+                    fill: new Fill({ color: '#dc2626' }), // Red for national territory
+                    stroke: new Stroke({ color: '#ffffff', width: 4 }),
+                    offsetY: 0,
+                  })
+                }));
+              } else {
+                // Island/Reef
+                f.setStyle(new Style({
+                  image: new CircleStyle({
+                    radius: 3,
+                    fill: new Fill({ color: '#dc2626' }),
+                    stroke: new Stroke({ color: '#ffffff', width: 1.5 })
+                  }),
+                  text: new Text({
+                    text: text,
+                    font: '600 11px Inter, Arial, sans-serif',
+                    fill: new Fill({ color: '#0f172a' }),
+                    stroke: new Stroke({ color: '#ffffff', width: 3 }),
+                    offsetY: -10,
+                  })
+                }));
+              }
             });
             territorySource.addFeatures(features);
           } catch (e) {

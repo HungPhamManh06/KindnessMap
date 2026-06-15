@@ -10,8 +10,106 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          114.0,
+          114,
           10.5
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Đá Subi",
+        "type": "island"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          114.0628,
+          10.9238
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Đá Chữ Thập",
+        "type": "island"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.8906,
+          9.5517
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Đá Vành Khăn",
+        "type": "island"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          115.5408,
+          9.9089
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Đảo Trường Sa",
+        "type": "island"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          111.9194,
+          8.6444
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Đảo Ba Bình",
+        "type": "island"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          114.3664,
+          10.3769
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Đảo Song Tử Tây",
+        "type": "island"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          114.3314,
+          11.4283
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Đảo Sinh Tồn",
+        "type": "island"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          114.3167,
+          9.8667
         ]
       }
     }
