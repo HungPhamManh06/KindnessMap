@@ -221,8 +221,8 @@ export const MapComponent = ({
             const text = feature.get('name');
             
             if (type === 'territory') {
-              // Chỉnh size vừa phải, tự nhiên hơn
-              const size = zoom > 6 ? 13 : 11.5;
+              // Scale size dynamically and naturally with zoom level
+              const size = Math.min(16, Math.max(11, zoom * 0.8 + 7));
               return new Style({
                 text: new Text({
                   text: text,
