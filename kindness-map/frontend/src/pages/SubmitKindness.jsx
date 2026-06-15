@@ -3,30 +3,96 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import {
   Sparkles, CheckCircle2, AlertTriangle, Image as ImageIcon,
-  MapPin, Send, HelpCircle, ArrowLeft, Plus, LocateFixed
+  MapPin, Send, HelpCircle, ArrowLeft, LocateFixed
 } from 'lucide-react';
+import { getGoogleMapsApiKey, loadGoogleMaps } from '../utils/googleMapsLoader';
 
-// Fix lỗi icon marker Leaflet bị mất khi build bằng Vite/Vercel.
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
+const GoogleLocationPicker = ({ position, setPosition }) => {
+  const mapDivRef = React.useRef(null);
+  const mapRef = React.useRef(null);
+  const markerRef = React.useRef(null);
+  const [error, setError] = React.useState('');
+  const apiKey = getGoogleMapsApiKey();
 
-const LocationPickerMarker = ({ position, setPosition }) => {
-  useMapEvents({
-    click(e) {
-      setPosition([Number(e.latlng.lat.toFixed(6)), Number(e.latlng.lng.toFixed(6))]);
-    },
-  });
+  React.useEffect(() => {
+    let cancelled = false;
 
-  return position ? <Marker position={position} /> : null;
+    const initMap = async () => {
+      try {
+        const maps = await loadGoogleMaps();
+        if (cancelled || !mapDivRef.current || mapRef.current) return;
+
+        const center = { lat: Number(position[0]), lng: Number(position[1]) };
+        mapRef.current = new maps.Map(mapDivRef.current, {
+          center,
+          zoom: 14,
+          mapTypeControl: true,
+          streetViewControl: true,
+          fullscreenControl: true,
+          gestureHandling: 'greedy',
+          mapTypeId: maps.MapTypeId.ROADMAP,
+        });
+
+        markerRef.current = new maps.Marker({
+          position: center,
+          map: mapRef.current,
+          draggable: true,
+          title: 'Vị trí việc tốt của bạn',
+        });
+
+        mapRef.current.addListener('click', (event) => {
+          const next = [Number(event.latLng.lat().toFixed(6)), Number(event.latLng.lng().toFixed(6))];
+          setPosition(next);
+        });
+
+        markerRef.current.addListener('dragend', (event) => {
+          const next = [Number(event.latLng.lat().toFixed(6)), Number(event.latLng.lng().toFixed(6))];
+          setPosition(next);
+        });
+      } catch (err) {
+        if (!cancelled) setError(err.message || 'Không tải được Google Maps.');
+      }
+    };
+
+    initMap();
+    return () => { cancelled = true; };
+  }, []);
+
+  React.useEffect(() => {
+    if (!mapRef.current || !markerRef.current) return;
+    const next = { lat: Number(position[0]), lng: Number(position[1]) };
+    if (!Number.isFinite(next.lat) || !Number.isFinite(next.lng)) return;
+    markerRef.current.setPosition(next);
+    mapRef.current.panTo(next);
+  }, [position]);
+
+  if (!apiKey) {
+    return (
+      <div className="w-full h-full bg-slate-100 flex items-center justify-center p-6 text-center">
+        <div className="bg-white rounded-2xl border border-amber-200 p-5 max-w-md shadow-lg">
+          <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
+          <p className="text-xs text-slate-700 font-semibold leading-relaxed">
+            Chưa cấu hình <strong>VITE_GOOGLE_MAPS_API_KEY</strong>. Vui lòng thêm API key để dùng Google Maps.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-full bg-slate-100 flex items-center justify-center p-6 text-center">
+        <div className="bg-white rounded-2xl border border-rose-200 p-5 max-w-md shadow-lg">
+          <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto mb-2" />
+          <p className="text-xs text-slate-700 font-semibold leading-relaxed">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <div ref={mapDivRef} className="w-full h-full" />;
 };
 
 export const SubmitKindness = () => {
@@ -179,9 +245,10 @@ export const SubmitKindness = () => {
 
           <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 w-full flex items-center justify-between text-xs text-slate-700 font-medium">
             <span>Trạng thái bài viết:</span>
-            <span className={`px-3 py-1 rounded-full font-black text-xs ${successPost.post?.status === 'Approved' ? 'bg-emerald-100 text-brand-green' :
-                successPost.post?.status === 'Rejected' ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-700'
-              }`}>
+            <span className={`px-3 py-1 rounded-full font-black text-xs ${
+              successPost.post?.status === 'Approved' ? 'bg-emerald-100 text-brand-green' :
+              successPost.post?.status === 'Rejected' ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-700'
+            }`}>
               {successPost.post?.status === 'Approved' ? '✅ Đã Phê Duyệt' :
                 successPost.post?.status === 'Rejected' ? '🚫 Bị Từ Chối' : '⏳ Đang Chờ Duyệt'}
             </span>
@@ -342,19 +409,7 @@ export const SubmitKindness = () => {
               <div className="absolute top-2 left-2 z-[1000] bg-white/90 backdrop-blur-md px-3 py-1 rounded-xl text-[10px] font-black text-brand-green shadow-sm">
                 💡 Bấm trực tiếp vào bản đồ để gắn tọa độ
               </div>
-              <MapContainer
-                key="submit-location-picker"
-                center={pickedLatLng}
-                zoom={13}
-                style={{ width: '100%', height: '100%' }}
-                scrollWheelZoom={true}
-              >
-                <TileLayer
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                />
-                <LocationPickerMarker position={pickedLatLng} setPosition={setPickedLatLng} />
-              </MapContainer>
+              <GoogleLocationPicker position={pickedLatLng} setPosition={setPickedLatLng} />
             </div>
 
             <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-start gap-2">
