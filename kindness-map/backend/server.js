@@ -43,8 +43,17 @@ app.get('/api/health', (req, res) => {
 
 // Config endpoint to fetch map API key (securely served from backend env)
 app.get('/api/config/map', (req, res) => {
+  const key = process.env.MAPTILER_API_KEY || '';
   res.status(200).json({
-    maptilerApiKey: process.env.MAPTILER_API_KEY || ''
+    maptilerApiKey: key,
+    // === DEBUG INFO (temporary - remove after fix is confirmed) ===
+    _debug: {
+      envExists: key.length > 0,
+      envLength: key.length,
+      envPrefix: key.length >= 3 ? key.substring(0, 3) : '---',
+      runtime: process.env.NODE_ENV || 'unknown',
+      serverNote: 'This response is served by the Express backend on Render.com'
+    }
   });
 });
 
