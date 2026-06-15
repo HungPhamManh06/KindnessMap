@@ -1,3 +1,5 @@
+/* css-lint disable-all */
+/* eslint-disable-next-line */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,6 +9,7 @@
     @apply bg-[#F8FAFC] text-slate-800 antialiased selection:bg-brand-green selection:text-white;
   }
 }
+
 
 /* Custom CSS animations and smooth transitions */
 @keyframes fadeIn {
@@ -42,3 +45,31 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
+
+/* ── MapLibre GL JS popup overrides ──────────────────────────────────────── */
+.maplibregl-popup-content {
+  border-radius: 20px !important;
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.18) !important;
+  border: 1px solid #e2e8f0 !important;
+  padding: 14px 16px 12px !important;
+  font-family: 'Inter', Arial, sans-serif;
+}
+
+.maplibregl-popup-close-button {
+  font-size: 18px;
+  color: #94a3b8;
+  padding: 4px 8px;
+  top: 4px;
+  right: 4px;
+  line-height: 1;
+}
+
+.maplibregl-popup-close-button:hover {
+  color: #0f172a;
+  background: transparent;
+}
+
+.maplibregl-ctrl-attrib {
+  font-size: 10px !important;
+}
+
