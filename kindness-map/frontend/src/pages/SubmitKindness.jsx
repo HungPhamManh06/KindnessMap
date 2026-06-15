@@ -25,6 +25,7 @@ const OpenLayersLocationPicker = ({ position, setPosition }) => {
   const containerRef = React.useRef(null);
   const mapRef       = React.useRef(null);
   const markerFeatureRef = React.useRef(null);
+  const [pickerError, setPickerError] = React.useState(null);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -34,9 +35,19 @@ const OpenLayersLocationPicker = ({ position, setPosition }) => {
         let MAPTILER_KEY = '';
         try {
           const res = await api.get('/config/map');
-          MAPTILER_KEY = res.data.maptilerApiKey;
+          MAPTILER_KEY = res.data.maptilerApiKey || '';
+          if (res.data._debug) {
+            console.info('[MapTiler Debug - LocationPicker]', res.data._debug);
+          }
         } catch (err) {
           console.error('Failed to load map API key from backend', err);
+          if (!cancelled) setPickerError('Không thể kết nối máy chủ để tải bản đồ.');
+          return;
+        }
+
+        if (!MAPTILER_KEY || MAPTILER_KEY.length === 0) {
+          if (!cancelled) setPickerError('Cấu hình MapTiler chưa được thiết lập trên máy chủ.');
+          return;
         }
 
         if (cancelled) return;
@@ -51,20 +62,18 @@ const OpenLayersLocationPicker = ({ position, setPosition }) => {
           }),
         });
 
-        if (MAPTILER_KEY) {
-          const STYLE_URL = `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`;
-          const response = await fetch(STYLE_URL);
-          const styleJson = await response.json();
-          
-          if (styleJson.layers) {
-            styleJson.layers.forEach(layer => {
-              if (layer.layout && layer.layout['text-field']) {
-                layer.layout['text-field'] = ['coalesce', ['get', 'name:vi'], ['get', 'name:en'], ['get', 'name']];
-              }
-            });
-          }
-          await apply(map, styleJson);
+        const STYLE_URL = `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`;
+        const response = await fetch(STYLE_URL);
+        const styleJson = await response.json();
+        
+        if (styleJson.layers) {
+          styleJson.layers.forEach(layer => {
+            if (layer.layout && layer.layout['text-field']) {
+              layer.layout['text-field'] = ['coalesce', ['get', 'name:vi'], ['get', 'name:en'], ['get', 'name']];
+            }
+          });
         }
+        await apply(map, styleJson);
 
         if (cancelled) return;
 
@@ -132,7 +141,17 @@ const OpenLayersLocationPicker = ({ position, setPosition }) => {
     mapRef.current.getView().animate({ center: coords, zoom: 14, duration: 600 });
   }, [position]);
 
-  return <div ref={containerRef} className="w-full h-full" />;
+  return pickerError ? (
+    <div className="w-full h-full flex items-center justify-center bg-slate-50 rounded-2xl border border-rose-200">
+      <div className="text-center px-6 py-4 flex flex-col items-center gap-2">
+        <MapPin className="w-6 h-6 text-rose-400" />
+        <p className="text-xs font-bold text-rose-700">{pickerError}</p>
+        <p className="text-[10px] text-slate-400">Vui lòng liên hệ quản trị viên.</p>
+      </div>
+    </div>
+  ) : (
+    <div ref={containerRef} className="w-full h-full" />
+  );
 };
 
 export const SubmitKindness = () => {

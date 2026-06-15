@@ -110,6 +110,7 @@ export const MapComponent = ({
   
   const [heatmapMode, setHeatmapMode] = useState(false);
   const [mapReady,    setMapReady]    = useState(false);
+  const [mapError,    setMapError]    = useState(null);
 
   // ── 1. Init Map ───────────────────────────────────────────────────────────
   useEffect(() => {
@@ -120,9 +121,21 @@ export const MapComponent = ({
         let MAPTILER_KEY = '';
         try {
           const res = await api.get('/config/map');
-          MAPTILER_KEY = res.data.maptilerApiKey;
+          MAPTILER_KEY = res.data.maptilerApiKey || '';
+          // Log debug info if available (temporary)
+          if (res.data._debug) {
+            console.info('[MapTiler Debug]', res.data._debug);
+          }
         } catch (err) {
           console.error('Failed to load map API key from backend', err);
+          if (!cancelled) setMapError('Không thể kết nối đến máy chủ để tải cấu hình bản đồ.');
+          return;
+        }
+
+        if (!MAPTILER_KEY || MAPTILER_KEY.length === 0) {
+          console.error('MapTiler API Key is empty. Check MAPTILER_API_KEY on Render.com backend.');
+          if (!cancelled) setMapError('Không thể tải cấu hình MapTiler từ máy chủ. Bản đồ không khả dụng.');
+          return;
         }
 
         if (cancelled) return;
@@ -135,24 +148,19 @@ export const MapComponent = ({
           }),
         });
 
-        if (MAPTILER_KEY) {
-          const STYLE_URL = `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`;
-          const response = await fetch(STYLE_URL);
-          const styleJson = await response.json();
-          
-          // Force Vietnamese language on MapTiler vector tiles
-          if (styleJson.layers) {
-            styleJson.layers.forEach(layer => {
-              if (layer.layout && layer.layout['text-field']) {
-                layer.layout['text-field'] = ['coalesce', ['get', 'name:vi'], ['get', 'name:en'], ['get', 'name']];
-              }
-            });
-          }
-          await apply(map, styleJson);
-        } else {
-          // Fallback if no API key
-          console.warn('MapTiler API Key is not set. Map may not load properly.');
+        const STYLE_URL = `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`;
+        const response = await fetch(STYLE_URL);
+        const styleJson = await response.json();
+        
+        // Force Vietnamese language on MapTiler vector tiles
+        if (styleJson.layers) {
+          styleJson.layers.forEach(layer => {
+            if (layer.layout && layer.layout['text-field']) {
+              layer.layout['text-field'] = ['coalesce', ['get', 'name:vi'], ['get', 'name:en'], ['get', 'name']];
+            }
+          });
         }
+        await apply(map, styleJson);
 
         if (cancelled) return;
 
@@ -375,6 +383,25 @@ export const MapComponent = ({
   }, [selectedCenter, mapReady]);
 
   // ── Render ───────────────────────────────────────────────────────────────
+
+  // Show visible error banner instead of blank map
+  if (mapError) {
+    return (
+      <div className={`relative ${className} flex items-center justify-center bg-slate-50 border border-rose-200`}>
+        <div className="flex flex-col items-center gap-3 text-center px-8 py-10">
+          <div className="w-14 h-14 rounded-full bg-rose-100 flex items-center justify-center">
+            <MapPin className="w-7 h-7 text-rose-500" />
+          </div>
+          <h3 className="text-slate-800 font-black text-base">Không Thể Tải Bản Đồ</h3>
+          <p className="text-slate-500 text-xs leading-relaxed max-w-xs">{mapError}</p>
+          <p className="text-slate-400 text-[10px]">
+            Lỗi cấu hình máy chủ — Vui lòng liên hệ quản trị viên.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`relative ${className}`}>
 
