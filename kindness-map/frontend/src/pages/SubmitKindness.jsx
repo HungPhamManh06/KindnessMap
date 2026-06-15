@@ -7,65 +7,90 @@ import {
   Sparkles, CheckCircle2, AlertTriangle, Image as ImageIcon,
   MapPin, Send, HelpCircle, ArrowLeft, LocateFixed
 } from 'lucide-react';
-import { getGoogleMapsApiKey, loadGoogleMaps } from '../utils/googleMapsLoader';
+import { getHereMapsApiKey, loadHereMaps } from '../utils/hereMapsLoader';
 
-const GoogleLocationPicker = ({ position, setPosition }) => {
+const HereLocationPicker = ({ position, setPosition }) => {
   const mapDivRef = React.useRef(null);
   const mapRef = React.useRef(null);
   const markerRef = React.useRef(null);
+  const behaviorRef = React.useRef(null);
+  const resizeHandlerRef = React.useRef(null);
   const [error, setError] = React.useState('');
-  const apiKey = getGoogleMapsApiKey();
+  const apiKey = getHereMapsApiKey();
 
   React.useEffect(() => {
     let cancelled = false;
 
     const initMap = async () => {
       try {
-        const maps = await loadGoogleMaps();
+        const H = await loadHereMaps();
         if (cancelled || !mapDivRef.current || mapRef.current) return;
 
+        const platform = new H.service.Platform({ apikey: apiKey });
+        const defaultLayers = platform.createDefaultLayers();
         const center = { lat: Number(position[0]), lng: Number(position[1]) };
-        mapRef.current = new maps.Map(mapDivRef.current, {
+
+        mapRef.current = new H.Map(mapDivRef.current, defaultLayers.vector.normal.map, {
           center,
           zoom: 14,
-          mapTypeControl: true,
-          streetViewControl: true,
-          fullscreenControl: true,
-          gestureHandling: 'greedy',
-          mapTypeId: maps.MapTypeId.ROADMAP,
+          pixelRatio: window.devicePixelRatio || 1,
         });
 
-        markerRef.current = new maps.Marker({
-          position: center,
-          map: mapRef.current,
-          draggable: true,
-          title: 'Vị trí việc tốt của bạn',
-        });
+        behaviorRef.current = new H.mapevents.Behavior(new H.mapevents.MapEvents(mapRef.current));
+        H.ui.UI.createDefault(mapRef.current, defaultLayers, 'vi-VN');
 
-        mapRef.current.addListener('click', (event) => {
-          const next = [Number(event.latLng.lat().toFixed(6)), Number(event.latLng.lng().toFixed(6))];
+        markerRef.current = new H.map.Marker(center, { volatility: true });
+        markerRef.current.draggable = true;
+        mapRef.current.addObject(markerRef.current);
+
+        mapRef.current.addEventListener('tap', (evt) => {
+          const pointer = evt.currentPointer;
+          const coord = mapRef.current.screenToGeo(pointer.viewportX, pointer.viewportY);
+          const next = [Number(coord.lat.toFixed(6)), Number(coord.lng.toFixed(6))];
           setPosition(next);
         });
 
-        markerRef.current.addListener('dragend', (event) => {
-          const next = [Number(event.latLng.lat().toFixed(6)), Number(event.latLng.lng().toFixed(6))];
-          setPosition(next);
-        });
+        mapRef.current.addEventListener('dragstart', (evt) => {
+          if (evt.target instanceof H.map.Marker) behaviorRef.current?.disable();
+        }, false);
+
+        mapRef.current.addEventListener('drag', (evt) => {
+          if (!(evt.target instanceof H.map.Marker)) return;
+          const pointer = evt.currentPointer;
+          evt.target.setGeometry(mapRef.current.screenToGeo(pointer.viewportX, pointer.viewportY));
+        }, false);
+
+        mapRef.current.addEventListener('dragend', (evt) => {
+          if (!(evt.target instanceof H.map.Marker)) return;
+          behaviorRef.current?.enable();
+          const geo = evt.target.getGeometry();
+          setPosition([Number(geo.lat.toFixed(6)), Number(geo.lng.toFixed(6))]);
+        }, false);
+
+        resizeHandlerRef.current = () => mapRef.current?.getViewPort().resize();
+        window.addEventListener('resize', resizeHandlerRef.current);
       } catch (err) {
-        if (!cancelled) setError(err.message || 'Không tải được Google Maps.');
+        if (!cancelled) setError(err.message || 'Không tải được HERE Maps.');
       }
     };
 
     initMap();
-    return () => { cancelled = true; };
-  }, []);
+    return () => {
+      cancelled = true;
+      if (resizeHandlerRef.current) window.removeEventListener('resize', resizeHandlerRef.current);
+      if (mapRef.current) {
+        mapRef.current.dispose();
+        mapRef.current = null;
+      }
+    };
+  }, [apiKey]);
 
   React.useEffect(() => {
     if (!mapRef.current || !markerRef.current) return;
     const next = { lat: Number(position[0]), lng: Number(position[1]) };
     if (!Number.isFinite(next.lat) || !Number.isFinite(next.lng)) return;
-    markerRef.current.setPosition(next);
-    mapRef.current.panTo(next);
+    markerRef.current.setGeometry(next);
+    mapRef.current.setCenter(next, true);
   }, [position]);
 
   if (!apiKey) {
@@ -74,7 +99,7 @@ const GoogleLocationPicker = ({ position, setPosition }) => {
         <div className="bg-white rounded-2xl border border-amber-200 p-5 max-w-md shadow-lg">
           <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
           <p className="text-xs text-slate-700 font-semibold leading-relaxed">
-            Chưa cấu hình <strong>VITE_GOOGLE_MAPS_API_KEY</strong>. Vui lòng thêm API key để dùng Google Maps.
+            Chưa cấu hình <strong>VITE_HERE_MAPS_API_KEY</strong>. Vui lòng thêm API key để dùng HERE Maps.
           </p>
         </div>
       </div>
@@ -409,7 +434,7 @@ export const SubmitKindness = () => {
               <div className="absolute top-2 left-2 z-[1000] bg-white/90 backdrop-blur-md px-3 py-1 rounded-xl text-[10px] font-black text-brand-green shadow-sm">
                 💡 Bấm trực tiếp vào bản đồ để gắn tọa độ
               </div>
-              <GoogleLocationPicker position={pickedLatLng} setPosition={setPickedLatLng} />
+              <HereLocationPicker position={pickedLatLng} setPosition={setPickedLatLng} />
             </div>
 
             <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-start gap-2">
