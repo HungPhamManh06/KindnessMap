@@ -8,129 +8,128 @@ import {
   MapPin, Send, HelpCircle, ArrowLeft, LocateFixed
 } from 'lucide-react';
 
-// ─── MapLibre GL JS CDN loader (no API key required) ──────────────────────────
-const MAPLIBRE_CSS = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css';
-const MAPLIBRE_JS  = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js';
+// ─── OpenLayers Location Picker ──────────────────────────────────────────
+import Map from 'ol/Map';
+import View from 'ol/View';
+import Feature from 'ol/Feature';
+import Point from 'ol/geom/Point';
+import { Vector as VectorLayer } from 'ol/layer';
+import { Vector as VectorSource } from 'ol/source';
+import { Style, Icon } from 'ol/style';
+import { Translate } from 'ol/interaction';
+import { apply } from 'ol-mapbox-style';
+import { fromLonLat, toLonLat } from 'ol/proj';
+import Collection from 'ol/Collection';
 
-const OSM_STYLE = {
-  "version": 8,
-  "sources": {
-    "osm": {
-      "type": "raster",
-      "tiles": ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      "tileSize": 256
-    }
-  },
-  "layers": [
-    {
-      "id": "osm",
-      "type": "raster",
-      "source": "osm"
-    }
-  ]
-};
-
-const loadCdnCss = (href) => {
-  if (document.querySelector(`link[href="${href}"]`)) return;
-  const el = document.createElement('link');
-  el.rel = 'stylesheet';
-  el.href = href;
-  document.head.appendChild(el);
-};
-
-const loadCdnJs = (src) =>
-  new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) return resolve();
-    const el = document.createElement('script');
-    el.src = src;
-    el.onload = resolve;
-    el.onerror = reject;
-    document.head.appendChild(el);
-  });
-
-// ─── Location Picker: MapLibre GL JS + OSM (no API key) ───────────────────────
-const MapLibreLocationPicker = ({ position, setPosition }) => {
+const OpenLayersLocationPicker = ({ position, setPosition }) => {
   const containerRef = React.useRef(null);
   const mapRef       = React.useRef(null);
-  const markerRef    = React.useRef(null);
+  const markerFeatureRef = React.useRef(null);
 
-  // Build a draggable SVG pin element
-  const createPinEl = () => {
-    const el = document.createElement('div');
-    el.style.cursor = 'grab';
-    el.innerHTML = `
-      <svg width="32" height="42" viewBox="0 0 38 48" xmlns="http://www.w3.org/2000/svg">
-        <filter id="lp-shadow" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.4"/>
-        </filter>
-        <path filter="url(#lp-shadow)"
-          d="M19 46C19 46 35 29.8 35 17.8C35 8.5 27.8 1 19 1C10.2 1 3 8.5 3 17.8C3 29.8 19 46 19 46Z"
-          fill="#059669" stroke="white" stroke-width="4"/>
-        <circle cx="19" cy="18" r="7" fill="white" fill-opacity="0.96"/>
-      </svg>`;
-    return el;
-  };
-
-  // Init map once
   React.useEffect(() => {
     let cancelled = false;
 
     const init = async () => {
       try {
-        loadCdnCss(MAPLIBRE_CSS);
-        await loadCdnJs(MAPLIBRE_JS);
-        if (cancelled || !containerRef.current || mapRef.current) return;
+        let MAPTILER_KEY = '';
+        try {
+          const res = await api.get('/config/map');
+          MAPTILER_KEY = res.data.maptilerApiKey;
+        } catch (err) {
+          console.error('Failed to load map API key from backend', err);
+        }
 
-        const maplibregl = window.maplibregl;
+        if (cancelled) return;
+        
         const [lat, lng] = [Number(position[0]), Number(position[1])];
 
-        const map = new maplibregl.Map({
-          container: containerRef.current,
-          style: OSM_STYLE,
-          center: [lng, lat],
-          zoom: 14,
-          attributionControl: true,
+        const map = new Map({
+          target: containerRef.current,
+          view: new View({
+            center: fromLonLat([lng, lat]),
+            zoom: 14,
+          }),
         });
 
-        // Draggable marker
-        const marker = new maplibregl.Marker({ element: createPinEl(), draggable: true, anchor: 'bottom' })
-          .setLngLat([lng, lat])
-          .addTo(map);
+        if (MAPTILER_KEY) {
+          const STYLE_URL = `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`;
+          const response = await fetch(STYLE_URL);
+          const styleJson = await response.json();
+          
+          if (styleJson.layers) {
+            styleJson.layers.forEach(layer => {
+              if (layer.layout && layer.layout['text-field']) {
+                layer.layout['text-field'] = ['coalesce', ['get', 'name:vi'], ['get', 'name:en'], ['get', 'name']];
+              }
+            });
+          }
+          await apply(map, styleJson);
+        }
 
-        // Update position when drag ends
-        marker.on('dragend', () => {
-          const { lng: mLng, lat: mLat } = marker.getLngLat();
-          setPosition([Number(mLat.toFixed(6)), Number(mLng.toFixed(6))]);
+        if (cancelled) return;
+
+        // Draggable marker SVG
+        const svg = `<svg width="32" height="42" viewBox="0 0 38 48" xmlns="http://www.w3.org/2000/svg">
+          <filter id="lp-shadow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.4"/>
+          </filter>
+          <path filter="url(#lp-shadow)"
+            d="M19 46C19 46 35 29.8 35 17.8C35 8.5 27.8 1 19 1C10.2 1 3 8.5 3 17.8C3 29.8 19 46 19 46Z"
+            fill="#059669" stroke="white" stroke-width="4"/>
+          <circle cx="19" cy="18" r="7" fill="white" fill-opacity="0.96"/>
+        </svg>`;
+        const iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+
+        const markerFeature = new Feature({ geometry: new Point(fromLonLat([lng, lat])) });
+        markerFeature.setStyle(new Style({
+          image: new Icon({ src: iconUrl, anchor: [0.5, 1], scale: 1 })
+        }));
+        
+        markerFeatureRef.current = markerFeature;
+
+        const vectorSource = new VectorSource({ features: [markerFeature] });
+        const vectorLayer = new VectorLayer({ source: vectorSource, zIndex: 10 });
+        map.addLayer(vectorLayer);
+
+        const translate = new Translate({ features: new Collection([markerFeature]) });
+        map.addInteraction(translate);
+
+        translate.on('translateend', () => {
+          const coords = toLonLat(markerFeature.getGeometry().getCoordinates());
+          setPosition([Number(coords[1].toFixed(6)), Number(coords[0].toFixed(6))]);
         });
 
-        // Click anywhere on map to move marker
-        map.on('click', (e) => {
-          marker.setLngLat([e.lngLat.lng, e.lngLat.lat]);
-          setPosition([Number(e.lngLat.lat.toFixed(6)), Number(e.lngLat.lng.toFixed(6))]);
+        map.on('singleclick', (e) => {
+          markerFeature.getGeometry().setCoordinates(e.coordinate);
+          const coords = toLonLat(e.coordinate);
+          setPosition([Number(coords[1].toFixed(6)), Number(coords[0].toFixed(6))]);
         });
 
-        mapRef.current   = map;
-        markerRef.current = marker;
+        mapRef.current = map;
       } catch (err) {
-        console.error('MapLibre location picker error:', err);
+        console.error('OpenLayers location picker error:', err);
       }
     };
 
     init();
     return () => {
       cancelled = true;
-      if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }
+      if (mapRef.current) {
+        mapRef.current.setTarget(null);
+        mapRef.current = null;
+      }
     };
-  }, []);  // run once
+  }, []); // run once
 
-  // Sync marker when position changes from outside (e.g. geolocation button)
   React.useEffect(() => {
-    if (!markerRef.current || !mapRef.current) return;
+    if (!markerFeatureRef.current || !mapRef.current) return;
     const lat = Number(position[0]);
     const lng = Number(position[1]);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-    markerRef.current.setLngLat([lng, lat]);
-    mapRef.current.flyTo({ center: [lng, lat], zoom: 14, duration: 600 });
+    
+    const coords = fromLonLat([lng, lat]);
+    markerFeatureRef.current.getGeometry().setCoordinates(coords);
+    mapRef.current.getView().animate({ center: coords, zoom: 14, duration: 600 });
   }, [position]);
 
   return <div ref={containerRef} className="w-full h-full" />;
@@ -450,7 +449,7 @@ export const SubmitKindness = () => {
               <div className="absolute top-2 left-2 z-[1000] bg-white/90 backdrop-blur-md px-3 py-1 rounded-xl text-[10px] font-black text-brand-green shadow-sm">
                 💡 Bấm trực tiếp vào bản đồ để gắn tọa độ
               </div>
-              <MapLibreLocationPicker position={pickedLatLng} setPosition={setPickedLatLng} />
+              <OpenLayersLocationPicker position={pickedLatLng} setPosition={setPickedLatLng} />
             </div>
 
             <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-start gap-2">

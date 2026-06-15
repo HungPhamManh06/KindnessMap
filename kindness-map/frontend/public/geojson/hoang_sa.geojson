@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Quần đảo Hoàng Sa",
+        "type": "territory"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          112.5,
+          16.5
+        ]
+      }
+    }
+  ]
+}

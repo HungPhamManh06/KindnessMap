@@ -1,30 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Flame, MapPin } from 'lucide-react';
+import 'ol/ol.css';
+import Map from 'ol/Map';
+import View from 'ol/View';
+import Overlay from 'ol/Overlay';
+import Feature from 'ol/Feature';
+import Polygon from 'ol/geom/Polygon';
+import Point from 'ol/geom/Point';
+import { Vector as VectorLayer } from 'ol/layer';
+import { Vector as VectorSource } from 'ol/source';
+import GeoJSON from 'ol/format/GeoJSON';
+import { Style, Fill, Stroke, Text } from 'ol/style';
+import { apply } from 'ol-mapbox-style';
+import { fromLonLat } from 'ol/proj';
+import api from '../services/api';
 
-// ---------------------------------------------------------------------------
-// CDN URLs — MapLibre GL JS (no API key, no backend, pure OSM)
-// ---------------------------------------------------------------------------
-const MAPLIBRE_CSS_URL = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css';
-const MAPLIBRE_JS_URL  = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js';
-
-// Free OpenStreetMap raster tiles — public, no key needed
-const OSM_STYLE = {
-  "version": 8,
-  "sources": {
-    "osm": {
-      "type": "raster",
-      "tiles": ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-      "tileSize": 256
-    }
-  },
-  "layers": [
-    {
-      "id": "osm",
-      "type": "raster",
-      "source": "osm"
-    }
-  ]
-};
 
 // ---------------------------------------------------------------------------
 // Category → colour mapping
@@ -70,26 +60,6 @@ const escapeHtml = (value = '') =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 
-/** Dynamically inject a <link> or <script> tag once */
-const loadScript = (src) =>
-  new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) return resolve();
-    const el = document.createElement('script');
-    el.src = src;
-    el.onload = resolve;
-    el.onerror = reject;
-    document.head.appendChild(el);
-  });
-
-const loadCss = (href) => {
-  if (document.querySelector(`link[href="${href}"]`)) return;
-  const el = document.createElement('link');
-  el.rel = 'stylesheet';
-  el.href = href;
-  document.head.appendChild(el);
-};
-
-/** Build an SVG pin element for use as a MapLibre marker */
 const createPinElement = (color) => {
   const el = document.createElement('div');
   el.style.cursor = 'pointer';
@@ -106,21 +76,19 @@ const createPinElement = (color) => {
   return el;
 };
 
-/** Meters → approximate degrees (rough, good enough for circle polygons) */
 const metersToLngDeg = (meters, lat) => meters / (111320 * Math.cos((lat * Math.PI) / 180));
 const metersToLatDeg = (meters) => meters / 110540;
 
-/** Build a GeoJSON polygon circle */
 const buildCirclePolygon = (lat, lng, radiusMeters, steps = 64) => {
   const coords = [];
   for (let i = 0; i <= steps; i++) {
     const angle = (i / steps) * 2 * Math.PI;
-    coords.push([
+    coords.push(fromLonLat([
       lng + metersToLngDeg(radiusMeters, lat) * Math.cos(angle),
       lat + metersToLatDeg(radiusMeters)      * Math.sin(angle),
-    ]);
+    ]));
   }
-  return { type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] } };
+  return new Polygon([coords]);
 };
 
 // ---------------------------------------------------------------------------
@@ -132,179 +100,217 @@ export const MapComponent = ({
   className = 'h-[550px] w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200',
 }) => {
   const containerRef  = useRef(null);
-  const mapRef        = useRef(null);     // maplibregl.Map instance
-  const markersRef    = useRef([]);       // array of maplibregl.Marker
-  const popupRef      = useRef(null);     // single shared Popup
+  const popupElementRef = useRef(null);
+  
+  const mapRef        = useRef(null);
+  const popupOverlayRef = useRef(null);
+  const markersLayerRef = useRef(null);
+  const heatmapLayerRef = useRef(null);
+  const overlaysRef = useRef([]); // To keep track of marker overlays
+  
   const [heatmapMode, setHeatmapMode] = useState(false);
   const [mapReady,    setMapReady]    = useState(false);
 
-  // ── 1. Load MapLibre GL JS + CSS from CDN, then init map ────────────────
+  // ── 1. Init Map ───────────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
 
-    const init = async () => {
+    const initMap = async () => {
       try {
-        loadCss(MAPLIBRE_CSS_URL);
-        await loadScript(MAPLIBRE_JS_URL);
-        if (cancelled || !containerRef.current || mapRef.current) return;
+        let MAPTILER_KEY = '';
+        try {
+          const res = await api.get('/config/map');
+          MAPTILER_KEY = res.data.maptilerApiKey;
+        } catch (err) {
+          console.error('Failed to load map API key from backend', err);
+        }
 
-        const maplibregl = window.maplibregl;
-
-        const map = new maplibregl.Map({
-          container: containerRef.current,
-          style: OSM_STYLE,
-          center: [108, 16],
-          zoom: 5,
-          attributionControl: true,
+        if (cancelled) return;
+        
+        const map = new Map({
+          target: containerRef.current,
+          view: new View({
+            center: fromLonLat([108, 16]),
+            zoom: 5,
+          }),
         });
 
-        // Shared popup (re-used for every marker click)
-        popupRef.current = new maplibregl.Popup({
-          maxWidth: '280px',
-          closeButton: true,
-          closeOnClick: false,
-          className: 'kindness-popup',
+        if (MAPTILER_KEY) {
+          const STYLE_URL = `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`;
+          const response = await fetch(STYLE_URL);
+          const styleJson = await response.json();
+          
+          // Force Vietnamese language on MapTiler vector tiles
+          if (styleJson.layers) {
+            styleJson.layers.forEach(layer => {
+              if (layer.layout && layer.layout['text-field']) {
+                layer.layout['text-field'] = ['coalesce', ['get', 'name:vi'], ['get', 'name:en'], ['get', 'name']];
+              }
+            });
+          }
+          await apply(map, styleJson);
+        } else {
+          // Fallback if no API key
+          console.warn('MapTiler API Key is not set. Map may not load properly.');
+        }
+
+        if (cancelled) return;
+
+        // Shared popup overlay
+        popupOverlayRef.current = new Overlay({
+          element: popupElementRef.current,
+          positioning: 'bottom-center',
+          stopEvent: false,
+          offset: [0, -44],
         });
+        map.addOverlay(popupOverlayRef.current);
 
-        // Example marker: Hà Nội
-        const hanoiEl = createPinElement('#059669');
-        hanoiEl.title = 'Hà Nội';
-        new maplibregl.Marker({ element: hanoiEl })
-          .setLngLat([105.8412, 21.0245])
-          .setPopup(
-            new maplibregl.Popup({ maxWidth: '200px' }).setHTML(
-              `<div style="font-family:Inter,Arial,sans-serif;font-size:12px;font-weight:800;color:#0f172a;">
-                 📍 Hà Nội<br/>
-                 <span style="font-weight:500;color:#64748b;font-size:11px;">Thủ đô Việt Nam</span>
-               </div>`
-            )
-          )
-          .addTo(map);
+        // --- Territorial GeoJSON Overlays ---
+        const territorySource = new VectorSource();
+        const territoryLayer = new VectorLayer({
+          source: territorySource,
+          zIndex: 1000,
+          style: new Style({
+            text: new Text({
+              font: 'bold 12px Inter, Arial, sans-serif',
+              fill: new Fill({ color: '#0f172a' }),
+              stroke: new Stroke({ color: '#ffffff', width: 3 }),
+              offsetY: 15,
+            })
+          })
+        });
+        map.addLayer(territoryLayer);
 
-        // Add Hoàng Sa and Trường Sa markers
-        new maplibregl.Marker()
-          .setLngLat([112.5, 16.5])
-          .setPopup(new maplibregl.Popup({ offset: [0, -10] }).setText("Hoàng Sa (Paracel Islands)"))
-          .addTo(map);
+        const addTerritory = async (url) => {
+          try {
+            const res = await fetch(url);
+            const data = await res.json();
+            const features = new GeoJSON().readFeatures(data, { featureProjection: 'EPSG:3857' });
+            features.forEach(f => {
+              f.setStyle(new Style({
+                text: new Text({
+                  text: f.get('name'),
+                  font: 'bold 13px Inter, Arial, sans-serif',
+                  fill: new Fill({ color: '#1e293b' }),
+                  stroke: new Stroke({ color: '#ffffff', width: 4 }),
+                  offsetY: 0,
+                })
+              }));
+            });
+            territorySource.addFeatures(features);
+          } catch (e) {
+            console.error('Failed to load territory', e);
+          }
+        };
 
-        new maplibregl.Marker()
-          .setLngLat([114.0, 10.5])
-          .setPopup(new maplibregl.Popup({ offset: [0, -10] }).setText("Trường Sa (Spratly Islands)"))
-          .addTo(map);
+        addTerritory('/geojson/hoang_sa.geojson');
+        addTerritory('/geojson/truong_sa.geojson');
 
         mapRef.current = map;
-        map.on('load', () => {
-          if (!cancelled) setMapReady(true);
-        });
+        setMapReady(true);
       } catch (err) {
-        console.error('MapLibre init error:', err);
+        console.error('Map init error:', err);
       }
     };
 
-    init();
+    initMap();
 
     return () => {
       cancelled = true;
-      // Clean up markers
-      markersRef.current.forEach((m) => m.remove());
-      markersRef.current = [];
       if (mapRef.current) {
-        mapRef.current.remove();
+        mapRef.current.setTarget(null);
         mapRef.current = null;
       }
-      setMapReady(false);
     };
   }, []); // run once
 
-  // ── 2. Render posts markers OR heatmap circles whenever data changes ─────
+  // ── 2. Render markers OR heatmap ──────────────────────────────────────────
   useEffect(() => {
     if (!mapReady || !mapRef.current) return;
     const map = mapRef.current;
-    const maplibregl = window.maplibregl;
 
-    // Remove existing custom markers
-    markersRef.current.forEach((m) => m.remove());
-    markersRef.current = [];
+    // Clean up existing custom overlays (markers)
+    overlaysRef.current.forEach(overlay => map.removeOverlay(overlay));
+    overlaysRef.current = [];
+    
+    // Clean up vector layers
+    if (markersLayerRef.current) map.removeLayer(markersLayerRef.current);
+    if (heatmapLayerRef.current) map.removeLayer(heatmapLayerRef.current);
 
-    // Remove existing heatmap layers/sources
-    ['heatmap-fill', 'heatmap-stroke'].forEach((id) => {
-      if (map.getLayer(id)) map.removeLayer(id);
-    });
-    if (map.getSource('heatmap')) map.removeSource('heatmap');
+    popupOverlayRef.current.setPosition(undefined); // hide popup
 
     // ── Heatmap mode ──────────────────────────────────────────────────────
     if (heatmapMode) {
-      const features = HEATMAP_HOTSPOTS.map((spot) => ({
-        ...buildCirclePolygon(spot.lat, spot.lng, spot.radius),
-        properties: { name: spot.name, count: spot.count, strong: spot.count > 40 },
-      }));
-
-      map.addSource('heatmap', {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features },
+      const features = HEATMAP_HOTSPOTS.map((spot) => {
+        const polygon = buildCirclePolygon(spot.lat, spot.lng, spot.radius);
+        const feature = new Feature({ geometry: polygon });
+        feature.setProperties({ name: spot.name, count: spot.count, strong: spot.count > 40 });
+        return feature;
       });
 
-      map.addLayer({
-        id: 'heatmap-fill',
-        type: 'fill',
-        source: 'heatmap',
-        paint: {
-          'fill-color': [
-            'case',
-            ['get', 'strong'], 'rgba(244,63,94,0.35)',
-            'rgba(16,185,129,0.32)',
-          ],
-        },
+      const source = new VectorSource({ features });
+      
+      heatmapLayerRef.current = new VectorLayer({
+        source,
+        style: (feature) => {
+          const strong = feature.get('strong');
+          return new Style({
+            fill: new Fill({ color: strong ? 'rgba(244,63,94,0.35)' : 'rgba(16,185,129,0.32)' }),
+            stroke: new Stroke({ color: strong ? 'rgba(225,29,72,0.85)' : 'rgba(5,150,105,0.85)', width: 2 })
+          });
+        }
       });
+      map.addLayer(heatmapLayerRef.current);
 
-      map.addLayer({
-        id: 'heatmap-stroke',
-        type: 'line',
-        source: 'heatmap',
-        paint: {
-          'line-color': [
-            'case',
-            ['get', 'strong'], 'rgba(225,29,72,0.85)',
-            'rgba(5,150,105,0.85)',
-          ],
-          'line-width': 2,
-        },
-      });
-
-      // Popup on heatmap circle click
-      map.on('click', 'heatmap-fill', (e) => {
-        const { name, count } = e.features[0].properties;
-        popupRef.current
-          .setLngLat(e.lngLat)
-          .setHTML(
-            `<div style="font-family:Inter,Arial,sans-serif;font-size:12px;font-weight:800;color:#0f172a;">
+      // Map click for heatmap popups
+      const clickHandler = (e) => {
+        const feature = map.forEachFeatureAtPixel(e.pixel, (feat, layer) => {
+          if (layer === heatmapLayerRef.current) return feat;
+        });
+        
+        if (feature) {
+          const { name, count } = feature.getProperties();
+          popupElementRef.current.innerHTML = `
+            <div style="font-family:Inter,Arial,sans-serif;font-size:12px;font-weight:800;color:#0f172a;background:white;padding:12px;border-radius:12px;box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1);">
                🔥 ${escapeHtml(name)}<br/>
                <span style="font-weight:600;color:#64748b;">Hơn ${count} hành động việc tốt</span>
-             </div>`
-          )
-          .addTo(map);
-      });
+            </div>`;
+          popupOverlayRef.current.setPosition(e.coordinate);
+        } else {
+          popupOverlayRef.current.setPosition(undefined);
+        }
+      };
+      
+      const pointerHandler = (e) => {
+        const hit = map.hasFeatureAtPixel(e.pixel, { layerFilter: (l) => l === heatmapLayerRef.current });
+        map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+      };
 
-      map.on('mouseenter', 'heatmap-fill', () => { map.getCanvas().style.cursor = 'pointer'; });
-      map.on('mouseleave', 'heatmap-fill', () => { map.getCanvas().style.cursor = ''; });
-      return;
+      map.on('singleclick', clickHandler);
+      map.on('pointermove', pointerHandler);
+
+      return () => {
+        map.un('singleclick', clickHandler);
+        map.un('pointermove', pointerHandler);
+      };
     }
 
     // ── Marker mode ───────────────────────────────────────────────────────
+    
     posts.forEach((post) => {
       const lat = Number(post.latitude);
       const lng = Number(post.longitude);
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
       const el = createPinElement(getCategoryColor(post.category));
-
+      
       const image = post.imageUrl
         ? `<img src="${escapeHtml(post.imageUrl)}" alt="${escapeHtml(post.title)}"
              style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin:8px 0;"/>`
         : '';
 
       const popupHtml = `
-        <div style="width:250px;font-family:Inter,Arial,sans-serif;">
+        <div style="width:250px;font-family:Inter,Arial,sans-serif;background:white;padding:12px;border-radius:16px;box-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);">
           <span style="display:inline-block;padding:3px 10px;border-radius:999px;
             background:#dcfce7;color:#166534;font-size:10px;font-weight:900;text-transform:uppercase;">
             ${escapeHtml(post.category)}
@@ -329,21 +335,29 @@ export const MapComponent = ({
           </a>
         </div>`;
 
-      const popup = new maplibregl.Popup({
-        maxWidth: '280px',
-        closeButton: true,
-        closeOnClick: false,
-        className: 'kindness-popup',
-        offset: [0, -44],
-      }).setHTML(popupHtml);
+      const coords = fromLonLat([lng, lat]);
+      
+      const overlay = new Overlay({
+        element: el,
+        position: coords,
+        positioning: 'bottom-center',
+        stopEvent: false
+      });
+      map.addOverlay(overlay);
+      overlaysRef.current.push(overlay);
 
-      const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
-        .setLngLat([lng, lat])
-        .setPopup(popup)
-        .addTo(map);
-
-      markersRef.current.push(marker);
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        popupElementRef.current.innerHTML = popupHtml;
+        popupOverlayRef.current.setPosition(coords);
+      });
     });
+
+    // Close popup on map click
+    const closePopup = () => popupOverlayRef.current.setPosition(undefined);
+    map.on('singleclick', closePopup);
+    return () => map.un('singleclick', closePopup);
+
   }, [posts, heatmapMode, mapReady]);
 
   // ── 3. Pan to selectedCenter when parent updates it ──────────────────────
@@ -353,7 +367,11 @@ export const MapComponent = ({
     const lng = Number(selectedCenter[1]);
     if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
-    mapRef.current.flyTo({ center: [lng, lat], zoom: 14, duration: 900, essential: true });
+    mapRef.current.getView().animate({
+      center: fromLonLat([lng, lat]),
+      zoom: 14,
+      duration: 900
+    });
   }, [selectedCenter, mapReady]);
 
   // ── Render ───────────────────────────────────────────────────────────────
@@ -381,11 +399,14 @@ export const MapComponent = ({
         font-black px-3 py-1.5 rounded-xl shadow-lg backdrop-blur-md flex items-center
         gap-1.5 border border-slate-100">
         <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-        <span>MapLibre GL · OpenStreetMap</span>
+        <span>OpenLayers · MapTiler</span>
       </div>
 
-      {/* Map container — MapLibre mounts here */}
+      {/* Map container */}
       <div ref={containerRef} className="w-full h-full" />
+      
+      {/* Hidden element for Popup */}
+      <div ref={popupElementRef} className="absolute z-50"></div>
     </div>
   );
 };

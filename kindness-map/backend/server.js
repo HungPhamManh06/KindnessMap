@@ -41,6 +41,13 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'KindnessMap Backend API is running successfully.', timestamp: new Date().toISOString() });
 });
 
+// Config endpoint to fetch map API key (securely served from backend env)
+app.get('/api/config/map', (req, res) => {
+  res.status(200).json({
+    maptilerApiKey: process.env.MAPTILER_API_KEY || ''
+  });
+});
+
 // Simulation of real-time incoming good deeds
 app.get('/api/stream/live-deeds', (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');

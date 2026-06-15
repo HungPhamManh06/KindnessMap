@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Quần đảo Trường Sa",
+        "type": "territory"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          114.0,
+          10.5
+        ]
+      }
+    }
+  ]
+}
