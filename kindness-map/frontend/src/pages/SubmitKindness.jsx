@@ -7,117 +7,129 @@ import {
   Sparkles, CheckCircle2, AlertTriangle, Image as ImageIcon,
   MapPin, Send, HelpCircle, ArrowLeft, LocateFixed
 } from 'lucide-react';
-import { getHereMapsApiKey, loadHereMaps } from '../utils/hereMapsLoader';
 
-const HereLocationPicker = ({ position, setPosition }) => {
-  const mapDivRef = React.useRef(null);
-  const mapRef = React.useRef(null);
-  const markerRef = React.useRef(null);
-  const behaviorRef = React.useRef(null);
-  const resizeHandlerRef = React.useRef(null);
-  const [error, setError] = React.useState('');
-  const apiKey = getHereMapsApiKey();
+// ─── MapLibre GL JS CDN loader (no API key required) ──────────────────────────
+const MAPLIBRE_CSS = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css';
+const MAPLIBRE_JS  = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js';
 
+const OSM_STYLE = {
+  version: 8,
+  sources: {
+    osm: {
+      type: 'raster',
+      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
+      tileSize: 256,
+      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
+      maxzoom: 19,
+    },
+  },
+  layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
+};
+
+const loadCdnCss = (href) => {
+  if (document.querySelector(`link[href="${href}"]`)) return;
+  const el = document.createElement('link');
+  el.rel = 'stylesheet';
+  el.href = href;
+  document.head.appendChild(el);
+};
+
+const loadCdnJs = (src) =>
+  new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) return resolve();
+    const el = document.createElement('script');
+    el.src = src;
+    el.onload = resolve;
+    el.onerror = reject;
+    document.head.appendChild(el);
+  });
+
+// ─── Location Picker: MapLibre GL JS + OSM (no API key) ───────────────────────
+const MapLibreLocationPicker = ({ position, setPosition }) => {
+  const containerRef = React.useRef(null);
+  const mapRef       = React.useRef(null);
+  const markerRef    = React.useRef(null);
+
+  // Build a draggable SVG pin element
+  const createPinEl = () => {
+    const el = document.createElement('div');
+    el.style.cursor = 'grab';
+    el.innerHTML = `
+      <svg width="32" height="42" viewBox="0 0 38 48" xmlns="http://www.w3.org/2000/svg">
+        <filter id="lp-shadow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.4"/>
+        </filter>
+        <path filter="url(#lp-shadow)"
+          d="M19 46C19 46 35 29.8 35 17.8C35 8.5 27.8 1 19 1C10.2 1 3 8.5 3 17.8C3 29.8 19 46 19 46Z"
+          fill="#059669" stroke="white" stroke-width="4"/>
+        <circle cx="19" cy="18" r="7" fill="white" fill-opacity="0.96"/>
+      </svg>`;
+    return el;
+  };
+
+  // Init map once
   React.useEffect(() => {
     let cancelled = false;
 
-    const initMap = async () => {
+    const init = async () => {
       try {
-        const H = await loadHereMaps();
-        if (cancelled || !mapDivRef.current || mapRef.current) return;
+        loadCdnCss(MAPLIBRE_CSS);
+        await loadCdnJs(MAPLIBRE_JS);
+        if (cancelled || !containerRef.current || mapRef.current) return;
 
-        const platform = new H.service.Platform({ apikey: apiKey });
-        const defaultLayers = platform.createDefaultLayers();
-        const center = { lat: Number(position[0]), lng: Number(position[1]) };
+        const maplibregl = window.maplibregl;
+        const [lat, lng] = [Number(position[0]), Number(position[1])];
 
-        mapRef.current = new H.Map(mapDivRef.current, defaultLayers.vector.normal.map, {
-          center,
+        const map = new maplibregl.Map({
+          container: containerRef.current,
+          style: OSM_STYLE,
+          center: [lng, lat],
           zoom: 14,
-          pixelRatio: window.devicePixelRatio || 1,
+          attributionControl: true,
         });
 
-        behaviorRef.current = new H.mapevents.Behavior(new H.mapevents.MapEvents(mapRef.current));
-        H.ui.UI.createDefault(mapRef.current, defaultLayers, 'vi-VN');
+        // Draggable marker
+        const marker = new maplibregl.Marker({ element: createPinEl(), draggable: true, anchor: 'bottom' })
+          .setLngLat([lng, lat])
+          .addTo(map);
 
-        markerRef.current = new H.map.Marker(center, { volatility: true });
-        markerRef.current.draggable = true;
-        mapRef.current.addObject(markerRef.current);
-
-        mapRef.current.addEventListener('tap', (evt) => {
-          const pointer = evt.currentPointer;
-          const coord = mapRef.current.screenToGeo(pointer.viewportX, pointer.viewportY);
-          const next = [Number(coord.lat.toFixed(6)), Number(coord.lng.toFixed(6))];
-          setPosition(next);
+        // Update position when drag ends
+        marker.on('dragend', () => {
+          const { lng: mLng, lat: mLat } = marker.getLngLat();
+          setPosition([Number(mLat.toFixed(6)), Number(mLng.toFixed(6))]);
         });
 
-        mapRef.current.addEventListener('dragstart', (evt) => {
-          if (evt.target instanceof H.map.Marker) behaviorRef.current?.disable();
-        }, false);
+        // Click anywhere on map to move marker
+        map.on('click', (e) => {
+          marker.setLngLat([e.lngLat.lng, e.lngLat.lat]);
+          setPosition([Number(e.lngLat.lat.toFixed(6)), Number(e.lngLat.lng.toFixed(6))]);
+        });
 
-        mapRef.current.addEventListener('drag', (evt) => {
-          if (!(evt.target instanceof H.map.Marker)) return;
-          const pointer = evt.currentPointer;
-          evt.target.setGeometry(mapRef.current.screenToGeo(pointer.viewportX, pointer.viewportY));
-        }, false);
-
-        mapRef.current.addEventListener('dragend', (evt) => {
-          if (!(evt.target instanceof H.map.Marker)) return;
-          behaviorRef.current?.enable();
-          const geo = evt.target.getGeometry();
-          setPosition([Number(geo.lat.toFixed(6)), Number(geo.lng.toFixed(6))]);
-        }, false);
-
-        resizeHandlerRef.current = () => mapRef.current?.getViewPort().resize();
-        window.addEventListener('resize', resizeHandlerRef.current);
+        mapRef.current   = map;
+        markerRef.current = marker;
       } catch (err) {
-        if (!cancelled) setError(err.message || 'Không tải được HERE Maps.');
+        console.error('MapLibre location picker error:', err);
       }
     };
 
-    initMap();
+    init();
     return () => {
       cancelled = true;
-      if (resizeHandlerRef.current) window.removeEventListener('resize', resizeHandlerRef.current);
-      if (mapRef.current) {
-        mapRef.current.dispose();
-        mapRef.current = null;
-      }
+      if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }
     };
-  }, [apiKey]);
+  }, []);  // run once
 
+  // Sync marker when position changes from outside (e.g. geolocation button)
   React.useEffect(() => {
-    if (!mapRef.current || !markerRef.current) return;
-    const next = { lat: Number(position[0]), lng: Number(position[1]) };
-    if (!Number.isFinite(next.lat) || !Number.isFinite(next.lng)) return;
-    markerRef.current.setGeometry(next);
-    mapRef.current.setCenter(next, true);
+    if (!markerRef.current || !mapRef.current) return;
+    const lat = Number(position[0]);
+    const lng = Number(position[1]);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    markerRef.current.setLngLat([lng, lat]);
+    mapRef.current.flyTo({ center: [lng, lat], zoom: 14, duration: 600 });
   }, [position]);
 
-  if (!apiKey) {
-    return (
-      <div className="w-full h-full bg-slate-100 flex items-center justify-center p-6 text-center">
-        <div className="bg-white rounded-2xl border border-amber-200 p-5 max-w-md shadow-lg">
-          <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto mb-2" />
-          <p className="text-xs text-slate-700 font-semibold leading-relaxed">
-            Chưa cấu hình <strong>VITE_HERE_MAPS_API_KEY</strong>. Vui lòng thêm API key để dùng HERE Maps.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="w-full h-full bg-slate-100 flex items-center justify-center p-6 text-center">
-        <div className="bg-white rounded-2xl border border-rose-200 p-5 max-w-md shadow-lg">
-          <AlertTriangle className="w-8 h-8 text-rose-500 mx-auto mb-2" />
-          <p className="text-xs text-slate-700 font-semibold leading-relaxed">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
-  return <div ref={mapDivRef} className="w-full h-full" />;
+  return <div ref={containerRef} className="w-full h-full" />;
 };
 
 export const SubmitKindness = () => {
@@ -434,7 +446,7 @@ export const SubmitKindness = () => {
               <div className="absolute top-2 left-2 z-[1000] bg-white/90 backdrop-blur-md px-3 py-1 rounded-xl text-[10px] font-black text-brand-green shadow-sm">
                 💡 Bấm trực tiếp vào bản đồ để gắn tọa độ
               </div>
-              <HereLocationPicker position={pickedLatLng} setPosition={setPickedLatLng} />
+              <MapLibreLocationPicker position={pickedLatLng} setPosition={setPickedLatLng} />
             </div>
 
             <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-start gap-2">
