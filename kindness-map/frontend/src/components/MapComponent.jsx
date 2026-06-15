@@ -224,9 +224,11 @@ export const MapComponent = ({
                 f.setStyle(new Style({
                   text: new Text({
                     text: text,
-                    font: 'bold 14px Inter, Arial, sans-serif',
-                    fill: new Fill({ color: '#dc2626' }), // Red for national territory
-                    stroke: new Stroke({ color: '#ffffff', width: 4 }),
+                    font: '900 16px Inter, Arial, sans-serif',
+                    fill: new Fill({ color: '#dc2626' }), // Bold Red
+                    stroke: new Stroke({ color: '#ffffff', width: 5 }),
+                    backgroundFill: new Fill({ color: 'rgba(255, 255, 255, 0.6)' }),
+                    padding: [6, 10, 6, 10],
                     offsetY: 0,
                   })
                 }));

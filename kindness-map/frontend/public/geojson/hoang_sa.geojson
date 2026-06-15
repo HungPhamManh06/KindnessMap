@@ -4,7 +4,7 @@
     {
       "type": "Feature",
       "properties": {
-        "name": "Quần đảo Hoàng Sa",
+        "name": "QUẦN ĐẢO HOÀNG SA (VIỆT NAM)",
         "type": "territory"
       },
       "geometry": {
@@ -12,62 +12,6 @@
         "coordinates": [
           112.5,
           16.5
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "name": "Đảo Phú Lâm",
-        "type": "island"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          112.3333,
-          16.8333
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "name": "Đảo Tri Tôn",
-        "type": "island"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          111.2,
-          15.7833
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "name": "Đảo Hoàng Sa",
-        "type": "island"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          111.6,
-          16.5333
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": {
-        "name": "Đảo Quang Hòa",
-        "type": "island"
-      },
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          111.7167,
-          16.45
         ]
       }
     }
