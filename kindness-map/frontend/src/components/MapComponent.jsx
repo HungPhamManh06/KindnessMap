@@ -9,17 +9,21 @@ const MAPLIBRE_JS_URL  = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.j
 
 // Free OpenStreetMap raster tiles — public, no key needed
 const OSM_STYLE = {
-  version: 8,
-  sources: {
-    osm: {
-      type: 'raster',
-      tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'],
-      tileSize: 256,
-      attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
-      maxzoom: 19,
-    },
+  "version": 8,
+  "sources": {
+    "osm": {
+      "type": "raster",
+      "tiles": ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+      "tileSize": 256
+    }
   },
-  layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
+  "layers": [
+    {
+      "id": "osm",
+      "type": "raster",
+      "source": "osm"
+    }
+  ]
 };
 
 // ---------------------------------------------------------------------------
@@ -95,8 +99,8 @@ const createPinElement = (color) => {
         <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.35"/>
       </filter>
       <path filter="url(#pin-shadow)"
-        d="M19 46C19 46 35 29.8 35 17.8C35 8.5 27.8 1 19 1C10.2 1 3 8.5 3 17.8C3 29.8 19 46 19 46Z"
-        fill="${color}" stroke="white" stroke-width="4"/>
+         d="M19 46C19 46 35 29.8 35 17.8C35 8.5 27.8 1 19 1C10.2 1 3 8.5 3 17.8C3 29.8 19 46 19 46Z"
+         fill="${color}" stroke="white" stroke-width="4"/>
       <circle cx="19" cy="18" r="7" fill="white" fill-opacity="0.96"/>
     </svg>`;
   return el;
@@ -149,7 +153,7 @@ export const MapComponent = ({
         const map = new maplibregl.Map({
           container: containerRef.current,
           style: OSM_STYLE,
-          center: [108.2772, 16.0544], // Việt Nam (kinh độ, vĩ độ)
+          center: [108, 16],
           zoom: 5,
           attributionControl: true,
         });
@@ -175,6 +179,17 @@ export const MapComponent = ({
                </div>`
             )
           )
+          .addTo(map);
+
+        // Add Hoàng Sa and Trường Sa markers
+        new maplibregl.Marker()
+          .setLngLat([112.5, 16.5])
+          .setPopup(new maplibregl.Popup({ offset: [0, -10] }).setText("Hoàng Sa (Paracel Islands)"))
+          .addTo(map);
+
+        new maplibregl.Marker()
+          .setLngLat([114.0, 10.5])
+          .setPopup(new maplibregl.Popup({ offset: [0, -10] }).setText("Trường Sa (Spratly Islands)"))
           .addTo(map);
 
         mapRef.current = map;
