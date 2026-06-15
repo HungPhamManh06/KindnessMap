@@ -1,5 +1,5 @@
 const express = require('express');
-const { getAllPosts, moderatePost, getAllUsers, updateUserRole, getAnalytics } = require('../controllers/adminController');
+const { getAllPosts, moderatePost, getAllUsers, updateUserRole, getAdminAwards, createAward, deleteAward, getAnalytics } = require('../controllers/adminController');
 const { authenticate, authorizeAdmin } = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -11,6 +11,9 @@ router.get('/posts', getAllPosts);
 router.put('/posts/:id/moderate', moderatePost);
 router.get('/users', getAllUsers);
 router.put('/users/:id/role', updateUserRole);
+router.get('/awards', getAdminAwards);
+router.post('/awards', createAward);
+router.delete('/awards/:id', deleteAward);
 router.get('/analytics', getAnalytics);
 
 module.exports = router;
