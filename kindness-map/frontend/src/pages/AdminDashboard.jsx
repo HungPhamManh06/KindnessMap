@@ -619,7 +619,7 @@ export const AdminDashboard = () => {
                         className="mt-2 w-4 h-4 accent-indigo-600 shrink-0"
                         aria-label={`Chọn bài ${p.title}`}
                       />
-                      <img src={p.imageUrl} alt={p.title} className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover shrink-0 shadow-xs bg-slate-200 dark:bg-slate-700" />
+                      <img src={p.imageUrl} alt={p.title} loading="lazy" decoding="async" className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover shrink-0 shadow-xs bg-slate-200 dark:bg-slate-700" />
 
                       <div className="flex-1 min-w-0 flex flex-col">
                         <div className="flex items-center gap-2 flex-wrap">
@@ -786,7 +786,7 @@ export const AdminDashboard = () => {
                     <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
                       <td className="p-4 font-bold text-slate-500 dark:text-slate-400">#{u.id}</td>
                       <td className="p-4 flex items-center gap-3">
-                        <img src={u.avatar} alt={u.fullName} className="w-9 h-9 rounded-full object-cover bg-slate-200 dark:bg-slate-700" />
+                        <img src={u.avatar} alt={u.fullName} loading="lazy" decoding="async" className="w-9 h-9 rounded-full object-cover bg-slate-200 dark:bg-slate-700" />
                         <div className="flex flex-col">
                           <span className="font-extrabold text-slate-900 dark:text-slate-100 text-sm whitespace-nowrap">{u.fullName}</span>
                           <span className="text-[10px] text-slate-400 dark:text-slate-500">Tham gia {formatDate(u.createdAt)}</span>
@@ -1117,7 +1117,7 @@ export const AdminDashboard = () => {
                   <div key={aw.id} className="p-5 rounded-3xl bg-gradient-to-r from-amber-50 to-white dark:from-amber-500/10 dark:to-slate-900 border border-amber-100 dark:border-amber-500/15 shadow-sm hover:shadow-md transition-all">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                       <div className="flex gap-4 min-w-0">
-                        <img src={aw.recipientAvatar} alt={aw.recipientName} className="w-14 h-14 rounded-2xl object-cover border-2 border-amber-300 bg-slate-200 dark:bg-slate-700 shrink-0" />
+                        <img src={aw.recipientAvatar} alt={aw.recipientName} loading="lazy" decoding="async" className="w-14 h-14 rounded-2xl object-cover border-2 border-amber-300 bg-slate-200 dark:bg-slate-700 shrink-0" />
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="px-3 py-1 rounded-full bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider">

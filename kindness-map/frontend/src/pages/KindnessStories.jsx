@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -25,6 +25,8 @@ export const KindnessStories = () => {
   const [comments, setComments] = useState([]);
   const [newCommentText, setNewCommentText] = useState('');
   const [sendingComment, setSendingComment] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const commentsCacheRef = useRef(new Map());
 
   // Share Modal State
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -64,11 +66,23 @@ export const KindnessStories = () => {
 
   const openStoryDetail = async (story) => {
     setActiveStory(story);
+
+    const cachedComments = commentsCacheRef.current.get(story.id);
+    if (cachedComments) {
+      setComments(cachedComments);
+      return;
+    }
+
     try {
+      setDetailLoading(true);
       const res = await api.get(`/posts/${story.id}`);
-      setComments(res.data.comments || []);
+      const nextComments = res.data.comments || [];
+      commentsCacheRef.current.set(story.id, nextComments);
+      setComments(nextComments);
     } catch (e) {
       console.error('Failed to get story comments');
+    } finally {
+      setDetailLoading(false);
     }
   };
 
@@ -122,7 +136,11 @@ export const KindnessStories = () => {
       setSendingComment(true);
       const res = await api.post(`/posts/${activeStory.id}/comment`, { content: newCommentText });
       
-      setComments((prev) => [res.data.comment, ...prev]);
+      setComments((prev) => {
+        const nextComments = [res.data.comment, ...prev];
+        commentsCacheRef.current.set(activeStory.id, nextComments);
+        return nextComments;
+      });
       setStories((prev) =>
         prev.map((s) => (s.id === activeStory.id ? { ...s, commentsCount: s.commentsCount + 1 } : s))
       );
@@ -150,6 +168,12 @@ export const KindnessStories = () => {
     addToast('Đã sao chép liên kết!', 'Bạn có thể gửi ngay cho bạn bè.', 'success');
     setTimeout(() => setCopiedLink(false), 3000);
   };
+
+  const featuredModalStats = useMemo(() => ({
+    likes: activeStory?.likesCount || 0,
+    comments: activeStory?.commentsCount || 0,
+    commentItems: comments.length,
+  }), [activeStory, comments.length]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10">
@@ -226,6 +250,8 @@ export const KindnessStories = () => {
                     <img
                       src={story.imageUrl}
                       alt={story.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute top-4 left-4 flex items-center gap-2">
@@ -350,7 +376,7 @@ export const KindnessStories = () => {
 
       {/* Detailed Story Modal with Real-time Comments */}
       {activeStory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4 animate-fade-in overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/72 backdrop-blur-md p-4 animate-fade-in overflow-y-auto">
           <div className="relative w-full max-w-3xl km-modal-shell overflow-hidden my-8 max-h-[90vh] flex flex-col">
             <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-r from-brand-green/10 via-brand-blue/10 to-emerald-500/10 dark:from-brand-green/15 dark:via-cyan-500/10 dark:to-emerald-500/10 pointer-events-none" />
             
@@ -377,8 +403,9 @@ export const KindnessStories = () => {
                 />
               </div>
 
-              <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between">
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-4 items-start">
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
                   <span className="px-3 py-1 bg-brand-lightGreen text-brand-deepGreen font-black text-xs rounded-full border border-brand-green/20">
                     {activeStory.category}
                   </span>
@@ -391,13 +418,32 @@ export const KindnessStories = () => {
                   {activeStory.title}
                 </h1>
 
-                <p className="text-slate-700 dark:text-slate-200 text-base leading-relaxed whitespace-pre-line bg-slate-50/90 dark:bg-slate-800/70 p-6 rounded-[24px] border border-slate-200 dark:border-slate-700/60 shadow-sm">
-                  {activeStory.description}
-                </p>
+                  <p className="text-slate-700 dark:text-slate-200 text-base leading-relaxed whitespace-pre-line bg-slate-50/90 dark:bg-slate-800/70 p-6 rounded-[24px] border border-slate-200 dark:border-slate-700/60 shadow-sm">
+                    {activeStory.description}
+                  </p>
+                </div>
+
+                <div className="km-panel-soft p-4 flex flex-col gap-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-green">Tóm tắt tương tác</p>
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3">
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Lượt thích</p>
+                      <p className="text-xl font-black text-slate-900 dark:text-slate-100 mt-1">{featuredModalStats.likes}</p>
+                    </div>
+                    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3">
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Bình luận</p>
+                      <p className="text-xl font-black text-slate-900 dark:text-slate-100 mt-1">{featuredModalStats.commentItems}</p>
+                    </div>
+                    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3">
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Địa điểm</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1 leading-relaxed">{activeStory.locationName}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* Author and Quick Tools */}
-              <div className="py-4 px-5 rounded-[24px] border border-slate-200 dark:border-slate-700/70 bg-white/70 dark:bg-slate-900/60 backdrop-blur-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="py-4 px-5 rounded-[24px] border border-slate-200 dark:border-slate-700/70 bg-white/80 dark:bg-slate-900/70 backdrop-blur-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                 <div className="flex items-center gap-3">
                   <img src={activeStory.authorAvatar} alt={activeStory.authorName} className="w-12 h-12 rounded-full object-cover border-2 border-brand-green shadow-md" />
                   <div className="flex flex-col">
@@ -461,8 +507,13 @@ export const KindnessStories = () => {
                 )}
 
                 {/* Comment items */}
-                <div className="flex flex-col gap-4 divide-y divide-slate-100">
-                  {comments.length === 0 ? (
+                <div className="flex flex-col gap-4 divide-y divide-slate-100 dark:divide-slate-800">
+                  {detailLoading ? (
+                    <div className="space-y-3 py-2">
+                      <div className="h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
+                      <div className="h-20 rounded-2xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
+                    </div>
+                  ) : comments.length === 0 ? (
                     <p className="py-8 text-center text-xs text-slate-400 dark:text-slate-500 font-medium">
                       Hãy là người đầu tiên gửi bình luận về việc tốt này!
                     </p>

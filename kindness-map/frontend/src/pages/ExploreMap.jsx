@@ -1,8 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
-import { MapComponent } from '../components/MapComponent';
 import { Search, MapPin, SlidersHorizontal, ArrowRight, Sparkles } from 'lucide-react';
+
+const LazyMapComponent = lazy(() => import('../components/MapComponent').then((module) => ({ default: module.MapComponent })));
+
+const MapSkeleton = () => (
+  <div className="h-[650px] w-full bg-slate-200 dark:bg-slate-800 animate-pulse rounded-[28px] flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold">
+    🗺️ Đang tải bản đồ và dữ liệu khu vực...
+  </div>
+);
 
 export const ExploreMap = () => {
   const navigate = useNavigate();
@@ -162,6 +169,8 @@ export const ExploreMap = () => {
                     <img
                       src={post.imageUrl}
                       alt={post.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-20 h-20 rounded-2xl object-cover shrink-0 shadow-xs ring-1 ring-black/5 dark:ring-white/5 group-hover:scale-105 transition-transform"
                     />
                     <div className="flex-1 min-w-0">
@@ -202,11 +211,13 @@ export const ExploreMap = () => {
 
         <div className="lg:col-span-7 sticky top-28">
           <div className="km-panel p-3 sm:p-4">
-            <MapComponent
-              posts={filteredPosts}
-              selectedCenter={selectedCenter}
-              className="h-[650px] w-full rounded-[28px] overflow-hidden shadow-none border border-slate-200 dark:border-slate-800"
-            />
+            <Suspense fallback={<MapSkeleton />}>
+              <LazyMapComponent
+                posts={filteredPosts}
+                selectedCenter={selectedCenter}
+                className="h-[650px] w-full rounded-[28px] overflow-hidden shadow-none border border-slate-200 dark:border-slate-800"
+              />
+            </Suspense>
           </div>
         </div>
       </div>

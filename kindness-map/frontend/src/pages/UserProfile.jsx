@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -63,7 +63,7 @@ export const UserProfile = () => {
     return { currentLevel, nextLevel, progressPercent, maxPts };
   };
 
-  const progressInfo = calculateLevelProgress();
+  const progressInfo = useMemo(() => calculateLevelProgress(), [user.points, user.level]);
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -275,7 +275,7 @@ export const UserProfile = () => {
                 }`}
               >
                 <div className="flex items-start gap-4">
-                  <img src={post.imageUrl} alt={post.title} className="w-24 h-24 rounded-2xl object-cover shrink-0 shadow-xs ring-1 ring-black/5 dark:ring-white/5" />
+                  <img src={post.imageUrl} alt={post.title} loading="lazy" decoding="async" className="w-24 h-24 rounded-2xl object-cover shrink-0 shadow-xs ring-1 ring-black/5 dark:ring-white/5" />
                   <div className="flex-1 min-w-0 flex flex-col">
                     <div className="flex items-center gap-2">
                       <span className="px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 text-[10px] font-black uppercase">

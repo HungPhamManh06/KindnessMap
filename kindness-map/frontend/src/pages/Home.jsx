@@ -1,18 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { MapComponent } from '../components/MapComponent';
-import {
-  ArrowRight,
-  Sparkles,
-  MapPin,
-  Heart,
-  MessageSquare,
-  PlusCircle,
-  Trophy,
-  Star,
-} from 'lucide-react';
+import { ArrowRight, Sparkles, MapPin, Heart, MessageSquare, PlusCircle, Trophy, Star } from 'lucide-react';
+
+const LazyMapComponent = lazy(() => import('../components/MapComponent').then((module) => ({ default: module.MapComponent })));
 
 const stats = [
   { value: '1,240+', label: 'Việc Tốt Đã Được Ghim' },
@@ -44,6 +36,12 @@ const journeySteps = [
   },
 ];
 
+const MapSkeleton = () => (
+  <div className="h-[560px] w-full bg-slate-200 dark:bg-slate-800 animate-pulse rounded-[28px] flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold">
+    🗺️ Đang chuẩn bị bản đồ tương tác...
+  </div>
+);
+
 export const Home = () => {
   const navigate = useNavigate();
   const { isAuthenticated, setActiveModal } = useAuth();
@@ -51,9 +49,15 @@ export const Home = () => {
   const [featuredStories, setFeaturedStories] = useState([]);
   const [mapPosts, setMapPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [enableMap, setEnableMap] = useState(false);
 
   useEffect(() => {
     fetchInitialData();
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setEnableMap(true), 180);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const fetchInitialData = async () => {
@@ -173,12 +177,12 @@ export const Home = () => {
         </div>
 
         <div className="km-panel p-3 sm:p-4">
-          {loading ? (
-            <div className="h-[550px] w-full bg-slate-200 dark:bg-slate-800 animate-pulse rounded-3xl flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold">
-              🗺️ Đang tải dữ liệu Bản Đồ Việc Tốt...
-            </div>
+          {loading || !enableMap ? (
+            <MapSkeleton />
           ) : (
-            <MapComponent posts={mapPosts} className="h-[560px] w-full rounded-[28px] overflow-hidden shadow-none border border-slate-200 dark:border-slate-800" />
+            <Suspense fallback={<MapSkeleton />}>
+              <LazyMapComponent posts={mapPosts} className="h-[560px] w-full rounded-[28px] overflow-hidden shadow-none border border-slate-200 dark:border-slate-800" />
+            </Suspense>
           )}
         </div>
       </section>
@@ -220,6 +224,8 @@ export const Home = () => {
                   <img
                     src={story.imageUrl}
                     alt={story.title}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-950/70 to-transparent pointer-events-none" />
@@ -246,7 +252,7 @@ export const Home = () => {
 
                   <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <img src={story.authorAvatar} alt={story.authorName} className="w-8 h-8 rounded-full object-cover bg-slate-200 dark:bg-slate-700 ring-1 ring-black/5 dark:ring-white/5" />
+                      <img src={story.authorAvatar} alt={story.authorName} loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover bg-slate-200 dark:bg-slate-700 ring-1 ring-black/5 dark:ring-white/5" />
                       <span className="font-bold text-xs text-slate-800 dark:text-slate-100">{story.authorName}</span>
                     </div>
 
