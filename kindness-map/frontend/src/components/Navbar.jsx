@@ -97,7 +97,7 @@ export const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-[auto_1fr_auto] items-center h-20 gap-4">
           {/* Logo brand */}
           <NavLink to="/" className="flex items-center gap-3 min-w-0 group">
@@ -137,8 +137,6 @@ export const Navbar = () => {
           <div className="flex items-center justify-end gap-2 min-w-0">
             {/* Action Tools Center */}
             <div className="hidden md:flex items-center gap-1.5 flex-nowrap">
-              {!isAuthenticated && <ThemeToggle compact />}
-
               {/* Admin Badge/Link if Admin */}
               {isAuthenticated && user?.role === 'admin' && (
                 <NavLink
