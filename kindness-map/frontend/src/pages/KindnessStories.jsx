@@ -3,10 +3,30 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { 
-  Heart, MessageSquare, Share2, Star, Send, ExternalLink, 
-  MapPin, Check, Copy, Flame, User, Sparkles, X, Filter 
+import {
+  Heart,
+  MessageSquare,
+  Share2,
+  Star,
+  Send,
+  ExternalLink,
+  MapPin,
+  Check,
+  Copy,
+  Flame,
+  User,
+  Sparkles,
+  X,
+  Filter,
 } from 'lucide-react';
+
+const FALLBACK_STORY_IMAGE = 'https://images.unsplash.com/photo-1593113598432-846f29edce7b?auto=format&fit=crop&w=1200&q=80';
+
+const applyFallbackImage = (event) => {
+  if (event.currentTarget.dataset.fallbackApplied === 'true') return;
+  event.currentTarget.dataset.fallbackApplied = 'true';
+  event.currentTarget.src = FALLBACK_STORY_IMAGE;
+};
 
 export const KindnessStories = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -244,10 +264,11 @@ export const KindnessStories = () => {
                   {/* Image full width */}
                   <div className="relative h-72 sm:h-96 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                     <img
-                      src={story.imageUrl}
+                      src={story.imageUrl || FALLBACK_STORY_IMAGE}
                       alt={story.title}
                       loading="lazy"
                       decoding="async"
+                      onError={applyFallbackImage}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute top-4 left-4 flex items-center gap-2">
@@ -409,10 +430,11 @@ export const KindnessStories = () => {
               <div className="rounded-[28px] overflow-hidden border border-slate-200/80 dark:border-slate-800/80 shadow-xl bg-slate-100 dark:bg-slate-800/60">
                 <img
                   key={activeStory.id}
-                  src={activeStory.imageUrl}
+                  src={activeStory.imageUrl || FALLBACK_STORY_IMAGE}
                   alt={activeStory.title}
                   loading="eager"
                   decoding="async"
+                  onError={applyFallbackImage}
                   className="w-full h-72 sm:h-96 object-cover"
                 />
               </div>

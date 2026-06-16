@@ -15,10 +15,9 @@ export const ThemeToggle = ({ mobile = false, dropdown = false, compact = false 
         type="button"
         onClick={toggleTheme}
         aria-label={isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
-        title={isDark ? 'Bật light mode' : 'Bật dark mode'}
-        className="w-12 h-12 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/80 text-slate-700 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm flex items-center justify-center"
+        className="w-11 h-11 rounded-2xl overflow-hidden shrink-0 border border-slate-200 dark:border-slate-700 bg-white/90 dark:bg-slate-800/80 text-slate-700 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm flex items-center justify-center"
       >
-        <div className={`flex items-center justify-center w-9 h-9 rounded-xl ${iconWrapClass}`}>
+        <div className={`flex items-center justify-center w-8 h-8 rounded-xl ${iconWrapClass}`}>
           {isDark ? <SunMedium className="w-4 h-4" /> : <MoonStar className="w-4 h-4" />}
         </div>
       </button>
@@ -38,7 +37,6 @@ export const ThemeToggle = ({ mobile = false, dropdown = false, compact = false 
       type="button"
       onClick={toggleTheme}
       aria-label={isDark ? 'Chuyển sang giao diện sáng' : 'Chuyển sang giao diện tối'}
-      title={isDark ? 'Bật light mode' : 'Bật dark mode'}
       className={baseClassName}
     >
       <div className="flex items-center gap-2.5 min-w-0">
