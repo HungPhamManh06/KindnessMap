@@ -1,196 +1,31 @@
-import React, { useMemo, useState } from 'react';
+import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
-import { useTheme } from '../context/ThemeContext';
 import {
-  Sparkles, CheckCircle2, AlertTriangle, Image as ImageIcon,
-  MapPin, Send, HelpCircle, ArrowLeft, LocateFixed
+  Sparkles,
+  CheckCircle2,
+  AlertTriangle,
+  Image as ImageIcon,
+  MapPin,
+  Send,
+  HelpCircle,
+  ArrowLeft,
+  LocateFixed,
 } from 'lucide-react';
 
-// ─── OpenLayers Location Picker ──────────────────────────────────────────
-import Map from 'ol/Map';
-import View from 'ol/View';
-import Feature from 'ol/Feature';
-import Point from 'ol/geom/Point';
-import { Vector as VectorLayer } from 'ol/layer';
-import { Vector as VectorSource } from 'ol/source';
-import { Style, Icon } from 'ol/style';
-import { Translate } from 'ol/interaction';
-import { apply } from 'ol-mapbox-style';
-import { fromLonLat, toLonLat } from 'ol/proj';
-import Collection from 'ol/Collection';
+const LazyLocationPicker = lazy(() =>
+  import('../components/SubmitLocationPicker').then((module) => ({ default: module.SubmitLocationPicker }))
+);
 
-const OpenLayersLocationPicker = ({ position, setPosition }) => {
-  const containerRef = React.useRef(null);
-  const mapRef       = React.useRef(null);
-  const markerFeatureRef = React.useRef(null);
-  const [pickerError, setPickerError] = React.useState(null);
-  const { isDark } = useTheme();
-
-  React.useEffect(() => {
-    let cancelled = false;
-    setPickerError(null);
-
-    const init = async () => {
-      try {
-        let MAPTILER_KEY = '';
-        try {
-          const res = await api.get('/config/map');
-          MAPTILER_KEY = res.data.maptilerApiKey || '';
-          if (res.data._debug) {
-            console.info('[MapTiler Debug - LocationPicker]', res.data._debug);
-          }
-        } catch (err) {
-          console.error('Failed to load map API key from backend', err);
-          if (!cancelled) setPickerError('Không thể kết nối máy chủ để tải bản đồ.');
-          return;
-        }
-
-        if (!MAPTILER_KEY || MAPTILER_KEY.length === 0) {
-          if (!cancelled) setPickerError('Cấu hình MapTiler chưa được thiết lập trên máy chủ.');
-          return;
-        }
-
-        if (cancelled) return;
-        
-        const [lat, lng] = [Number(position[0]), Number(position[1])];
-
-        const map = new Map({
-          target: containerRef.current,
-          view: new View({
-            center: fromLonLat([lng, lat]),
-            zoom: 14,
-          }),
-        });
-
-        const mapStyle = isDark ? 'streets-v2-dark' : 'streets-v2';
-        const STYLE_URL = `https://api.maptiler.com/maps/${mapStyle}/style.json?key=${MAPTILER_KEY}`;
-        const response = await fetch(STYLE_URL);
-        const styleJson = await response.json();
-        
-        if (styleJson.layers) {
-          const BANNED_NAMES = [
-            'Kalayaan', 'Zhubi', 'Fiery Cross', 'Mischief Reef', 'Meiji Jiao', 'Yongshu Jiao', 'Zhubi Jiao',
-            'Sansha', 'Woody Island', 'Yongxing Dao', 'Paracel Islands', 'Spratly Islands',
-            'South China Sea', 'Macclesfield Bank', 'Scarborough Shoal', 'Zhongjian Dao', 'Triton Island',
-            'Đảo Phú Lâm', 'Thành phố Tam Sa', 'Hoang Sa', 'Truong Sa', 'Pattle Island', 'Duncan Island',
-            'Quần đảo Hoàng Sa', 'Quần đảo Trường Sa', 'Itu Aba', 'Taiping Dao', 'Tai Ping Dao',
-            'Thitu Island', 'Pag-asa', 'West York Island', 'Likas Island', 'Northeast Cay', 'Parola',
-            'Southwest Cay', 'Pugad', 'Loaita Island', 'Kota', 'Nanshan Island', 'Lawak',
-            'Sand Cay', 'Bailan', 'Namyit Island', 'Binago', 'Sin Cowe Island', 'Rurok',
-            'Swallow Reef', 'Layang-Layang', 'Amboyna Cay', 'Kalantiyaw', 'Flat Island', 'Patag',
-            'Lankiam Cay', 'Panata', 'Cuarteron Reef', 'Calderon', 'Kagitingan', 'Gaven Reefs', 'Burgos',
-            'Hughes Reef', 'Chigua', 'Johnson South Reef', 'Mabini', 'Panganiban', 'Subi Reef', 'Zamora',
-            'Second Thomas Shoal', 'Ayungin', 'Reed Bank', 'Recto', 'Half Moon Shoal', 'Hasa-Hasa',
-            'Sabina Shoal', 'Escoda', 'Nansha Qundao', 'Xisha Qundao', 'Zhongsha Qundao', 'Dongsha Qundao',
-            'Shi Dao', 'Qilian Yu', 'Huayang Jiao', 'Nanxun Jiao', 'Chigua Jiao', 'Dongmen Jiao',
-            'Zhen\'ao Jiao', 'Macclesfield', 'Nansha', 'Xisha', 'Zhongsha', 'Dongsha', 'Triton',
-            'Vanguard Bank', 'Rifleman Bank', 'Prince of Wales Bank', 'Grainger Bank', 'Alexandra Bank',
-            'Southwest Bank', 'Prince Consort Bank', 'Owen Shoal', 'Bombay Castle', 'Orleana Shoal',
-            'Kingston Shoal', 'Coronation Bank', 'Eldad Reef', 'Petley Reef', 'Erica Reef', 'Mariveles Reef',
-            'Dallas Reef', 'Ardasier Reef', 'Commodore Reef', 'Barque Canada Reef', 'Investigator Shoal',
-            'Louisa Reef', 'Royal Charlotte Reef', 'Discovery Great Reef', 'Nanhai', 'South Sea'
-          ];
-          styleJson.layers.forEach(layer => {
-            if (layer.type === 'symbol' && layer.layout && layer.layout['text-field']) {
-              layer.layout['text-field'] = ['coalesce', ['get', 'name:vi'], ['get', 'name:en'], ['get', 'name']];
-              
-              const banFilter = ['!', ['in', ['get', 'name:en'], ['literal', BANNED_NAMES]]];
-              const banFilterVi = ['!', ['in', ['get', 'name:vi'], ['literal', BANNED_NAMES]]];
-              const banFilterName = ['!', ['in', ['get', 'name'], ['literal', BANNED_NAMES]]];
-              
-              if (!layer.filter) {
-                layer.filter = ['all', banFilter, banFilterVi, banFilterName];
-              } else if (layer.filter[0] === 'all') {
-                layer.filter.push(banFilter, banFilterVi, banFilterName);
-              } else {
-                layer.filter = ['all', layer.filter, banFilter, banFilterVi, banFilterName];
-              }
-            }
-          });
-        }
-        await apply(map, styleJson);
-
-        if (cancelled) return;
-
-        // Draggable marker SVG
-        const svg = `<svg width="32" height="42" viewBox="0 0 38 48" xmlns="http://www.w3.org/2000/svg">
-          <filter id="lp-shadow" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.4"/>
-          </filter>
-          <path filter="url(#lp-shadow)"
-            d="M19 46C19 46 35 29.8 35 17.8C35 8.5 27.8 1 19 1C10.2 1 3 8.5 3 17.8C3 29.8 19 46 19 46Z"
-            fill="#059669" stroke="white" stroke-width="4"/>
-          <circle cx="19" cy="18" r="7" fill="white" fill-opacity="0.96"/>
-        </svg>`;
-        const iconUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-
-        const markerFeature = new Feature({ geometry: new Point(fromLonLat([lng, lat])) });
-        markerFeature.setStyle(new Style({
-          image: new Icon({ src: iconUrl, anchor: [0.5, 1], scale: 1 })
-        }));
-        
-        markerFeatureRef.current = markerFeature;
-
-        const vectorSource = new VectorSource({ features: [markerFeature] });
-        const vectorLayer = new VectorLayer({ source: vectorSource, zIndex: 10 });
-        map.addLayer(vectorLayer);
-
-        const translate = new Translate({ features: new Collection([markerFeature]) });
-        map.addInteraction(translate);
-
-        translate.on('translateend', () => {
-          const coords = toLonLat(markerFeature.getGeometry().getCoordinates());
-          setPosition([Number(coords[1].toFixed(6)), Number(coords[0].toFixed(6))]);
-        });
-
-        map.on('singleclick', (e) => {
-          markerFeature.getGeometry().setCoordinates(e.coordinate);
-          const coords = toLonLat(e.coordinate);
-          setPosition([Number(coords[1].toFixed(6)), Number(coords[0].toFixed(6))]);
-        });
-
-        mapRef.current = map;
-      } catch (err) {
-        console.error('OpenLayers location picker error:', err);
-      }
-    };
-
-    init();
-    return () => {
-      cancelled = true;
-      if (mapRef.current) {
-        mapRef.current.setTarget(null);
-        mapRef.current = null;
-      }
-    };
-  }, [isDark]);
-
-  React.useEffect(() => {
-    if (!markerFeatureRef.current || !mapRef.current) return;
-    const lat = Number(position[0]);
-    const lng = Number(position[1]);
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-    
-    const coords = fromLonLat([lng, lat]);
-    markerFeatureRef.current.getGeometry().setCoordinates(coords);
-    mapRef.current.getView().animate({ center: coords, zoom: 14, duration: 600 });
-  }, [position]);
-
-  return pickerError ? (
-    <div className="w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800/70 rounded-2xl border border-rose-200">
-      <div className="text-center px-6 py-4 flex flex-col items-center gap-2">
-        <MapPin className="w-6 h-6 text-rose-400" />
-        <p className="text-xs font-bold text-rose-700">{pickerError}</p>
-        <p className="text-[10px] text-slate-400 dark:text-slate-500">Vui lòng liên hệ quản trị viên.</p>
-      </div>
+const pickerSkeleton = (
+  <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 animate-pulse">
+    <div className="text-center px-6 py-4">
+      <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Đang tải bản đồ chọn vị trí...</p>
     </div>
-  ) : (
-    <div ref={containerRef} className="w-full h-full" />
-  );
-};
+  </div>
+);
 
 export const SubmitKindness = () => {
   const navigate = useNavigate();
@@ -205,6 +40,7 @@ export const SubmitKindness = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [successPost, setSuccessPost] = useState(null);
+  const [enablePicker, setEnablePicker] = useState(false);
 
   const categories = ['Môi trường', 'Người cao tuổi', 'Trồng cây', 'Hiến máu', 'Giáo dục', 'Tình nguyện', 'Cộng đồng'];
 
@@ -218,6 +54,11 @@ export const SubmitKindness = () => {
   ];
 
   const inappropriateKeywords = ['chửi', 'đánh', 'lừa đảo', 'giết', 'bạo lực', 'tệ nạn', 'spam', 'khốn', 'mẹ', 'fuck', 'hate'];
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setEnablePicker(true), 200);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   const modCheck = useMemo(() => {
     const text = `${title} ${description}`.toLowerCase();
@@ -316,7 +157,7 @@ export const SubmitKindness = () => {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-8">
       <button
         onClick={() => navigate('/')}
-        className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 dark:text-slate-100 w-fit transition-colors"
+        className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 w-fit transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Quay lại trang chủ
       </button>
@@ -329,7 +170,7 @@ export const SubmitKindness = () => {
 
           <div className="flex flex-col gap-2">
             <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100">Ghim Việc Tốt Thành Công!</h2>
-            <p className="text-slate-600 dark:text-slate-300 dark:text-slate-400 text-sm leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">
               {successPost.post?.status === 'Approved' ? (
                 <span>Tuyệt vời! Câu chuyện của bạn đã được hiển thị công khai trên <strong>Bản Đồ Việc Tốt</strong>.</span>
               ) : successPost.post?.status === 'Rejected' ? (
@@ -340,14 +181,13 @@ export const SubmitKindness = () => {
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/80 dark:border-slate-700/70 w-full flex items-center justify-between text-xs text-slate-700 dark:text-slate-200 font-medium">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/70 w-full flex items-center justify-between text-xs text-slate-700 dark:text-slate-200 font-medium">
             <span>Trạng thái bài viết:</span>
             <span className={`px-3 py-1 rounded-full font-black text-xs ${
               successPost.post?.status === 'Approved' ? 'bg-emerald-100 text-brand-green' :
               successPost.post?.status === 'Rejected' ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-700'
             }`}>
-              {successPost.post?.status === 'Approved' ? '✅ Đã Phê Duyệt' :
-                successPost.post?.status === 'Rejected' ? '🚫 Bị Từ Chối' : '⏳ Đang Chờ Duyệt'}
+              {successPost.post?.status === 'Approved' ? '✅ Đã Phê Duyệt' : successPost.post?.status === 'Rejected' ? '🚫 Bị Từ Chối' : '⏳ Đang Chờ Duyệt'}
             </span>
           </div>
 
@@ -366,14 +206,14 @@ export const SubmitKindness = () => {
                 setImageUrl('');
                 setSuccessPost(null);
               }}
-              className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-extrabold text-xs rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 dark:bg-slate-700 transition-all"
+              className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-extrabold text-xs rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
             >
               ✍️ Gửi Thêm Câu Chuyện Khác
             </button>
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200 dark:border-slate-700/90 dark:border-slate-700/80 flex flex-col gap-8">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200 dark:border-slate-700/80 flex flex-col gap-8">
           <div className="flex flex-col gap-2 pb-6 border-b border-slate-100 dark:border-slate-800">
             <div className="inline-flex items-center gap-2 text-brand-green font-black text-xs uppercase tracking-wider">
               <Sparkles className="w-4 h-4" /> Chia Sẻ Điều Tử Tế Mỗi Ngày
@@ -403,7 +243,7 @@ export const SubmitKindness = () => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="VD: Nhóm bạn trẻ dọn rác cuối tuần"
-                className="px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+                className="px-4 py-3.5 rounded-2xl km-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
                 required
               />
             </div>
@@ -413,7 +253,7 @@ export const SubmitKindness = () => {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+                className="px-4 py-3.5 rounded-2xl km-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
               >
                 {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
               </select>
@@ -427,7 +267,7 @@ export const SubmitKindness = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Hãy kể rõ việc tốt đã diễn ra như thế nào, ai tham gia, giúp được ai và tác động tích cực ra sao..."
-              className="px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green resize-none"
+              className="px-4 py-3.5 rounded-2xl km-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green resize-none"
               required
             />
           </div>
@@ -442,7 +282,7 @@ export const SubmitKindness = () => {
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="Dán URL hình ảnh hoặc chọn ảnh mẫu bên dưới"
-              className="px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+              className="px-4 py-3.5 rounded-2xl km-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
             />
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -453,8 +293,8 @@ export const SubmitKindness = () => {
                   onClick={() => setImageUrl(img.url)}
                   className={`p-2 rounded-2xl border text-left transition-all ${imageUrl === img.url ? 'border-brand-green ring-4 ring-brand-green/10' : 'border-slate-200 dark:border-slate-700 hover:border-brand-green/40'}`}
                 >
-                  <img src={img.url} alt={img.name} className="w-full h-20 object-cover rounded-xl bg-slate-100 dark:bg-slate-800" />
-                  <span className="block mt-2 text-[11px] font-bold text-slate-600 dark:text-slate-300 dark:text-slate-400 line-clamp-1">{img.name}</span>
+                  <img src={img.url} alt={img.name} loading="lazy" decoding="async" className="w-full h-20 object-cover rounded-xl bg-slate-100 dark:bg-slate-800" />
+                  <span className="block mt-2 text-[11px] font-bold text-slate-600 dark:text-slate-300 line-clamp-1">{img.name}</span>
                 </button>
               ))}
             </div>
@@ -479,7 +319,7 @@ export const SubmitKindness = () => {
               value={locationName}
               onChange={(e) => setLocationName(e.target.value)}
               placeholder="VD: Hồ Tây, Hà Nội"
-              className="px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+              className="px-4 py-3.5 rounded-2xl km-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
               required
             />
 
@@ -489,7 +329,7 @@ export const SubmitKindness = () => {
                 step="0.000001"
                 value={pickedLatLng[0]}
                 onChange={(e) => setPickedLatLng([Number(e.target.value), pickedLatLng[1]])}
-                className="px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-mono focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+                className="px-4 py-3 rounded-2xl km-input text-xs font-mono focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
                 aria-label="Latitude"
               />
               <input
@@ -497,7 +337,7 @@ export const SubmitKindness = () => {
                 step="0.000001"
                 value={pickedLatLng[1]}
                 onChange={(e) => setPickedLatLng([pickedLatLng[0], Number(e.target.value)])}
-                className="px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-mono focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+                className="px-4 py-3 rounded-2xl km-input text-xs font-mono focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
                 aria-label="Longitude"
               />
             </div>
@@ -506,7 +346,13 @@ export const SubmitKindness = () => {
               <div className="absolute top-2 left-2 z-[1000] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-xl text-[10px] font-black text-brand-green shadow-sm">
                 💡 Bấm trực tiếp vào bản đồ để gắn tọa độ
               </div>
-              <OpenLayersLocationPicker position={pickedLatLng} setPosition={setPickedLatLng} />
+              {enablePicker ? (
+                <Suspense fallback={pickerSkeleton}>
+                  <LazyLocationPicker position={pickedLatLng} setPosition={setPickedLatLng} />
+                </Suspense>
+              ) : (
+                pickerSkeleton
+              )}
             </div>
 
             <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-start gap-2">
@@ -518,16 +364,14 @@ export const SubmitKindness = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-4 bg-brand-green disabled:bg-slate-300 disabled:text-slate-500 dark:text-slate-400 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-brand-green/20 hover:opacity-95 transition-all flex items-center justify-center gap-2"
+            className="w-full py-4 bg-brand-green disabled:bg-slate-300 disabled:text-slate-500 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-brand-green/20 hover:opacity-95 transition-all flex items-center justify-center gap-2"
           >
-            {submitting ? (
-              <>Đang gửi câu chuyện...</>
-            ) : (
-              <><Send className="w-5 h-5" /> Gửi Câu Chuyện Việc Tốt</>
-            )}
+            {submitting ? <>Đang gửi câu chuyện...</> : <><Send className="w-5 h-5" /> Gửi Câu Chuyện Việc Tốt</>}
           </button>
         </form>
       )}
     </div>
   );
 };
+
+export default SubmitKindness;

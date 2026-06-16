@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -168,12 +168,6 @@ export const KindnessStories = () => {
     addToast('Đã sao chép liên kết!', 'Bạn có thể gửi ngay cho bạn bè.', 'success');
     setTimeout(() => setCopiedLink(false), 3000);
   };
-
-  const featuredModalStats = useMemo(() => ({
-    likes: activeStory?.likesCount || 0,
-    comments: activeStory?.commentsCount || 0,
-    commentItems: comments.length,
-  }), [activeStory, comments.length]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10">
@@ -403,9 +397,8 @@ export const KindnessStories = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-4 items-start">
-                <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between gap-3 flex-wrap">
                   <span className="px-3 py-1 bg-brand-lightGreen text-brand-deepGreen font-black text-xs rounded-full border border-brand-green/20">
                     {activeStory.category}
                   </span>
@@ -418,28 +411,9 @@ export const KindnessStories = () => {
                   {activeStory.title}
                 </h1>
 
-                  <p className="text-slate-700 dark:text-slate-200 text-base leading-relaxed whitespace-pre-line bg-slate-50/90 dark:bg-slate-800/70 p-6 rounded-[24px] border border-slate-200 dark:border-slate-700/60 shadow-sm">
-                    {activeStory.description}
-                  </p>
-                </div>
-
-                <div className="km-panel-soft p-4 flex flex-col gap-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-green">Tóm tắt tương tác</p>
-                  <div className="grid grid-cols-1 gap-3">
-                    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3">
-                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Lượt thích</p>
-                      <p className="text-xl font-black text-slate-900 dark:text-slate-100 mt-1">{featuredModalStats.likes}</p>
-                    </div>
-                    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3">
-                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Bình luận</p>
-                      <p className="text-xl font-black text-slate-900 dark:text-slate-100 mt-1">{featuredModalStats.commentItems}</p>
-                    </div>
-                    <div className="rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 p-3">
-                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Địa điểm</p>
-                      <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mt-1 leading-relaxed">{activeStory.locationName}</p>
-                    </div>
-                  </div>
-                </div>
+                <p className="text-slate-700 dark:text-slate-200 text-base leading-relaxed whitespace-pre-line bg-slate-50/90 dark:bg-slate-800/70 p-6 rounded-[24px] border border-slate-200 dark:border-slate-700/60 shadow-sm">
+                  {activeStory.description}
+                </p>
               </div>
 
               {/* Author and Quick Tools */}
