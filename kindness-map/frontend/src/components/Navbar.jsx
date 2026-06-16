@@ -121,7 +121,7 @@ export const Navbar = () => {
 
           {/* Action Tools Center */}
           <div className="hidden lg:flex items-center gap-3">
-            <ThemeToggle />
+            {!isAuthenticated && <ThemeToggle />}
 
             {/* Quick Demo Switcher */}
             <div className="relative" ref={demoRef}>
@@ -261,7 +261,7 @@ export const Navbar = () => {
                   </button>
 
                   {profileDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 p-2 z-50 animate-fade-in divide-y divide-slate-100">
+                    <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 p-2 z-50 animate-fade-in divide-y divide-slate-100">
                       <div className="px-3 py-2.5">
                         <p className="font-extrabold text-sm text-slate-900 dark:text-slate-100">{user.fullName}</p>
                         <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">{user.email}</p>
@@ -280,6 +280,10 @@ export const Navbar = () => {
                         >
                           <User className="w-4 h-4 text-brand-blue" /> Hồ sơ & Thành tựu
                         </button>
+                      </div>
+
+                      <div className="py-1">
+                        <ThemeToggle dropdown />
                       </div>
 
                       <div className="py-1">
@@ -363,7 +367,7 @@ export const Navbar = () => {
             </div>
           </div>
 
-          <ThemeToggle mobile />
+          {!isAuthenticated && <ThemeToggle mobile />}
 
           <div className="flex flex-col gap-1">
             <NavLink to="/explore" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass}>
@@ -399,6 +403,7 @@ export const Navbar = () => {
                   </div>
                   <span className="text-xs bg-brand-green text-white py-0.5 px-2.5 rounded-full font-extrabold">{user.points} pts</span>
                 </button>
+                <ThemeToggle mobile />
                 <button
                   onClick={() => { logout(); setMobileMenuOpen(false); }}
                   className="w-full py-3 rounded-2xl bg-rose-50 text-rose-600 font-bold text-sm flex items-center justify-center gap-2"
