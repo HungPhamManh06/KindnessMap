@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { useNotification } from '../context/NotificationContext';
 import { ThemeToggle } from './ThemeToggle';
+import { LanguageToggle } from './LanguageToggle';
 import {
   HeartHandshake,
   Map,
@@ -368,6 +369,7 @@ export const Navbar = () => {
                             </div>
                             Trang cá nhân
                           </button>
+                          <LanguageToggle dropdown />
                           <ThemeToggle dropdown />
                           <button
                             onClick={() => {
@@ -463,7 +465,12 @@ export const Navbar = () => {
             </div>
           </div>
 
-          {!isAuthenticated && <ThemeToggle mobile />}
+          {!isAuthenticated && (
+            <>
+              <LanguageToggle mobile />
+              <ThemeToggle mobile />
+            </>
+          )}
 
           <div className="flex flex-col gap-1">
             <NavLink
@@ -534,6 +541,7 @@ export const Navbar = () => {
                     {user.points} pts
                   </span>
                 </button>
+                <LanguageToggle mobile />
                 <ThemeToggle mobile />
                 <button
                   onClick={() => {
