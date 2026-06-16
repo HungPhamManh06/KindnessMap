@@ -387,36 +387,36 @@ export const AdminDashboard = () => {
           <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/20 text-purple-300 font-extrabold text-xs w-fit self-center md:self-start">
             <Shield className="w-4 h-4" /> Bảng Điều Khiển Quản Trị KindnessMap
           </span>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight mt-1">
-            Trung Tâm Kiểm Duyệt & Vận Hành Cộng Đồng
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter mt-1">
+            Trung Tâm Kiểm Duyệt & Vận Hành
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-500">
-            Chào {user.fullName}! Màn hình mới hỗ trợ tìm kiếm, lọc nâng cao, xử lý hàng loạt và thống kê thật từ dữ liệu hệ thống.
+          <p className="text-xs sm:text-[13px] text-slate-400 font-bold leading-relaxed max-w-2xl mt-2">
+            Chào {user.fullName}! Quản lý hệ thống hiệu quả với bộ công cụ tìm kiếm, lọc nâng cao và xử lý dữ liệu hàng loạt.
           </p>
         </div>
 
         <button
           onClick={fetchAdminData}
           disabled={loading || actionLoading}
-          className="px-5 py-3 rounded-2xl bg-white/10 dark:bg-slate-800/50 hover:bg-white/20 dark:hover:bg-slate-700/70 disabled:opacity-60 border border-white/10 font-bold text-xs transition-colors flex items-center gap-2 shrink-0 backdrop-blur-md self-center md:self-end"
+          className="px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 disabled:opacity-50 border border-white/10 font-black text-[13px] transition-all flex items-center gap-3 shrink-0 backdrop-blur-md self-center md:self-end shadow-lg"
         >
           <RefreshCw className={`w-4 h-4 ${loading || actionLoading ? 'animate-spin' : ''}`} />
-          <span>Làm Mới Trạng Thái</span>
+          <span>Làm Mới Hệ Thống</span>
         </button>
       </div>
 
       {/* Realtime Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 -mt-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 -mt-6 relative z-20">
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className={`p-5 rounded-3xl border shadow-sm flex items-center justify-between gap-4 backdrop-blur-sm ${card.className}`}>
-              <div>
-                <p className="text-[11px] font-black uppercase tracking-wider opacity-80">{card.label}</p>
-                <p className="text-3xl font-black mt-1">{card.value}</p>
+            <div key={card.label} className={`p-6 rounded-[2rem] border shadow-xl flex items-center justify-between gap-4 backdrop-blur-xl transition-transform hover:scale-[1.02] ${card.className}`}>
+              <div className="flex flex-col">
+                <p className="text-[10px] font-black uppercase tracking-widest opacity-70 mb-1">{card.label}</p>
+                <p className="text-3xl font-black tracking-tight">{card.value}</p>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-white/70 dark:bg-slate-950/60 flex items-center justify-center shadow-sm border border-white/50 dark:border-slate-700/60">
-                <Icon className="w-6 h-6" />
+              <div className="w-14 h-14 rounded-2xl bg-white/80 dark:bg-slate-950/40 flex items-center justify-center shadow-inner border border-white/50 dark:border-slate-700/50">
+                <Icon className="w-7 h-7" />
               </div>
             </div>
           );
@@ -427,61 +427,77 @@ export const AdminDashboard = () => {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <button
           onClick={() => setActiveTab('moderation')}
-          className={`p-6 rounded-3xl border transition-all text-left flex flex-col gap-3 ${
-            activeTab === 'moderation' ? 'bg-gradient-to-br from-brand-lightGreen to-emerald-100/50 dark:from-emerald-500/20 dark:to-teal-500/10 border-brand-green shadow-lg ring-4 ring-brand-green/20' : 'bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80'
+          className={`p-6 rounded-[2rem] border transition-all text-left flex flex-col gap-4 group ${
+            activeTab === 'moderation' 
+              ? 'bg-white dark:bg-slate-900 border-brand-green shadow-xl ring-4 ring-brand-green/10' 
+              : 'bg-white/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-900'
           }`}
         >
-          <div className="w-12 h-12 rounded-2xl bg-brand-green text-white flex items-center justify-center shadow-md">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 ${
+            activeTab === 'moderation' ? 'bg-brand-green text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+          }`}>
             <FileText className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="font-black text-sm text-slate-900 dark:text-slate-100">1. Duyệt Bài Việc Tốt</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tìm kiếm, lọc và duyệt hàng loạt</p>
+            <h4 className={`font-black text-sm ${activeTab === 'moderation' ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}>1. Duyệt Bài Viết</h4>
+            <p className="text-[11px] font-bold text-slate-400 mt-1">Lọc & duyệt hàng loạt</p>
           </div>
         </button>
 
         <button
           onClick={() => setActiveTab('users')}
-          className={`p-6 rounded-3xl border transition-all text-left flex flex-col gap-3 ${
-            activeTab === 'users' ? 'bg-gradient-to-br from-purple-50 to-indigo-100/50 dark:from-purple-500/20 dark:to-indigo-500/10 border-purple-600 shadow-lg ring-4 ring-purple-600/20' : 'bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80'
+          className={`p-6 rounded-[2rem] border transition-all text-left flex flex-col gap-4 group ${
+            activeTab === 'users' 
+              ? 'bg-white dark:bg-slate-900 border-purple-500 shadow-xl ring-4 ring-purple-500/10' 
+              : 'bg-white/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-900'
           }`}
         >
-          <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 ${
+            activeTab === 'users' ? 'bg-purple-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+          }`}>
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="font-black text-sm text-slate-900 dark:text-slate-100">2. Quản Lý Thành Viên</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Lọc vai trò, tìm email, sắp xếp điểm</p>
+            <h4 className={`font-black text-sm ${activeTab === 'users' ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}>2. Quản Lý Thành Viên</h4>
+            <p className="text-[11px] font-bold text-slate-400 mt-1">Phân quyền & điểm số</p>
           </div>
         </button>
 
         <button
           onClick={() => setActiveTab('analytics')}
-          className={`p-6 rounded-3xl border transition-all text-left flex flex-col gap-3 ${
-            activeTab === 'analytics' ? 'bg-gradient-to-br from-blue-50 to-sky-100/50 dark:from-blue-500/20 dark:to-sky-500/10 border-blue-600 shadow-lg ring-4 ring-blue-600/20' : 'bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80'
+          className={`p-6 rounded-[2rem] border transition-all text-left flex flex-col gap-4 group ${
+            activeTab === 'analytics' 
+              ? 'bg-white dark:bg-slate-900 border-blue-500 shadow-xl ring-4 ring-blue-500/10' 
+              : 'bg-white/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-900'
           }`}
         >
-          <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 ${
+            activeTab === 'analytics' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+          }`}>
             <BarChart3 className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="font-black text-sm text-slate-900 dark:text-slate-100">3. Số Liệu Tổng Quan</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Biểu đồ thật theo tháng & danh mục</p>
+            <h4 className={`font-black text-sm ${activeTab === 'analytics' ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}>3. Số Liệu Tổng Quan</h4>
+            <p className="text-[11px] font-bold text-slate-400 mt-1">Biểu đồ & Thống kê</p>
           </div>
         </button>
 
         <button
           onClick={() => setActiveTab('awards')}
-          className={`p-6 rounded-3xl border transition-all text-left flex flex-col gap-3 ${
-            activeTab === 'awards' ? 'bg-gradient-to-br from-amber-50 to-yellow-100/50 dark:from-amber-500/20 dark:to-yellow-500/10 border-amber-500 shadow-lg ring-4 ring-amber-500/20' : 'bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80'
+          className={`p-6 rounded-[2rem] border transition-all text-left flex flex-col gap-4 group ${
+            activeTab === 'awards' 
+              ? 'bg-white dark:bg-slate-900 border-amber-500 shadow-xl ring-4 ring-amber-500/10' 
+              : 'bg-white/50 dark:bg-slate-900/40 border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-900'
           }`}
         >
-          <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 ${
+            activeTab === 'awards' ? 'bg-amber-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+          }`}>
             <Trophy className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="font-black text-sm text-slate-900 dark:text-slate-100">4. Giải Thưởng Tháng</h4>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Quản lý quỹ điểm thưởng & vinh danh</p>
+            <h4 className={`font-black text-sm ${activeTab === 'awards' ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}>4. Giải Thưởng Tháng</h4>
+            <p className="text-[11px] font-bold text-slate-400 mt-1">Vinh danh cộng đồng</p>
           </div>
         </button>
       </div>
