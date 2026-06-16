@@ -64,14 +64,14 @@ export const Navbar = () => {
   }, []);
 
   const navLinkClass = ({ isActive }) =>
-    `flex items-center gap-2 px-3.5 py-2.5 rounded-2xl font-bold text-[13px] transition-all duration-300 ${
+    `flex items-center gap-2 px-2.5 py-2 rounded-2xl font-bold text-[13px] whitespace-nowrap transition-all duration-300 ${
       isActive
         ? 'bg-brand-green/10 text-brand-deepGreen dark:text-brand-green'
         : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80'
     }`;
 
   const mobileNavLinkClass = ({ isActive }) =>
-    `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-base transition-all ${
+    `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-bold text-base whitespace-nowrap transition-all ${
       isActive
         ? 'bg-brand-green text-white'
         : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80'
@@ -98,7 +98,7 @@ export const Navbar = () => {
           </NavLink>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-0.5 flex-nowrap">
             <NavLink to="/explore" className={navLinkClass}>
               <Map className="w-4 h-4" /> Bản Đồ
             </NavLink>
@@ -117,14 +117,14 @@ export const Navbar = () => {
           </nav>
 
           {/* Action Tools Center */}
-          <div className="hidden md:flex items-center gap-2.5">
+          <div className="hidden md:flex items-center gap-2 flex-nowrap">
             {!isAuthenticated && <ThemeToggle compact />}
 
             {/* Admin Badge/Link if Admin */}
             {isAuthenticated && user?.role === 'admin' && (
               <NavLink 
                 to="/admin" 
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-brand-green text-white font-bold text-[13px] shadow-lg shadow-brand-green/25 hover:opacity-90 transition-all"
+                className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-brand-green text-white font-bold text-[13px] whitespace-nowrap shadow-lg shadow-brand-green/25 hover:opacity-90 transition-all"
               >
                 <Shield className="w-4 h-4" /> Quản Trị Admin
               </NavLink>
@@ -134,7 +134,7 @@ export const Navbar = () => {
             <div className="relative" ref={demoRef}>
               <button
                 onClick={() => setDemoDropdownOpen(!demoDropdownOpen)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-500 text-white font-bold text-[13px] shadow-lg shadow-amber-500/20 hover:bg-amber-600 transition-all"
+                className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-amber-500 text-white font-bold text-[13px] whitespace-nowrap shadow-lg shadow-amber-500/20 hover:bg-amber-600 transition-all"
                 title="Chuyển nhanh các tài khoản người dùng mẫu"
               >
                 <Sparkles className="w-4 h-4 animate-spin-slow" />
@@ -193,7 +193,7 @@ export const Navbar = () => {
                 if (!isAuthenticated) setActiveModal('login');
                 else navigate('/submit');
               }}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-brand-deepGreen to-brand-green text-white font-bold text-[13px] shadow-lg shadow-brand-green/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-gradient-to-r from-brand-deepGreen to-brand-green text-white font-bold text-[13px] whitespace-nowrap shadow-lg shadow-brand-green/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
             >
               <PlusCircle className="w-5 h-5" />
               <span>Gửi Việc Tốt</span>
@@ -269,8 +269,8 @@ export const Navbar = () => {
                       <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-brand-green border-2 border-white dark:border-slate-950 rounded-full"></div>
                     </div>
                     <div className="hidden xl:flex flex-col text-left pr-2">
-                      <span className="font-bold text-[13px] text-slate-800 dark:text-slate-100 leading-tight">{user.fullName}</span>
-                      <span className="text-[10px] font-black text-brand-green uppercase tracking-wider">{user.level}</span>
+                      <span className="font-bold text-[13px] text-slate-800 dark:text-slate-100 leading-tight whitespace-nowrap">{user.fullName}</span>
+                      <span className="text-[10px] font-black text-brand-green uppercase tracking-wider whitespace-nowrap">{user.level}</span>
                     </div>
                     <ChevronDown className="w-4 h-4 text-slate-400 mr-2" />
                   </button>
@@ -318,13 +318,13 @@ export const Navbar = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setActiveModal('login')}
-                  className="px-5 py-2.5 rounded-2xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-bold text-[13px] hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all"
+                  className="px-5 py-2.5 rounded-2xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-bold text-[13px] whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all"
                 >
                   Đăng Nhập
                 </button>
                 <button
                   onClick={() => setActiveModal('register')}
-                  className="px-6 py-2.5 rounded-2xl bg-brand-lightGreen border-2 border-brand-green text-brand-deepGreen font-black text-[13px] hover:bg-brand-green hover:text-white transition-all shadow-sm"
+                  className="px-6 py-2.5 rounded-2xl bg-brand-lightGreen border-2 border-brand-green text-brand-deepGreen font-black text-[13px] whitespace-nowrap hover:bg-brand-green hover:text-white transition-all shadow-sm"
                 >
                   Đăng Ký
                 </button>
