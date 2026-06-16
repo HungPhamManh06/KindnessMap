@@ -401,7 +401,7 @@ export const KindnessStories = () => {
       {/* Detailed Story Modal with Real-time Comments */}
       {activeStory && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/72 backdrop-blur-md p-4 animate-fade-in overflow-y-auto">
-          <div className="relative w-full max-w-3xl km-modal-shell overflow-hidden my-8 max-h-[90vh] flex flex-col">
+          <div key={activeStory.id} className="relative w-full max-w-3xl km-modal-shell overflow-hidden my-8 max-h-[90vh] flex flex-col">
             <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-r from-brand-green/10 via-brand-blue/10 to-emerald-500/10 dark:from-brand-green/15 dark:via-cyan-500/10 dark:to-emerald-500/10 pointer-events-none" />
             
             {/* Modal Header Bar */}
@@ -434,7 +434,8 @@ export const KindnessStories = () => {
                 </h1>
               </div>
 
-              <div className="rounded-[28px] overflow-hidden border border-slate-200/80 dark:border-slate-800/80 shadow-xl bg-slate-100 dark:bg-slate-800/60">
+              <div className="rounded-[28px] overflow-hidden border border-slate-200/80 dark:border-slate-800/80 shadow-xl bg-slate-100 dark:bg-slate-800/60 min-h-[280px] sm:min-h-[360px] relative">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.10),_transparent_40%)] pointer-events-none" />
                 <img
                   key={activeStory.id}
                   src={activeStory.imageUrl || FALLBACK_STORY_IMAGE}
@@ -442,7 +443,7 @@ export const KindnessStories = () => {
                   loading="eager"
                   decoding="async"
                   onError={applyFallbackImage}
-                  className="w-full h-72 sm:h-96 object-cover"
+                  className="block w-full h-[280px] sm:h-[360px] object-cover"
                 />
               </div>
 
