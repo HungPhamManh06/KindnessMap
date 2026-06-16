@@ -5,8 +5,8 @@ import api from '../services/api';
 import { useNotification } from '../context/NotificationContext';
 import { ThemeToggle } from './ThemeToggle';
 import { 
-  HeartHandshake, Map, BookOpen, Trophy, Shield, PlusCircle, 
-  Bell, LogOut, User, ChevronDown, Award, Menu, X, Check, Sparkles 
+  HeartHandshake, Map, BookOpen, Trophy, Shield, PlusCircle,
+  Bell, LogOut, User, ChevronDown, Award, Menu, X, Check, Sparkles, Target
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -110,6 +110,9 @@ export const Navbar = () => {
             </NavLink>
             <NavLink to="/awards" className={navLinkClass}>
               <Award className="w-4 h-4" /> Giải Thưởng
+            </NavLink>
+            <NavLink to="/matching" className={navLinkClass}>
+              <Target className="w-4 h-4" /> AI Ghép Nối
             </NavLink>
 
             {isAuthenticated && user?.role === 'admin' && (
@@ -381,6 +384,9 @@ export const Navbar = () => {
             </NavLink>
             <NavLink to="/awards" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass}>
               <Award className="w-5 h-5" /> Community Awards
+            </NavLink>
+            <NavLink to="/matching" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass}>
+              <Target className="w-5 h-5" /> AI Ghép Nối
             </NavLink>
 
             {isAuthenticated && user?.role === 'admin' && (

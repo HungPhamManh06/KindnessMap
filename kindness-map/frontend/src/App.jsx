@@ -17,6 +17,7 @@ import { Leaderboard } from './pages/Leaderboard';
 import { UserProfile } from './pages/UserProfile';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { MonthlyAwards } from './pages/MonthlyAwards';
+import { AIMatchingEngine } from './pages/AIMatchingEngine';
 
 export const App = () => {
   return (
@@ -33,6 +34,7 @@ export const App = () => {
                   <Route path="/stories" element={<KindnessStories />} />
                   <Route path="/submit" element={<SubmitKindness />} />
                   <Route path="/leaderboard" element={<Leaderboard />} />
+                  <Route path="/matching" element={<AIMatchingEngine />} />
                   <Route path="/profile" element={<UserProfile />} />
                   <Route path="/admin" element={<AdminDashboard />} />
                   <Route path="/awards" element={<MonthlyAwards />} />
