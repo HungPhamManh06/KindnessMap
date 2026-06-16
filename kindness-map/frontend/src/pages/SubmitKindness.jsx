@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useNotification } from '../context/NotificationContext';
+import { useTheme } from '../context/ThemeContext';
 import {
   Sparkles, CheckCircle2, AlertTriangle, Image as ImageIcon,
   MapPin, Send, HelpCircle, ArrowLeft, LocateFixed
@@ -26,9 +27,11 @@ const OpenLayersLocationPicker = ({ position, setPosition }) => {
   const mapRef       = React.useRef(null);
   const markerFeatureRef = React.useRef(null);
   const [pickerError, setPickerError] = React.useState(null);
+  const { isDark } = useTheme();
 
   React.useEffect(() => {
     let cancelled = false;
+    setPickerError(null);
 
     const init = async () => {
       try {
@@ -62,7 +65,8 @@ const OpenLayersLocationPicker = ({ position, setPosition }) => {
           }),
         });
 
-        const STYLE_URL = `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`;
+        const mapStyle = isDark ? 'streets-v2-dark' : 'streets-v2';
+        const STYLE_URL = `https://api.maptiler.com/maps/${mapStyle}/style.json?key=${MAPTILER_KEY}`;
         const response = await fetch(STYLE_URL);
         const styleJson = await response.json();
         
@@ -162,7 +166,7 @@ const OpenLayersLocationPicker = ({ position, setPosition }) => {
         mapRef.current = null;
       }
     };
-  }, []); // run once
+  }, [isDark]);
 
   React.useEffect(() => {
     if (!markerFeatureRef.current || !mapRef.current) return;
@@ -176,11 +180,11 @@ const OpenLayersLocationPicker = ({ position, setPosition }) => {
   }, [position]);
 
   return pickerError ? (
-    <div className="w-full h-full flex items-center justify-center bg-slate-50 rounded-2xl border border-rose-200">
+    <div className="w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800/70 rounded-2xl border border-rose-200">
       <div className="text-center px-6 py-4 flex flex-col items-center gap-2">
         <MapPin className="w-6 h-6 text-rose-400" />
         <p className="text-xs font-bold text-rose-700">{pickerError}</p>
-        <p className="text-[10px] text-slate-400">Vui lòng liên hệ quản trị viên.</p>
+        <p className="text-[10px] text-slate-400 dark:text-slate-500">Vui lòng liên hệ quản trị viên.</p>
       </div>
     </div>
   ) : (
@@ -292,15 +296,15 @@ export const SubmitKindness = () => {
     return (
       <div className="max-w-3xl mx-auto px-4 py-20 text-center flex flex-col items-center gap-4">
         <AlertTriangle className="w-16 h-16 text-amber-500" />
-        <h2 className="text-3xl font-black text-slate-900">Vui Lòng Đăng Nhập</h2>
-        <p className="text-slate-600 max-w-md text-xs leading-relaxed">
+        <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100">Vui Lòng Đăng Nhập</h2>
+        <p className="text-slate-600 dark:text-slate-300 dark:text-slate-400 max-w-md text-xs leading-relaxed">
           Bạn cần đăng nhập hoặc tạo tài khoản để ghim việc tốt lên Bản Đồ, tích lũy điểm công dân số và nhận huy hiệu thành tựu.
         </p>
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-4">
           <button onClick={() => setActiveModal('login')} className="px-8 py-3.5 bg-brand-green text-white rounded-2xl font-black text-xs shadow-lg shadow-brand-green/20">
             Đăng Nhập Ngay
           </button>
-          <button onClick={() => setActiveModal('register')} className="px-8 py-3.5 bg-white border border-slate-200 text-slate-800 rounded-2xl font-black text-xs">
+          <button onClick={() => setActiveModal('register')} className="px-8 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-2xl font-black text-xs">
             Tạo Tài Khoản
           </button>
         </div>
@@ -312,20 +316,20 @@ export const SubmitKindness = () => {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-8">
       <button
         onClick={() => navigate('/')}
-        className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 w-fit transition-colors"
+        className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 dark:text-slate-100 w-fit transition-colors"
       >
         <ArrowLeft className="w-4 h-4" /> Quay lại trang chủ
       </button>
 
       {successPost ? (
-        <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-2xl border border-emerald-100 text-center flex flex-col items-center gap-6 animate-fade-in max-w-2xl mx-auto w-full">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 sm:p-12 shadow-2xl border border-emerald-100 text-center flex flex-col items-center gap-6 animate-fade-in max-w-2xl mx-auto w-full">
           <div className="w-20 h-20 bg-emerald-100 text-brand-green rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/20">
             <CheckCircle2 className="w-12 h-12" />
           </div>
 
           <div className="flex flex-col gap-2">
-            <h2 className="text-3xl font-black text-slate-900">Ghim Việc Tốt Thành Công!</h2>
-            <p className="text-slate-600 text-sm leading-relaxed">
+            <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100">Ghim Việc Tốt Thành Công!</h2>
+            <p className="text-slate-600 dark:text-slate-300 dark:text-slate-400 text-sm leading-relaxed">
               {successPost.post?.status === 'Approved' ? (
                 <span>Tuyệt vời! Câu chuyện của bạn đã được hiển thị công khai trên <strong>Bản Đồ Việc Tốt</strong>.</span>
               ) : successPost.post?.status === 'Rejected' ? (
@@ -336,7 +340,7 @@ export const SubmitKindness = () => {
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 w-full flex items-center justify-between text-xs text-slate-700 font-medium">
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/80 dark:border-slate-700/70 w-full flex items-center justify-between text-xs text-slate-700 dark:text-slate-200 font-medium">
             <span>Trạng thái bài viết:</span>
             <span className={`px-3 py-1 rounded-full font-black text-xs ${
               successPost.post?.status === 'Approved' ? 'bg-emerald-100 text-brand-green' :
@@ -362,22 +366,22 @@ export const SubmitKindness = () => {
                 setImageUrl('');
                 setSuccessPost(null);
               }}
-              className="w-full py-4 bg-slate-100 text-slate-800 font-extrabold text-xs rounded-2xl hover:bg-slate-200 transition-all"
+              className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-extrabold text-xs rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 dark:bg-slate-700 transition-all"
             >
               ✍️ Gửi Thêm Câu Chuyện Khác
             </button>
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200/90 flex flex-col gap-8">
-          <div className="flex flex-col gap-2 pb-6 border-b border-slate-100">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200 dark:border-slate-700/90 dark:border-slate-700/80 flex flex-col gap-8">
+          <div className="flex flex-col gap-2 pb-6 border-b border-slate-100 dark:border-slate-800">
             <div className="inline-flex items-center gap-2 text-brand-green font-black text-xs uppercase tracking-wider">
               <Sparkles className="w-4 h-4" /> Chia Sẻ Điều Tử Tế Mỗi Ngày
             </div>
-            <h1 className="text-2xl sm:text-4xl font-black text-slate-900">
+            <h1 className="text-2xl sm:text-4xl font-black text-slate-900 dark:text-slate-100">
               Gửi Câu Chuyện Việc Tốt Của Bạn
             </h1>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 dark:text-slate-400">
               Điền thông tin và bấm trực tiếp trên bản đồ để gắn tọa độ chính xác.
             </p>
           </div>
@@ -394,22 +398,22 @@ export const SubmitKindness = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Tiêu đề câu chuyện</label>
+              <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Tiêu đề câu chuyện</label>
               <input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="VD: Nhóm bạn trẻ dọn rác cuối tuần"
-                className="px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+                className="px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
                 required
               />
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Danh mục</label>
+              <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Danh mục</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+                className="px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
               >
                 {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
               </select>
@@ -417,13 +421,13 @@ export const SubmitKindness = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Mô tả chi tiết</label>
+            <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Mô tả chi tiết</label>
             <textarea
               rows="6"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Hãy kể rõ việc tốt đã diễn ra như thế nào, ai tham gia, giúp được ai và tác động tích cực ra sao..."
-              className="px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green resize-none"
+              className="px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green resize-none"
               required
             />
           </div>
@@ -431,14 +435,14 @@ export const SubmitKindness = () => {
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
               <ImageIcon className="w-5 h-5 text-brand-green" />
-              <h3 className="font-black text-slate-900">Hình ảnh minh họa</h3>
+              <h3 className="font-black text-slate-900 dark:text-slate-100">Hình ảnh minh họa</h3>
             </div>
 
             <input
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="Dán URL hình ảnh hoặc chọn ảnh mẫu bên dưới"
-              className="px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+              className="px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
             />
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -447,10 +451,10 @@ export const SubmitKindness = () => {
                   key={img.url}
                   type="button"
                   onClick={() => setImageUrl(img.url)}
-                  className={`p-2 rounded-2xl border text-left transition-all ${imageUrl === img.url ? 'border-brand-green ring-4 ring-brand-green/10' : 'border-slate-200 hover:border-brand-green/40'}`}
+                  className={`p-2 rounded-2xl border text-left transition-all ${imageUrl === img.url ? 'border-brand-green ring-4 ring-brand-green/10' : 'border-slate-200 dark:border-slate-700 hover:border-brand-green/40'}`}
                 >
-                  <img src={img.url} alt={img.name} className="w-full h-20 object-cover rounded-xl bg-slate-100" />
-                  <span className="block mt-2 text-[11px] font-bold text-slate-600 line-clamp-1">{img.name}</span>
+                  <img src={img.url} alt={img.name} className="w-full h-20 object-cover rounded-xl bg-slate-100 dark:bg-slate-800" />
+                  <span className="block mt-2 text-[11px] font-bold text-slate-600 dark:text-slate-300 dark:text-slate-400 line-clamp-1">{img.name}</span>
                 </button>
               ))}
             </div>
@@ -460,7 +464,7 @@ export const SubmitKindness = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-2">
                 <MapPin className="w-5 h-5 text-rose-500" />
-                <h3 className="font-black text-slate-900">Địa điểm & tọa độ</h3>
+                <h3 className="font-black text-slate-900 dark:text-slate-100">Địa điểm & tọa độ</h3>
               </div>
               <button
                 type="button"
@@ -475,7 +479,7 @@ export const SubmitKindness = () => {
               value={locationName}
               onChange={(e) => setLocationName(e.target.value)}
               placeholder="VD: Hồ Tây, Hà Nội"
-              className="px-4 py-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+              className="px-4 py-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
               required
             />
 
@@ -485,7 +489,7 @@ export const SubmitKindness = () => {
                 step="0.000001"
                 value={pickedLatLng[0]}
                 onChange={(e) => setPickedLatLng([Number(e.target.value), pickedLatLng[1]])}
-                className="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-mono focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+                className="px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-mono focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
                 aria-label="Latitude"
               />
               <input
@@ -493,13 +497,13 @@ export const SubmitKindness = () => {
                 step="0.000001"
                 value={pickedLatLng[1]}
                 onChange={(e) => setPickedLatLng([pickedLatLng[0], Number(e.target.value)])}
-                className="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-mono focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+                className="px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-mono focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
                 aria-label="Longitude"
               />
             </div>
 
-            <div className="h-80 w-full rounded-3xl overflow-hidden border border-slate-200 shadow-md relative bg-slate-100">
-              <div className="absolute top-2 left-2 z-[1000] bg-white/90 backdrop-blur-md px-3 py-1 rounded-xl text-[10px] font-black text-brand-green shadow-sm">
+            <div className="h-80 w-full rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-md relative bg-slate-100 dark:bg-slate-800">
+              <div className="absolute top-2 left-2 z-[1000] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1 rounded-xl text-[10px] font-black text-brand-green shadow-sm">
                 💡 Bấm trực tiếp vào bản đồ để gắn tọa độ
               </div>
               <OpenLayersLocationPicker position={pickedLatLng} setPosition={setPickedLatLng} />
@@ -514,7 +518,7 @@ export const SubmitKindness = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-4 bg-brand-green disabled:bg-slate-300 disabled:text-slate-500 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-brand-green/20 hover:opacity-95 transition-all flex items-center justify-center gap-2"
+            className="w-full py-4 bg-brand-green disabled:bg-slate-300 disabled:text-slate-500 dark:text-slate-400 text-white font-extrabold text-sm rounded-2xl shadow-lg shadow-brand-green/20 hover:opacity-95 transition-all flex items-center justify-center gap-2"
           >
             {submitting ? (
               <>Đang gửi câu chuyện...</>

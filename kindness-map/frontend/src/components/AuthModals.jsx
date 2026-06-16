@@ -46,16 +46,16 @@ export const AuthModals = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden">
         {/* Banner header */}
         <div className="bg-gradient-to-r from-brand-green to-brand-teal p-6 text-white text-center relative">
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 dark:bg-slate-800/50 hover:bg-white/20 dark:bg-slate-800/60 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
-          <div className="inline-flex p-3 rounded-2xl bg-white/15 backdrop-blur-md mb-2">
+          <div className="inline-flex p-3 rounded-2xl bg-white/15 dark:bg-slate-800/50 backdrop-blur-md mb-2">
             <Sparkles className="w-7 h-7 animate-spin" style={{ animationDuration: '6s' }} />
           </div>
           <h3 className="text-xl font-bold">
@@ -80,48 +80,48 @@ export const AuthModals = () => {
 
           {activeModal === 'register' && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Họ và tên</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 dark:text-slate-400 mb-1">Họ và tên</label>
               <div className="relative">
-                <User className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
+                <User className="absolute left-4 top-3.5 w-4 h-4 text-slate-400 dark:text-slate-500" />
                 <input
                   type="text"
                   required
                   placeholder="Ví dụ: Trần Minh Tuấn"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white transition-all"
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white dark:bg-slate-900 transition-all"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Địa chỉ Email</label>
+            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 dark:text-slate-400 mb-1">Địa chỉ Email</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
+              <Mail className="absolute left-4 top-3.5 w-4 h-4 text-slate-400 dark:text-slate-500" />
               <input
                 type="email"
                 required
                 placeholder="name@example.vn"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white transition-all"
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white dark:bg-slate-900 transition-all"
               />
             </div>
           </div>
 
           {activeModal !== 'reset' && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Mật khẩu</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 dark:text-slate-400 mb-1">Mật khẩu</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
+                <Lock className="absolute left-4 top-3.5 w-4 h-4 text-slate-400 dark:text-slate-500" />
                 <input
                   type="password"
                   required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white transition-all"
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white dark:bg-slate-900 transition-all"
                 />
               </div>
               {activeModal === 'login' && (
@@ -140,16 +140,16 @@ export const AuthModals = () => {
 
           {activeModal === 'reset' && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Mật khẩu mới</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 dark:text-slate-400 mb-1">Mật khẩu mới</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
+                <Lock className="absolute left-4 top-3.5 w-4 h-4 text-slate-400 dark:text-slate-500" />
                 <input
                   type="password"
                   required
                   placeholder="••••••••"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white transition-all"
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white dark:bg-slate-900 transition-all"
                 />
               </div>
             </div>
@@ -157,7 +157,7 @@ export const AuthModals = () => {
 
           {activeModal === 'register' && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Loại tài khoản</label>
+              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 dark:text-slate-400 mb-1">Loại tài khoản</label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -165,7 +165,7 @@ export const AuthModals = () => {
                   className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
                     role === 'user'
                       ? 'bg-brand-lightGreen border-brand-green text-brand-deepGreen shadow-sm'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                      : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 dark:bg-slate-800'
                   }`}
                 >
                   <User className="w-4 h-4" /> Công dân / TNV
@@ -176,7 +176,7 @@ export const AuthModals = () => {
                   className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
                     role === 'admin'
                       ? 'bg-brand-lightGreen border-brand-green text-brand-deepGreen shadow-sm'
-                      : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                      : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 dark:bg-slate-800'
                   }`}
                 >
                   <Shield className="w-4 h-4" /> Quản trị viên
@@ -202,9 +202,9 @@ export const AuthModals = () => {
             )}
           </button>
 
-          <div className="border-t border-slate-100 pt-4 mt-2 text-center">
+          <div className="border-t border-slate-100 dark:border-slate-800 pt-4 mt-2 text-center">
             {activeModal === 'login' ? (
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-slate-600 dark:text-slate-300 dark:text-slate-400">
                 Chưa có tài khoản?{' '}
                 <button
                   type="button"
@@ -215,7 +215,7 @@ export const AuthModals = () => {
                 </button>
               </p>
             ) : (
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-slate-600 dark:text-slate-300 dark:text-slate-400">
                 Đã có tài khoản?{' '}
                 <button
                   type="button"

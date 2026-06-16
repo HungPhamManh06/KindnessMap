@@ -12,19 +12,19 @@ const STATUS_CONFIG = {
   Pending: {
     label: 'Chờ duyệt',
     longLabel: '⏳ Chờ Quyết Định',
-    className: 'bg-amber-100 text-amber-700',
+    className: 'bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300 dark:border dark:border-amber-500/20',
     icon: Clock
   },
   Approved: {
     label: 'Đã duyệt',
     longLabel: '✅ Đã Phê Duyệt',
-    className: 'bg-emerald-100 text-brand-green',
+    className: 'bg-emerald-100 text-brand-green dark:bg-emerald-500/15 dark:text-emerald-300 dark:border dark:border-emerald-500/20',
     icon: CheckCircle2
   },
   Rejected: {
     label: 'Từ chối',
     longLabel: '🚫 Đã Từ Chối',
-    className: 'bg-rose-100 text-rose-600',
+    className: 'bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300 dark:border dark:border-rose-500/20',
     icon: XCircle
   },
 };
@@ -349,8 +349,8 @@ export const AdminDashboard = () => {
         <div className="w-20 h-20 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center shadow-xl">
           <Shield className="w-10 h-10" />
         </div>
-        <h2 className="text-3xl font-black text-slate-900">Khu Vực Quản Trị Hệ Thống (Admin Panel)</h2>
-        <p className="text-slate-600 max-w-md text-xs leading-relaxed">
+        <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100">Khu Vực Quản Trị Hệ Thống (Admin Panel)</h2>
+        <p className="text-slate-600 dark:text-slate-300 dark:text-slate-400 max-w-md text-xs leading-relaxed">
           Quyền truy cập bị từ chối. Trang này chỉ dành cho tài khoản <strong>Quản trị viên (Admin)</strong> có thẩm quyền phê duyệt bài đăng và quản lý điểm số.
         </p>
 
@@ -358,7 +358,7 @@ export const AdminDashboard = () => {
           <span className="flex items-center gap-2 text-xs font-black text-amber-900 uppercase tracking-wider">
             <Sparkles className="w-4 h-4 text-amber-600" /> Demo Admin Switcher:
           </span>
-          <p className="text-xs text-slate-700">Bạn muốn trải nghiệm tính năng Quản trị ngay bây giờ?</p>
+          <p className="text-xs text-slate-700 dark:text-slate-200">Bạn muốn trải nghiệm tính năng Quản trị ngay bây giờ?</p>
           <button
             onClick={() => quickDemoLogin('admin')}
             className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-purple-500/30 hover:opacity-95 transition-all"
@@ -371,10 +371,10 @@ export const AdminDashboard = () => {
   }
 
   const summaryCards = [
-    { label: 'Chờ duyệt', value: adminSummary?.pendingPosts ?? '—', icon: AlertTriangle, className: 'bg-amber-50 text-amber-700 border-amber-200' },
-    { label: 'Đã duyệt', value: adminSummary?.approvedPosts ?? adminSummary?.totalPosts ?? '—', icon: CheckCircle2, className: 'bg-emerald-50 text-brand-green border-emerald-200' },
-    { label: 'Bị từ chối', value: adminSummary?.rejectedPosts ?? '—', icon: XCircle, className: 'bg-rose-50 text-rose-600 border-rose-200' },
-    { label: 'Thành viên', value: adminSummary?.totalUsers ?? '—', icon: Users, className: 'bg-indigo-50 text-indigo-600 border-indigo-200' },
+    { label: 'Chờ duyệt', value: adminSummary?.pendingPosts ?? '—', icon: AlertTriangle, className: 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-300 dark:border-amber-500/20' },
+    { label: 'Đã duyệt', value: adminSummary?.approvedPosts ?? adminSummary?.totalPosts ?? '—', icon: CheckCircle2, className: 'bg-emerald-50 text-brand-green border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/20' },
+    { label: 'Bị từ chối', value: adminSummary?.rejectedPosts ?? '—', icon: XCircle, className: 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-300 dark:border-rose-500/20' },
+    { label: 'Thành viên', value: adminSummary?.totalUsers ?? '—', icon: Users, className: 'bg-indigo-50 text-indigo-600 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/20' },
   ];
 
   return (
@@ -390,7 +390,7 @@ export const AdminDashboard = () => {
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight mt-1">
             Trung Tâm Kiểm Duyệt & Vận Hành Cộng Đồng
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400">
+          <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-500">
             Chào {user.fullName}! Màn hình mới hỗ trợ tìm kiếm, lọc nâng cao, xử lý hàng loạt và thống kê thật từ dữ liệu hệ thống.
           </p>
         </div>
@@ -398,7 +398,7 @@ export const AdminDashboard = () => {
         <button
           onClick={fetchAdminData}
           disabled={loading || actionLoading}
-          className="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 disabled:opacity-60 border border-white/10 font-bold text-xs transition-colors flex items-center gap-2 shrink-0 backdrop-blur-md self-center md:self-end"
+          className="px-5 py-3 rounded-2xl bg-white/10 dark:bg-slate-800/50 hover:bg-white/20 dark:hover:bg-slate-700/70 disabled:opacity-60 border border-white/10 font-bold text-xs transition-colors flex items-center gap-2 shrink-0 backdrop-blur-md self-center md:self-end"
         >
           <RefreshCw className={`w-4 h-4 ${loading || actionLoading ? 'animate-spin' : ''}`} />
           <span>Làm Mới Trạng Thái</span>
@@ -410,12 +410,12 @@ export const AdminDashboard = () => {
         {summaryCards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} className={`p-5 rounded-3xl border shadow-sm bg-white flex items-center justify-between gap-4 ${card.className}`}>
+            <div key={card.label} className={`p-5 rounded-3xl border shadow-sm flex items-center justify-between gap-4 backdrop-blur-sm ${card.className}`}>
               <div>
                 <p className="text-[11px] font-black uppercase tracking-wider opacity-80">{card.label}</p>
                 <p className="text-3xl font-black mt-1">{card.value}</p>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-white/70 flex items-center justify-center shadow-sm">
+              <div className="w-12 h-12 rounded-2xl bg-white/70 dark:bg-slate-950/60 flex items-center justify-center shadow-sm border border-white/50 dark:border-slate-700/60">
                 <Icon className="w-6 h-6" />
               </div>
             </div>
@@ -428,75 +428,75 @@ export const AdminDashboard = () => {
         <button
           onClick={() => setActiveTab('moderation')}
           className={`p-6 rounded-3xl border transition-all text-left flex flex-col gap-3 ${
-            activeTab === 'moderation' ? 'bg-gradient-to-br from-brand-lightGreen to-emerald-100/50 border-brand-green shadow-lg ring-4 ring-brand-green/20' : 'bg-white border-slate-200 hover:bg-slate-50'
+            activeTab === 'moderation' ? 'bg-gradient-to-br from-brand-lightGreen to-emerald-100/50 dark:from-emerald-500/20 dark:to-teal-500/10 border-brand-green shadow-lg ring-4 ring-brand-green/20' : 'bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80'
           }`}
         >
           <div className="w-12 h-12 rounded-2xl bg-brand-green text-white flex items-center justify-center shadow-md">
             <FileText className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="font-black text-sm text-slate-900">1. Duyệt Bài Việc Tốt</h4>
-            <p className="text-xs text-slate-500 mt-0.5">Tìm kiếm, lọc và duyệt hàng loạt</p>
+            <h4 className="font-black text-sm text-slate-900 dark:text-slate-100">1. Duyệt Bài Việc Tốt</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Tìm kiếm, lọc và duyệt hàng loạt</p>
           </div>
         </button>
 
         <button
           onClick={() => setActiveTab('users')}
           className={`p-6 rounded-3xl border transition-all text-left flex flex-col gap-3 ${
-            activeTab === 'users' ? 'bg-gradient-to-br from-purple-50 to-indigo-100/50 border-purple-600 shadow-lg ring-4 ring-purple-600/20' : 'bg-white border-slate-200 hover:bg-slate-50'
+            activeTab === 'users' ? 'bg-gradient-to-br from-purple-50 to-indigo-100/50 dark:from-purple-500/20 dark:to-indigo-500/10 border-purple-600 shadow-lg ring-4 ring-purple-600/20' : 'bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80'
           }`}
         >
           <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md">
             <Users className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="font-black text-sm text-slate-900">2. Quản Lý Thành Viên</h4>
-            <p className="text-xs text-slate-500 mt-0.5">Lọc vai trò, tìm email, sắp xếp điểm</p>
+            <h4 className="font-black text-sm text-slate-900 dark:text-slate-100">2. Quản Lý Thành Viên</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Lọc vai trò, tìm email, sắp xếp điểm</p>
           </div>
         </button>
 
         <button
           onClick={() => setActiveTab('analytics')}
           className={`p-6 rounded-3xl border transition-all text-left flex flex-col gap-3 ${
-            activeTab === 'analytics' ? 'bg-gradient-to-br from-blue-50 to-sky-100/50 border-blue-600 shadow-lg ring-4 ring-blue-600/20' : 'bg-white border-slate-200 hover:bg-slate-50'
+            activeTab === 'analytics' ? 'bg-gradient-to-br from-blue-50 to-sky-100/50 dark:from-blue-500/20 dark:to-sky-500/10 border-blue-600 shadow-lg ring-4 ring-blue-600/20' : 'bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80'
           }`}
         >
           <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md">
             <BarChart3 className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="font-black text-sm text-slate-900">3. Số Liệu Tổng Quan</h4>
-            <p className="text-xs text-slate-500 mt-0.5">Biểu đồ thật theo tháng & danh mục</p>
+            <h4 className="font-black text-sm text-slate-900 dark:text-slate-100">3. Số Liệu Tổng Quan</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Biểu đồ thật theo tháng & danh mục</p>
           </div>
         </button>
 
         <button
           onClick={() => setActiveTab('awards')}
           className={`p-6 rounded-3xl border transition-all text-left flex flex-col gap-3 ${
-            activeTab === 'awards' ? 'bg-gradient-to-br from-amber-50 to-yellow-100/50 border-amber-500 shadow-lg ring-4 ring-amber-500/20' : 'bg-white border-slate-200 hover:bg-slate-50'
+            activeTab === 'awards' ? 'bg-gradient-to-br from-amber-50 to-yellow-100/50 dark:from-amber-500/20 dark:to-yellow-500/10 border-amber-500 shadow-lg ring-4 ring-amber-500/20' : 'bg-white dark:bg-slate-900/90 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/80'
           }`}
         >
           <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-md">
             <Trophy className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="font-black text-sm text-slate-900">4. Giải Thưởng Tháng</h4>
-            <p className="text-xs text-slate-500 mt-0.5">Quản lý quỹ điểm thưởng & vinh danh</p>
+            <h4 className="font-black text-sm text-slate-900 dark:text-slate-100">4. Giải Thưởng Tháng</h4>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Quản lý quỹ điểm thưởng & vinh danh</p>
           </div>
         </button>
       </div>
 
       {/* 3. Module 1: Post Moderation Suite */}
       {activeTab === 'moderation' && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 flex flex-col gap-6 animate-fade-in">
-          <div className="flex flex-col gap-5 pb-5 border-b border-slate-100">
+        <div className="km-panel p-6 sm:p-8 flex flex-col gap-6 animate-fade-in">
+          <div className="flex flex-col gap-5 pb-5 border-b border-slate-100 dark:border-slate-800">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div>
-                <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <FileText className="w-6 h-6 text-brand-green" />
                   Hàng Chờ Kiểm Duyệt Câu Chuyện
                 </h2>
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                   Đang hiển thị {filteredPosts.length}/{posts.length} bài. Chọn nhiều bài để duyệt hoặc từ chối nhanh.
                 </p>
               </div>
@@ -507,7 +507,7 @@ export const AdminDashboard = () => {
                     key={status}
                     onClick={() => setModStatusFilter(status)}
                     className={`px-4 py-2 rounded-2xl text-xs font-extrabold transition-all ${
-                      modStatusFilter === status ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                      modStatusFilter === status ? 'bg-slate-900 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200'
                     }`}
                   >
                     {status === 'Pending' ? '⏳ Chờ Duyệt' : status === 'Approved' ? '✅ Đã Duyệt' : status === 'Rejected' ? '🚫 Bị Từ Chối' : '🌟 Tất Cả'}
@@ -518,20 +518,20 @@ export const AdminDashboard = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
               <div className="lg:col-span-5 relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-4 top-1/2 -translate-y-1/2" />
                 <input
                   value={postSearch}
                   onChange={(e) => setPostSearch(e.target.value)}
                   placeholder="Tìm theo tiêu đề, địa điểm, tác giả, email..."
-                  className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+                  className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
                 />
               </div>
               <div className="lg:col-span-3 relative">
-                <Filter className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                <Filter className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-4 top-1/2 -translate-y-1/2" />
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+                  className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
                 >
                   {postCategories.map((cat) => (
                     <option key={cat} value={cat}>{cat === 'All' ? 'Tất cả danh mục' : cat}</option>
@@ -542,7 +542,7 @@ export const AdminDashboard = () => {
                 <select
                   value={postSortBy}
                   onChange={(e) => setPostSortBy(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
                 >
                   <option value="newest">Mới nhất</option>
                   <option value="oldest">Cũ nhất</option>
@@ -553,15 +553,15 @@ export const AdminDashboard = () => {
               <button
                 onClick={toggleSelectAllVisiblePosts}
                 disabled={filteredPosts.length === 0}
-                className="lg:col-span-2 px-4 py-3 rounded-2xl bg-slate-900 disabled:bg-slate-200 disabled:text-slate-400 text-white text-xs font-black hover:opacity-90 transition-all"
+                className="lg:col-span-2 px-4 py-3 rounded-2xl bg-slate-900 dark:bg-slate-700 disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 text-white text-xs font-black hover:opacity-90 transition-all"
               >
                 {visibleSelectedCount === filteredPosts.length && filteredPosts.length > 0 ? 'Bỏ chọn tất cả' : 'Chọn trang này'}
               </button>
             </div>
 
             {selectedPostIds.length > 0 && (
-              <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <span className="text-xs font-black text-indigo-700 flex items-center gap-2">
+              <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 dark:bg-indigo-500/10 dark:border-indigo-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <span className="text-xs font-black text-indigo-700 dark:text-indigo-300 flex items-center gap-2">
                   <Zap className="w-4 h-4" /> Đã chọn {selectedPostIds.length} bài viết
                 </span>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -581,7 +581,7 @@ export const AdminDashboard = () => {
                   </button>
                   <button
                     onClick={() => setSelectedPostIds([])}
-                    className="px-4 py-2 rounded-xl bg-white text-slate-600 border border-slate-200 text-xs font-black hover:bg-slate-50"
+                    className="px-4 py-2 rounded-xl bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-xs font-black hover:bg-slate-50 dark:hover:bg-slate-800/80"
                   >
                     Bỏ chọn
                   </button>
@@ -592,11 +592,11 @@ export const AdminDashboard = () => {
 
           <div className="flex flex-col gap-6">
             {loading ? (
-              <div className="p-16 text-center text-slate-400 font-bold text-xs animate-pulse">
+              <div className="p-16 text-center text-slate-400 dark:text-slate-500 font-bold text-xs animate-pulse">
                 Đang tải danh sách bài viết...
               </div>
             ) : filteredPosts.length === 0 ? (
-              <div className="p-16 text-center text-slate-400 font-bold text-xs bg-slate-50 rounded-2xl border border-slate-200">
+              <div className="p-16 text-center text-slate-400 dark:text-slate-500 font-bold text-xs bg-slate-50 dark:bg-slate-800/70 rounded-2xl border border-slate-200 dark:border-slate-700">
                 Không có bài viết phù hợp với bộ lọc hiện tại.
               </div>
             ) : (
@@ -605,8 +605,10 @@ export const AdminDashboard = () => {
                 return (
                   <div
                     key={p.id}
-                    className={`p-5 sm:p-6 rounded-3xl border bg-slate-50/50 flex flex-col lg:flex-row items-start justify-between gap-6 hover:shadow-xl transition-all ${
-                      selectedPostIds.includes(p.id) ? 'border-indigo-400 ring-4 ring-indigo-100' : 'border-slate-200'
+                    className={`p-5 sm:p-6 rounded-3xl border bg-slate-50/80 dark:bg-slate-800/60 flex flex-col lg:flex-row items-start justify-between gap-6 hover:shadow-xl transition-all ${
+                      selectedPostIds.includes(p.id)
+                        ? 'border-indigo-400 ring-4 ring-indigo-100 dark:ring-indigo-500/20'
+                        : 'border-slate-200 dark:border-slate-700/70'
                     }`}
                   >
                     <div className="flex items-start gap-4 flex-1 min-w-0 w-full">
@@ -617,14 +619,14 @@ export const AdminDashboard = () => {
                         className="mt-2 w-4 h-4 accent-indigo-600 shrink-0"
                         aria-label={`Chọn bài ${p.title}`}
                       />
-                      <img src={p.imageUrl} alt={p.title} className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover shrink-0 shadow-xs bg-slate-200" />
+                      <img src={p.imageUrl} alt={p.title} className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl object-cover shrink-0 shadow-xs bg-slate-200 dark:bg-slate-700" />
 
                       <div className="flex-1 min-w-0 flex flex-col">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="px-2.5 py-0.5 rounded-full bg-brand-lightGreen text-brand-deepGreen text-[10px] font-black uppercase border border-brand-green/20">
                             {p.category} · +{getPointForCategory(p.category)} pts
                           </span>
-                          <span className="text-[11px] text-slate-400 font-semibold">
+                          <span className="text-[11px] text-slate-400 dark:text-slate-500 font-semibold">
                             📍 {p.locationName}
                           </span>
                           {Number(p.isFeatured) === 1 && (
@@ -639,15 +641,15 @@ export const AdminDashboard = () => {
                           )}
                         </div>
 
-                        <h3 className="font-extrabold text-base text-slate-900 mt-1.5 leading-snug">
+                        <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 mt-1.5 leading-snug">
                           {p.title}
                         </h3>
 
-                        <p className="text-xs text-slate-600 mt-1 line-clamp-3 leading-relaxed">
+                        <p className="text-xs text-slate-600 dark:text-slate-300 dark:text-slate-400 mt-1 line-clamp-3 leading-relaxed">
                           {p.description}
                         </p>
 
-                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-slate-200/60 text-xs font-semibold text-slate-500 flex-wrap">
+                        <div className="flex items-center gap-3 mt-3 pt-3 border-t border-slate-200 dark:border-slate-700/60 text-xs font-semibold text-slate-500 dark:text-slate-400 flex-wrap">
                           <span>✍️ {p.authorName}</span>
                           <span>✉️ {p.authorEmail}</span>
                           <span>📅 {formatDate(p.createdAt)}</span>
@@ -656,7 +658,7 @@ export const AdminDashboard = () => {
                       </div>
                     </div>
 
-                    <div className="flex lg:flex-col items-center lg:items-end justify-between w-full lg:w-52 gap-3 border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-200 shrink-0">
+                    <div className="flex lg:flex-col items-center lg:items-end justify-between w-full lg:w-52 gap-3 border-t lg:border-t-0 pt-4 lg:pt-0 border-slate-200 dark:border-slate-700 shrink-0">
                       <span className={`px-3 py-1 rounded-full font-black text-xs ${status.className}`}>
                         {status.longLabel}
                       </span>
@@ -689,7 +691,7 @@ export const AdminDashboard = () => {
                             onClick={() => handleModeratePost(p.id, 'Approved', Number(p.isFeatured) !== 1)}
                             disabled={actionLoading}
                             className={`px-3 py-2 rounded-xl font-extrabold text-xs flex items-center gap-1 transition-all disabled:opacity-60 ${
-                              Number(p.isFeatured) === 1 ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                              Number(p.isFeatured) === 1 ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
                             }`}
                           >
                             <Star className="w-3.5 h-3.5 fill-current" /> {Number(p.isFeatured) === 1 ? 'Bỏ Nổi Bật' : 'Nổi Bật'}
@@ -707,34 +709,34 @@ export const AdminDashboard = () => {
 
       {/* 4. Module 2: User Management Suite */}
       {activeTab === 'users' && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 flex flex-col gap-6 animate-fade-in">
-          <div className="flex flex-col gap-4 pb-4 border-b border-slate-100">
+        <div className="km-panel p-6 sm:p-8 flex flex-col gap-6 animate-fade-in">
+          <div className="flex flex-col gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <UserCog className="w-6 h-6 text-purple-600" />
                   Danh Sách Người Dùng ({filteredUsers.length}/{usersList.length})
                 </h2>
-                <p className="text-xs text-slate-500 mt-1">Tìm kiếm, lọc vai trò và sắp xếp để quản trị cộng đồng nhanh hơn.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Tìm kiếm, lọc vai trò và sắp xếp để quản trị cộng đồng nhanh hơn.</p>
               </div>
-              <span className="text-xs text-slate-400 font-semibold">Không thể hạ quyền tài khoản admin mặc định</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500 font-semibold">Không thể hạ quyền tài khoản admin mặc định</span>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-3">
               <div className="lg:col-span-6 relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+                <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-4 top-1/2 -translate-y-1/2" />
                 <input
                   value={userSearch}
                   onChange={(e) => setUserSearch(e.target.value)}
                   placeholder="Tìm theo tên, email, danh hiệu..."
-                  className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-purple-600/10 focus:border-purple-600"
+                  className="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-purple-600/10 focus:border-purple-600"
                 />
               </div>
               <div className="lg:col-span-3">
                 <select
                   value={userRoleFilter}
                   onChange={(e) => setUserRoleFilter(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-purple-600/10 focus:border-purple-600"
+                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-purple-600/10 focus:border-purple-600"
                 >
                   <option value="All">Tất cả vai trò</option>
                   <option value="admin">Quản trị viên</option>
@@ -745,7 +747,7 @@ export const AdminDashboard = () => {
                 <select
                   value={userSortBy}
                   onChange={(e) => setUserSortBy(e.target.value)}
-                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-purple-600/10 focus:border-purple-600"
+                  className="w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-purple-600/10 focus:border-purple-600"
                 >
                   <option value="points_desc">Điểm cao nhất</option>
                   <option value="points_asc">Điểm thấp nhất</option>
@@ -757,18 +759,18 @@ export const AdminDashboard = () => {
           </div>
 
           {loading ? (
-            <div className="p-16 text-center text-slate-400 font-bold text-xs animate-pulse">
+            <div className="p-16 text-center text-slate-400 dark:text-slate-500 font-bold text-xs animate-pulse">
               Đang tải danh sách người dùng...
             </div>
           ) : filteredUsers.length === 0 ? (
-            <div className="p-16 text-center text-slate-400 font-bold text-xs bg-slate-50 rounded-2xl border border-slate-200">
+            <div className="p-16 text-center text-slate-400 dark:text-slate-500 font-bold text-xs bg-slate-50 dark:bg-slate-800/70 rounded-2xl border border-slate-200 dark:border-slate-700">
               Không tìm thấy người dùng phù hợp.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-200 bg-slate-50 text-xs font-black text-slate-600 uppercase">
+                  <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/70 text-xs font-black text-slate-600 dark:text-slate-300 dark:text-slate-400 uppercase">
                     <th className="p-4 rounded-l-2xl">ID</th>
                     <th className="p-4">Thành Viên</th>
                     <th className="p-4">Email</th>
@@ -781,26 +783,26 @@ export const AdminDashboard = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs font-medium">
                   {filteredUsers.map((u) => (
-                    <tr key={u.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="p-4 font-bold text-slate-500">#{u.id}</td>
+                    <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors">
+                      <td className="p-4 font-bold text-slate-500 dark:text-slate-400">#{u.id}</td>
                       <td className="p-4 flex items-center gap-3">
-                        <img src={u.avatar} alt={u.fullName} className="w-9 h-9 rounded-full object-cover bg-slate-200" />
+                        <img src={u.avatar} alt={u.fullName} className="w-9 h-9 rounded-full object-cover bg-slate-200 dark:bg-slate-700" />
                         <div className="flex flex-col">
-                          <span className="font-extrabold text-slate-900 text-sm whitespace-nowrap">{u.fullName}</span>
-                          <span className="text-[10px] text-slate-400">Tham gia {formatDate(u.createdAt)}</span>
+                          <span className="font-extrabold text-slate-900 dark:text-slate-100 text-sm whitespace-nowrap">{u.fullName}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500">Tham gia {formatDate(u.createdAt)}</span>
                         </div>
                       </td>
-                      <td className="p-4 font-mono text-slate-500">{u.email}</td>
+                      <td className="p-4 font-mono text-slate-500 dark:text-slate-400">{u.email}</td>
                       <td className="p-4">
                         <span className="px-2.5 py-1 bg-brand-lightGreen text-brand-deepGreen font-black text-[11px] rounded-full whitespace-nowrap">
                           {u.level}
                         </span>
                       </td>
-                      <td className="p-4 text-center font-bold text-slate-700">{u.postsCount} bài</td>
+                      <td className="p-4 text-center font-bold text-slate-700 dark:text-slate-200">{u.postsCount} bài</td>
                       <td className="p-4 text-center font-black text-brand-green">{u.points} pts</td>
                       <td className="p-4">
                         <span className={`px-2.5 py-1 rounded-full font-black text-[10px] uppercase tracking-wider ${
-                          u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'
+                          u.role === 'admin' ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                         }`}>
                           {u.role === 'admin' ? 'Quản Trị' : 'Người Dùng'}
                         </span>
@@ -831,40 +833,40 @@ export const AdminDashboard = () => {
       {activeTab === 'analytics' && analytics && (
         <div className="flex flex-col gap-8 animate-fade-in">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-200 flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-slate-400 font-bold text-xs uppercase tracking-wider">Tổng Thành Viên</span>
-                <span className="text-4xl font-black text-slate-900 mt-1">{analytics.totalUsers}</span>
+                <span className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase tracking-wider">Tổng Thành Viên</span>
+                <span className="text-4xl font-black text-slate-900 dark:text-slate-100 mt-1">{analytics.totalUsers}</span>
               </div>
               <div className="w-16 h-16 rounded-2xl bg-purple-100 text-purple-600 flex items-center justify-center shadow-md">
                 <Users className="w-8 h-8" />
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-200 flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-slate-400 font-bold text-xs uppercase tracking-wider">Việc Tốt Phê Duyệt</span>
-                <span className="text-4xl font-black text-slate-900 mt-1">{analytics.totalPosts}</span>
+                <span className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase tracking-wider">Việc Tốt Phê Duyệt</span>
+                <span className="text-4xl font-black text-slate-900 dark:text-slate-100 mt-1">{analytics.totalPosts}</span>
               </div>
               <div className="w-16 h-16 rounded-2xl bg-emerald-100 text-brand-green flex items-center justify-center shadow-md">
                 <FileText className="w-8 h-8" />
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-200 flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-slate-400 font-bold text-xs uppercase tracking-wider">Quỹ Điểm Đã Cấp</span>
-                <span className="text-4xl font-black text-slate-900 mt-1">{analytics.totalPoints} pts</span>
+                <span className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase tracking-wider">Quỹ Điểm Đã Cấp</span>
+                <span className="text-4xl font-black text-slate-900 dark:text-slate-100 mt-1">{analytics.totalPoints} pts</span>
               </div>
               <div className="w-16 h-16 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-md">
                 <Trophy className="w-8 h-8" />
               </div>
             </div>
 
-            <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-200 flex items-center justify-between">
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl border border-slate-200 dark:border-slate-700 flex items-center justify-between">
               <div className="flex flex-col">
-                <span className="text-slate-400 font-bold text-xs uppercase tracking-wider">Cần Xử Lý</span>
-                <span className="text-4xl font-black text-slate-900 mt-1">{analytics.pendingPosts}</span>
+                <span className="text-slate-400 dark:text-slate-500 font-bold text-xs uppercase tracking-wider">Cần Xử Lý</span>
+                <span className="text-4xl font-black text-slate-900 dark:text-slate-100 mt-1">{analytics.pendingPosts}</span>
               </div>
               <div className="w-16 h-16 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shadow-md">
                 <AlertTriangle className="w-8 h-8" />
@@ -873,15 +875,15 @@ export const AdminDashboard = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <div className="lg:col-span-7 bg-white rounded-3xl p-8 shadow-xl border border-slate-200 flex flex-col gap-6">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                <h3 className="font-black text-lg text-slate-900 flex items-center gap-2">
+            <div className="lg:col-span-7 km-panel p-8 flex flex-col gap-6">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                <h3 className="font-black text-lg text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <BarChart3 className="w-5 h-5 text-brand-blue" />
                   <span>Tăng Trưởng Việc Tốt & Điểm Cộng Đồng (6 Tháng Gần Nhất)</span>
                 </h3>
               </div>
 
-              <div className="flex items-end gap-4 h-64 px-4 pt-8 pb-4 bg-slate-50 rounded-2xl border border-slate-200/60 justify-between">
+              <div className="flex items-end gap-4 h-64 px-4 pt-8 pb-4 bg-slate-50 dark:bg-slate-800/70 rounded-2xl border border-slate-200 dark:border-slate-700/60 justify-between">
                 {analytics.monthlyActivity?.map((ma, idx) => {
                   const maxPoints = Math.max(1, ...analytics.monthlyActivity.map((item) => item.points || 0));
                   const heightPercent = `${Math.max(8, ((ma.points || 0) / maxPoints) * 100)}%`;
@@ -891,23 +893,23 @@ export const AdminDashboard = () => {
                         {ma.posts} bài · {ma.points} pts
                       </span>
                       <div className="w-full max-w-[44px] bg-gradient-to-t from-brand-green to-brand-teal rounded-t-xl transition-all group-hover:opacity-90 shadow-sm" style={{ height: heightPercent }} />
-                      <span className="text-[10px] font-bold text-slate-500 mt-1 text-center truncate w-full">
+                      <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 text-center truncate w-full">
                         {ma.month}
                       </span>
                     </div>
                   );
                 })}
               </div>
-              <div className="flex items-center justify-center gap-6 text-xs text-slate-500 font-semibold">
+              <div className="flex items-center justify-center gap-6 text-xs text-slate-500 dark:text-slate-400 font-semibold">
                 <span className="flex items-center gap-1.5">
                   <span className="w-3 h-3 bg-brand-green rounded-full inline-block" /> Điểm cộng đồng phát sinh từ bài đã duyệt
                 </span>
               </div>
             </div>
 
-            <div className="lg:col-span-5 bg-white rounded-3xl p-8 shadow-xl border border-slate-200 flex flex-col gap-6">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                <h3 className="font-black text-lg text-slate-900 flex items-center gap-2">
+            <div className="lg:col-span-5 km-panel p-8 flex flex-col gap-6">
+              <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+                <h3 className="font-black text-lg text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <MapPin className="w-5 h-5 text-rose-500" />
                   <span>Khu Vực Có Nhiều Việc Tốt Nhất</span>
                 </h3>
@@ -920,22 +922,22 @@ export const AdminDashboard = () => {
                       <span className="w-8 h-8 rounded-xl bg-rose-100 text-rose-600 font-black text-xs flex items-center justify-center">
                         #{idx + 1}
                       </span>
-                      <span className="font-extrabold text-xs text-slate-800">{al.locationName}</span>
+                      <span className="font-extrabold text-xs text-slate-800 dark:text-slate-100">{al.locationName}</span>
                     </div>
                     <span className="text-xs font-black px-3 py-1 bg-emerald-50 text-brand-green rounded-full border border-brand-green/20">
                       {al.deedsCount} việc tốt
                     </span>
                   </div>
                 )) : (
-                  <div className="text-xs text-slate-400 font-bold text-center py-8">Chưa có dữ liệu địa điểm.</div>
+                  <div className="text-xs text-slate-400 dark:text-slate-500 font-bold text-center py-8">Chưa có dữ liệu địa điểm.</div>
                 )}
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            <div className="lg:col-span-5 bg-white rounded-3xl p-8 shadow-xl border border-slate-200 flex flex-col gap-6">
-              <h3 className="font-black text-lg text-slate-900 flex items-center gap-2 pb-4 border-b border-slate-100">
+            <div className="lg:col-span-5 km-panel p-8 flex flex-col gap-6">
+              <h3 className="font-black text-lg text-slate-900 dark:text-slate-100 flex items-center gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
                 <Filter className="w-5 h-5 text-indigo-600" /> Phân Bổ Theo Danh Mục
               </h3>
               <div className="flex flex-col gap-4">
@@ -945,30 +947,30 @@ export const AdminDashboard = () => {
                   return (
                     <div key={cat.category} className="flex flex-col gap-2">
                       <div className="flex items-center justify-between text-xs font-black">
-                        <span className="text-slate-700">{cat.category}</span>
+                        <span className="text-slate-700 dark:text-slate-200">{cat.category}</span>
                         <span className="text-brand-green">{cat.postsCount} bài · {cat.pointsPotential} pts</span>
                       </div>
-                      <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                      <div className="h-2 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                         <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-brand-teal" style={{ width: `${percent}%` }} />
                       </div>
                     </div>
                   );
                 }) : (
-                  <div className="text-xs text-slate-400 font-bold text-center py-8">Chưa có dữ liệu danh mục.</div>
+                  <div className="text-xs text-slate-400 dark:text-slate-500 font-bold text-center py-8">Chưa có dữ liệu danh mục.</div>
                 )}
               </div>
             </div>
 
-            <div className="lg:col-span-7 bg-white rounded-3xl p-8 shadow-xl border border-slate-200 flex flex-col gap-6">
-              <h3 className="font-black text-lg text-slate-900 flex items-center gap-2 pb-4 border-b border-slate-100">
+            <div className="lg:col-span-7 km-panel p-8 flex flex-col gap-6">
+              <h3 className="font-black text-lg text-slate-900 dark:text-slate-100 flex items-center gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
                 <Eye className="w-5 h-5 text-amber-600" /> Bài Chờ Duyệt Gần Đây
               </h3>
               <div className="flex flex-col gap-3">
                 {analytics.recentPending?.length ? analytics.recentPending.map((p) => (
-                  <div key={p.id} className="p-4 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-between gap-4">
+                  <div key={p.id} className="p-4 rounded-2xl bg-amber-50 border border-amber-100 dark:bg-amber-500/10 dark:border-amber-500/15 flex items-center justify-between gap-4">
                     <div className="min-w-0">
-                      <p className="font-black text-sm text-slate-900 truncate">{p.title}</p>
-                      <p className="text-[11px] text-slate-500 font-semibold mt-1">{p.authorName} · {p.category} · {formatDate(p.createdAt)}</p>
+                      <p className="font-black text-sm text-slate-900 dark:text-slate-100 truncate">{p.title}</p>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-1">{p.authorName} · {p.category} · {formatDate(p.createdAt)}</p>
                     </div>
                     <button
                       onClick={() => {
@@ -976,13 +978,13 @@ export const AdminDashboard = () => {
                         setModStatusFilter('Pending');
                         setPostSearch(p.title);
                       }}
-                      className="px-3 py-2 rounded-xl bg-white text-amber-700 border border-amber-200 text-[11px] font-black hover:bg-amber-100 shrink-0"
+                      className="px-3 py-2 rounded-xl bg-white dark:bg-slate-900 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-500/20 text-[11px] font-black hover:bg-amber-100 dark:hover:bg-amber-500/10 shrink-0"
                     >
                       Xem
                     </button>
                   </div>
                 )) : (
-                  <div className="text-xs text-slate-400 font-bold text-center py-8">Không còn bài chờ duyệt.</div>
+                  <div className="text-xs text-slate-400 dark:text-slate-500 font-bold text-center py-8">Không còn bài chờ duyệt.</div>
                 )}
               </div>
             </div>
@@ -993,61 +995,61 @@ export const AdminDashboard = () => {
       {/* 6. Module 4: Real Community Awards Management */}
       {activeTab === 'awards' && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 animate-fade-in items-start">
-          <div className="lg:col-span-5 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 flex flex-col gap-6">
-            <div className="pb-4 border-b border-slate-100">
-              <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+          <div className="lg:col-span-5 km-panel p-6 sm:p-8 flex flex-col gap-6">
+            <div className="pb-4 border-b border-slate-100 dark:border-slate-800">
+              <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <Award className="w-6 h-6 text-amber-500" />
                 Trao Giải Thưởng Tháng
               </h2>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Tạo giải thưởng thật trong database, cộng điểm cho người nhận và gửi thông báo tự động.
               </p>
             </div>
 
             <form onSubmit={handleCreateAward} className="flex flex-col gap-4">
               <div>
-                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Tên giải thưởng</label>
+                <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Tên giải thưởng</label>
                 <input
                   value={awardForm.title}
                   onChange={(e) => setAwardForm((prev) => ({ ...prev, title: e.target.value }))}
                   placeholder="VD: Hiệp Sĩ Môi Trường Của Tháng"
-                  className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500"
+                  className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500"
                   required
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Tháng vinh danh</label>
+                  <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Tháng vinh danh</label>
                   <input
                     value={awardForm.month}
                     onChange={(e) => setAwardForm((prev) => ({ ...prev, month: e.target.value }))}
                     placeholder="Tháng 6/2026"
-                    className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500"
+                    className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Điểm thưởng</label>
+                  <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Điểm thưởng</label>
                   <input
                     type="number"
                     min="0"
                     max="5000"
                     value={awardForm.awardPoints}
                     onChange={(e) => setAwardForm((prev) => ({ ...prev, awardPoints: e.target.value }))}
-                    className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500"
+                    className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Người nhận</label>
+                <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Người nhận</label>
                 <select
                   value={awardForm.recipientUserId}
                   onChange={(e) => setAwardForm((prev) => ({ ...prev, recipientUserId: e.target.value }))}
-                  className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500"
+                  className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500"
                   required
                 >
                   <option value="">Chọn thành viên xứng đáng</option>
@@ -1060,13 +1062,13 @@ export const AdminDashboard = () => {
               </div>
 
               <div>
-                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Lý do vinh danh</label>
+                <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Lý do vinh danh</label>
                 <textarea
                   rows="5"
                   value={awardForm.description}
                   onChange={(e) => setAwardForm((prev) => ({ ...prev, description: e.target.value }))}
                   placeholder="Mô tả đóng góp nổi bật, tác động cộng đồng và lý do xứng đáng nhận giải..."
-                  className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 resize-none"
+                  className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 resize-none"
                   required
                 />
               </div>
@@ -1087,14 +1089,14 @@ export const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200 flex flex-col gap-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+          <div className="lg:col-span-7 km-panel p-6 sm:p-8 flex flex-col gap-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-800">
               <div>
-                <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                <h2 className="text-xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <Trophy className="w-6 h-6 text-amber-500" />
                   Sảnh Vinh Danh Đang Công Bố
                 </h2>
-                <p className="text-xs text-slate-500 mt-1">Danh sách này cũng hiển thị ở trang “Giải Thưởng Tháng”.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Danh sách này cũng hiển thị ở trang “Giải Thưởng Tháng”.</p>
               </div>
               <span className="text-xs text-brand-green font-bold bg-brand-lightGreen px-3 py-1 rounded-full border border-brand-green/20 w-fit">
                 {awards.length} giải thưởng
@@ -1102,20 +1104,20 @@ export const AdminDashboard = () => {
             </div>
 
             {loading ? (
-              <div className="p-16 text-center text-slate-400 font-bold text-xs animate-pulse">
+              <div className="p-16 text-center text-slate-400 dark:text-slate-500 font-bold text-xs animate-pulse">
                 Đang tải danh sách giải thưởng...
               </div>
             ) : awards.length === 0 ? (
-              <div className="p-16 text-center text-slate-400 font-bold text-xs bg-slate-50 rounded-2xl border border-slate-200">
+              <div className="p-16 text-center text-slate-400 dark:text-slate-500 font-bold text-xs bg-slate-50 dark:bg-slate-800/70 rounded-2xl border border-slate-200 dark:border-slate-700">
                 Chưa có giải thưởng nào. Hãy tạo giải đầu tiên để vinh danh cộng đồng.
               </div>
             ) : (
               <div className="flex flex-col gap-4">
                 {awards.map((aw) => (
-                  <div key={aw.id} className="p-5 rounded-3xl bg-gradient-to-r from-amber-50 to-white border border-amber-100 shadow-sm hover:shadow-md transition-all">
+                  <div key={aw.id} className="p-5 rounded-3xl bg-gradient-to-r from-amber-50 to-white dark:from-amber-500/10 dark:to-slate-900 border border-amber-100 dark:border-amber-500/15 shadow-sm hover:shadow-md transition-all">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                       <div className="flex gap-4 min-w-0">
-                        <img src={aw.recipientAvatar} alt={aw.recipientName} className="w-14 h-14 rounded-2xl object-cover border-2 border-amber-300 bg-slate-200 shrink-0" />
+                        <img src={aw.recipientAvatar} alt={aw.recipientName} className="w-14 h-14 rounded-2xl object-cover border-2 border-amber-300 bg-slate-200 dark:bg-slate-700 shrink-0" />
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="px-3 py-1 rounded-full bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider">
@@ -1125,10 +1127,10 @@ export const AdminDashboard = () => {
                               +{aw.awardPoints} pts
                             </span>
                           </div>
-                          <h3 className="font-black text-base text-slate-900 mt-2">{aw.title}</h3>
-                          <p className="text-xs text-slate-600 leading-relaxed mt-1 line-clamp-3">{aw.description}</p>
-                          <p className="text-[11px] text-slate-500 font-semibold mt-3">
-                            Người nhận: <strong className="text-slate-800">{aw.recipientName}</strong> · {aw.recipientEmail} · {aw.recipientLevel}
+                          <h3 className="font-black text-base text-slate-900 dark:text-slate-100 mt-2">{aw.title}</h3>
+                          <p className="text-xs text-slate-600 dark:text-slate-300 dark:text-slate-400 leading-relaxed mt-1 line-clamp-3">{aw.description}</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold mt-3">
+                            Người nhận: <strong className="text-slate-800 dark:text-slate-100">{aw.recipientName}</strong> · {aw.recipientEmail} · {aw.recipientLevel}
                           </p>
                         </div>
                       </div>
@@ -1151,16 +1153,16 @@ export const AdminDashboard = () => {
 
       {rejectDialog.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+          <div className="w-full max-w-lg km-modal-shell overflow-hidden">
             <div className="p-6 bg-gradient-to-r from-rose-600 to-red-500 text-white relative">
               <button
                 onClick={closeRejectDialog}
-                className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center"
+                className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/10 dark:bg-slate-800/50 hover:bg-white/20 dark:bg-slate-800/60 flex items-center justify-center"
                 aria-label="Đóng hộp thoại từ chối"
               >
                 <X className="w-5 h-5" />
               </button>
-              <div className="w-12 h-12 rounded-2xl bg-white/15 flex items-center justify-center mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-white/15 dark:bg-slate-800/50 flex items-center justify-center mb-3">
                 <AlertTriangle className="w-7 h-7" />
               </div>
               <h3 className="text-xl font-black">
@@ -1175,11 +1177,11 @@ export const AdminDashboard = () => {
 
             <div className="p-6 flex flex-col gap-4">
               <div>
-                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Lý do chính</label>
+                <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Lý do chính</label>
                 <select
                   value={rejectDialog.reason}
                   onChange={(e) => setRejectDialog((prev) => ({ ...prev, reason: e.target.value }))}
-                  className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500"
+                  className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500"
                 >
                   {REJECTION_REASONS.map((reason) => (
                     <option key={reason} value={reason}>{reason}</option>
@@ -1188,24 +1190,24 @@ export const AdminDashboard = () => {
               </div>
 
               <div>
-                <label className="text-xs font-black text-slate-700 uppercase tracking-wider">Ghi chú bổ sung cho người dùng</label>
+                <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Ghi chú bổ sung cho người dùng</label>
                 <textarea
                   rows="4"
                   value={rejectDialog.details}
                   onChange={(e) => setRejectDialog((prev) => ({ ...prev, details: e.target.value }))}
                   placeholder="VD: Vui lòng bổ sung ảnh trước/sau hoạt động, mô tả số người tham gia hoặc chọn lại vị trí chính xác trên bản đồ..."
-                  className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 resize-none"
+                  className="mt-2 w-full px-4 py-3 rounded-2xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs font-semibold focus:outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 resize-none"
                 />
               </div>
 
-              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-700 leading-relaxed">
+              <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 dark:bg-rose-500/10 dark:border-rose-500/15 text-xs text-rose-700 dark:text-rose-200 leading-relaxed">
                 <strong>Xem trước thông báo:</strong> Bài viết chưa được duyệt. Lý do: {buildRejectionReason() || '...' }
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
                   onClick={closeRejectDialog}
-                  className="px-5 py-3 rounded-2xl bg-slate-100 text-slate-700 text-xs font-black hover:bg-slate-200"
+                  className="px-5 py-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-black hover:bg-slate-200 dark:hover:bg-slate-700"
                 >
                   Hủy
                 </button>

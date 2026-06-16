@@ -1,9 +1,11 @@
 import React from 'react';
 import { useNotification } from '../context/NotificationContext';
+import { useTheme } from '../context/ThemeContext';
 import { Info, CheckCircle2, AlertTriangle, Trophy, X } from 'lucide-react';
 
 export const NotificationToast = () => {
   const { toasts, removeToast } = useNotification();
+  const { isDark } = useTheme();
 
   if (toasts.length === 0) return null;
 
@@ -21,6 +23,19 @@ export const NotificationToast = () => {
   };
 
   const getBg = (type) => {
+    if (isDark) {
+      switch (type) {
+        case 'success':
+          return 'border-emerald-700/60 bg-emerald-950/70 text-emerald-100';
+        case 'warning':
+          return 'border-amber-700/60 bg-amber-950/70 text-amber-100';
+        case 'award':
+          return 'border-yellow-700/60 bg-yellow-950/70 text-yellow-100 shadow-yellow-950/20';
+        default:
+          return 'border-blue-700/60 bg-blue-950/70 text-blue-100';
+      }
+    }
+
     switch (type) {
       case 'success':
         return 'border-emerald-200 bg-emerald-50/95 text-emerald-900';
@@ -47,7 +62,7 @@ export const NotificationToast = () => {
           </div>
           <button
             onClick={() => removeToast(toast.id)}
-            className="p-1 rounded-lg hover:bg-black/5 text-slate-400 hover:text-slate-600 transition-colors"
+            className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-slate-400 dark:text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
           >
             <X className="w-4 h-4" />
           </button>

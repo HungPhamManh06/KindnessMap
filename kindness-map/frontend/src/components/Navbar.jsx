@@ -3,6 +3,7 @@ import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { useNotification } from '../context/NotificationContext';
+import { ThemeToggle } from './ThemeToggle';
 import { 
   HeartHandshake, Map, BookOpen, Trophy, Shield, PlusCircle, 
   Bell, LogOut, User, ChevronDown, Award, Menu, X, Check, Sparkles 
@@ -66,16 +67,18 @@ export const Navbar = () => {
     `flex items-center gap-2 px-4 py-2.5 rounded-2xl font-medium text-sm transition-all duration-200 ${
       isActive
         ? 'bg-gradient-to-r from-brand-green to-brand-teal text-white shadow-md shadow-brand-green/20 font-semibold'
-        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80'
     }`;
 
   const mobileNavLinkClass = ({ isActive }) =>
     `flex items-center gap-3 px-4 py-3.5 rounded-2xl font-medium text-base transition-all ${
-      isActive ? 'bg-brand-green text-white font-semibold' : 'text-slate-700 hover:bg-slate-100'
+      isActive
+        ? 'bg-brand-green text-white font-semibold'
+        : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80'
     }`;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-xs">
+    <header className="sticky top-0 z-40 bg-white/90 dark:bg-slate-950/85 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20 gap-4">
           
@@ -88,7 +91,7 @@ export const Navbar = () => {
               <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-brand-deepGreen to-emerald-600 bg-clip-text text-transparent">
                 KindnessMap
               </span>
-              <span className="text-[11px] font-bold tracking-wide uppercase text-slate-400">
+              <span className="text-[11px] font-bold tracking-wide uppercase text-slate-400 dark:text-slate-500">
                 Bản Đồ Việc Tốt
               </span>
             </div>
@@ -118,7 +121,8 @@ export const Navbar = () => {
 
           {/* Action Tools Center */}
           <div className="hidden lg:flex items-center gap-3">
-            
+            <ThemeToggle />
+
             {/* Quick Demo Switcher */}
             <div className="relative" ref={demoRef}>
               <button
@@ -132,26 +136,26 @@ export const Navbar = () => {
               </button>
 
               {demoDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-3xl shadow-2xl border border-slate-100 py-2 z-50 animate-fade-in divide-y divide-slate-100">
+                <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 py-2 z-50 animate-fade-in divide-y divide-slate-100">
                   <div className="px-4 py-2">
-                    <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Chuyển Tài Khoản Thử Nghiệm</p>
-                    <p className="text-xs text-slate-600 mt-0.5 leading-snug">Trải nghiệm ngay các tính năng theo vai trò mà không cần đăng nhập thủ công.</p>
+                    <p className="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Chuyển Tài Khoản Thử Nghiệm</p>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 dark:text-slate-400 mt-0.5 leading-snug">Trải nghiệm ngay các tính năng theo vai trò mà không cần đăng nhập thủ công.</p>
                   </div>
                   <div className="py-1">
                     <button
                       onClick={() => { quickDemoLogin('volunteer'); setDemoDropdownOpen(false); }}
-                      className="w-full px-4 py-2.5 text-left text-xs font-semibold hover:bg-slate-50 flex items-center justify-between group"
+                      className="w-full px-4 py-2.5 text-left text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800/80 dark:bg-slate-800/70 flex items-center justify-between group"
                     >
-                      <div className="flex items-center gap-2 text-slate-800">
+                      <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100">
                         <User className="w-4 h-4 text-brand-green" /> 1. Người Dùng / TNV
                       </div>
                       <span className="text-[10px] py-0.5 px-2 bg-emerald-100 text-emerald-700 rounded-full font-bold">520 Điểm</span>
                     </button>
                     <button
                       onClick={() => { quickDemoLogin('admin'); setDemoDropdownOpen(false); }}
-                      className="w-full px-4 py-2.5 text-left text-xs font-semibold hover:bg-slate-50 flex items-center justify-between group"
+                      className="w-full px-4 py-2.5 text-left text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800/80 dark:bg-slate-800/70 flex items-center justify-between group"
                     >
-                      <div className="flex items-center gap-2 text-slate-800">
+                      <div className="flex items-center gap-2 text-slate-800 dark:text-slate-100">
                         <Shield className="w-4 h-4 text-purple-600" /> 2. Quản Trị Viên (Admin)
                       </div>
                       <span className="text-[10px] py-0.5 px-2 bg-purple-100 text-purple-700 rounded-full font-bold">Quản Trị</span>
@@ -160,7 +164,7 @@ export const Navbar = () => {
                   <div className="py-1 px-4">
                     <button
                       onClick={() => { logout(); setDemoDropdownOpen(false); }}
-                      className="w-full py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-100 text-center"
+                      className="w-full py-2 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white bg-slate-100 dark:bg-slate-800 text-center"
                     >
                       Trở thành Khách (Guest)
                     </button>
@@ -192,7 +196,7 @@ export const Navbar = () => {
                 <div className="relative" ref={notifRef}>
                   <button
                     onClick={() => setNotifDropdownOpen(!notifDropdownOpen)}
-                    className="relative p-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                    className="relative p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors"
                   >
                     <Bell className="w-5 h-5" />
                     {unreadCount > 0 && (
@@ -203,9 +207,9 @@ export const Navbar = () => {
                   </button>
 
                   {notifDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border border-slate-100 py-3 z-50 animate-fade-in divide-y divide-slate-100 max-h-[480px] flex flex-col">
+                    <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 py-3 z-50 animate-fade-in divide-y divide-slate-100 max-h-[480px] flex flex-col">
                       <div className="px-4 py-2 flex items-center justify-between shrink-0">
-                        <h4 className="font-bold text-sm text-slate-800">Thông báo của bạn</h4>
+                        <h4 className="font-bold text-sm text-slate-800 dark:text-slate-100">Thông báo của bạn</h4>
                         {unreadCount > 0 && (
                           <button
                             onClick={markAllAsRead}
@@ -218,22 +222,22 @@ export const Navbar = () => {
 
                       <div className="overflow-y-auto flex-1 divide-y divide-slate-50">
                         {notifications.length === 0 ? (
-                          <div className="p-8 text-center text-slate-400 text-xs">
+                          <div className="p-8 text-center text-slate-400 dark:text-slate-500 text-xs">
                             Không có thông báo nào.
                           </div>
                         ) : (
                           notifications.map((notif) => (
                             <div
                               key={notif.id}
-                              className={`p-3.5 transition-colors ${notif.isRead ? 'bg-white opacity-70' : 'bg-brand-lightGreen/50 font-medium'}`}
+                              className={`p-3.5 transition-colors ${notif.isRead ? 'bg-white dark:bg-slate-900 opacity-70' : 'bg-brand-lightGreen/50 font-medium'}`}
                             >
                               <div className="flex items-center justify-between">
-                                <span className="text-xs font-bold text-slate-900">{notif.title}</span>
-                                <span className="text-[10px] text-slate-400">
+                                <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{notif.title}</span>
+                                <span className="text-[10px] text-slate-400 dark:text-slate-500">
                                   {new Date(notif.createdAt).toLocaleDateString('vi-VN')}
                                 </span>
                               </div>
-                              <p className="text-xs text-slate-600 mt-1 leading-relaxed">{notif.message}</p>
+                              <p className="text-xs text-slate-600 dark:text-slate-300 dark:text-slate-400 mt-1 leading-relaxed">{notif.message}</p>
                             </div>
                           ))
                         )}
@@ -246,23 +250,23 @@ export const Navbar = () => {
                 <div className="relative" ref={profileRef}>
                   <button
                     onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                    className="flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl hover:bg-slate-100 border border-slate-100 transition-all text-left"
+                    className="flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-slate-100 dark:border-slate-800 transition-all text-left"
                   >
-                    <img src={user.avatar} alt={user.fullName} className="w-9 h-9 rounded-xl object-cover bg-slate-200" />
+                    <img src={user.avatar} alt={user.fullName} className="w-9 h-9 rounded-xl object-cover bg-slate-200 dark:bg-slate-700" />
                     <div className="hidden xl:flex flex-col">
-                      <span className="font-bold text-xs text-slate-800 leading-none">{user.fullName}</span>
+                      <span className="font-bold text-xs text-slate-800 dark:text-slate-100 leading-none">{user.fullName}</span>
                       <span className="text-[10px] font-semibold text-brand-green mt-1 leading-none">{user.level}</span>
                     </div>
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                    <ChevronDown className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                   </button>
 
                   {profileDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-3xl shadow-2xl border border-slate-100 p-2 z-50 animate-fade-in divide-y divide-slate-100">
+                    <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 p-2 z-50 animate-fade-in divide-y divide-slate-100">
                       <div className="px-3 py-2.5">
-                        <p className="font-extrabold text-sm text-slate-900">{user.fullName}</p>
-                        <p className="text-xs text-slate-500 font-mono mt-0.5">{user.email}</p>
-                        <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between">
-                          <span className="text-xs font-bold text-slate-600">Tổng điểm:</span>
+                        <p className="font-extrabold text-sm text-slate-900 dark:text-slate-100">{user.fullName}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">{user.email}</p>
+                        <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                          <span className="text-xs font-bold text-slate-600 dark:text-slate-300 dark:text-slate-400">Tổng điểm:</span>
                           <span className="text-xs font-extrabold text-white bg-gradient-to-r from-brand-green to-brand-teal px-2.5 py-0.5 rounded-full shadow-xs">
                             {user.points} pts
                           </span>
@@ -272,7 +276,7 @@ export const Navbar = () => {
                       <div className="py-1">
                         <button
                           onClick={() => { navigate('/profile'); setProfileDropdownOpen(false); }}
-                          className="w-full px-3 py-2 text-left rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-100 flex items-center gap-2"
+                          className="w-full px-3 py-2 text-left rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 flex items-center gap-2"
                         >
                           <User className="w-4 h-4 text-brand-blue" /> Hồ sơ & Thành tựu
                         </button>
@@ -295,7 +299,7 @@ export const Navbar = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setActiveModal('login')}
-                  className="px-4 py-2.5 rounded-2xl text-slate-700 hover:text-slate-900 font-bold text-sm hover:bg-slate-100 transition-colors"
+                  className="px-4 py-2.5 rounded-2xl text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
                 >
                   Đăng Nhập
                 </button>
@@ -325,7 +329,7 @@ export const Navbar = () => {
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 rounded-2xl text-slate-700 hover:bg-slate-100 transition-colors"
+              className="p-2.5 rounded-2xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -336,7 +340,7 @@ export const Navbar = () => {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="lg:hidden fixed inset-x-0 top-20 bg-white border-b border-slate-200 shadow-2xl px-4 py-6 z-50 animate-fade-in flex flex-col gap-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
+        <div className="lg:hidden fixed inset-x-0 top-20 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 shadow-2xl px-4 py-6 z-50 animate-fade-in flex flex-col gap-4 max-h-[calc(100vh-5rem)] overflow-y-auto">
           
           {/* Quick Demo Switcher Mobile */}
           <div className="p-4 rounded-3xl bg-amber-50 border border-amber-200 flex flex-col gap-2">
@@ -346,18 +350,20 @@ export const Navbar = () => {
             <div className="grid grid-cols-2 gap-2 mt-1">
               <button
                 onClick={() => { quickDemoLogin('volunteer'); setMobileMenuOpen(false); }}
-                className="py-2.5 px-3 rounded-2xl bg-white border border-amber-300 text-xs font-bold text-slate-800 shadow-xs flex items-center justify-center gap-1.5"
+                className="py-2.5 px-3 rounded-2xl bg-white dark:bg-slate-900 border border-amber-300 text-xs font-bold text-slate-800 dark:text-slate-100 shadow-xs flex items-center justify-center gap-1.5"
               >
                 <User className="w-4 h-4 text-brand-green" /> User / TNV
               </button>
               <button
                 onClick={() => { quickDemoLogin('admin'); setMobileMenuOpen(false); }}
-                className="py-2.5 px-3 rounded-2xl bg-white border border-amber-300 text-xs font-bold text-slate-800 shadow-xs flex items-center justify-center gap-1.5"
+                className="py-2.5 px-3 rounded-2xl bg-white dark:bg-slate-900 border border-amber-300 text-xs font-bold text-slate-800 dark:text-slate-100 shadow-xs flex items-center justify-center gap-1.5"
               >
                 <Shield className="w-4 h-4 text-purple-600" /> Admin
               </button>
             </div>
           </div>
+
+          <ThemeToggle mobile />
 
           <div className="flex flex-col gap-1">
             <NavLink to="/explore" onClick={() => setMobileMenuOpen(false)} className={mobileNavLinkClass}>
@@ -380,12 +386,12 @@ export const Navbar = () => {
             )}
           </div>
 
-          <div className="pt-4 border-t border-slate-100 flex flex-col gap-3">
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-3">
             {isAuthenticated ? (
               <div className="flex flex-col gap-3">
                 <button
                   onClick={() => { navigate('/profile'); setMobileMenuOpen(false); }}
-                  className="w-full py-3 px-4 bg-slate-100 rounded-2xl font-bold text-sm text-slate-800 flex items-center justify-between"
+                  className="w-full py-3 px-4 bg-slate-100 dark:bg-slate-800 rounded-2xl font-bold text-sm text-slate-800 dark:text-slate-100 flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
                     <img src={user.avatar} className="w-7 h-7 rounded-lg object-cover" />
@@ -404,7 +410,7 @@ export const Navbar = () => {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => { setActiveModal('login'); setMobileMenuOpen(false); }}
-                  className="py-3.5 rounded-2xl bg-slate-100 text-slate-800 font-bold text-sm"
+                  className="py-3.5 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold text-sm"
                 >
                   Đăng Nhập
                 </button>

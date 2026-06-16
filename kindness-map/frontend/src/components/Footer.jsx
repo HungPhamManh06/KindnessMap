@@ -4,7 +4,7 @@ import { HeartHandshake, MapPin, Mail, Phone, Heart, Shield, Sparkles } from 'lu
 
 export const Footer = () => {
   return (
-    <footer className="bg-slate-900 text-slate-400 pt-16 pb-12 border-t border-slate-800 mt-20">
+    <footer className="bg-slate-900 text-slate-400 dark:text-slate-500 pt-16 pb-12 border-t border-slate-800 mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 pb-12 border-b border-slate-800">
           
@@ -16,7 +16,7 @@ export const Footer = () => {
               </div>
               <span className="font-extrabold text-xl text-white tracking-tight">KindnessMap</span>
             </div>
-            <p className="text-sm text-slate-400 leading-relaxed pr-6">
+            <p className="text-sm text-slate-400 dark:text-slate-500 leading-relaxed pr-6">
               Nền tảng cộng đồng Bản Đồ Việc Tốt khuyến khích và kết nối mọi người cùng chia sẻ những hành động tử tế, gieo mầm hy vọng và xóa nhòa sự vô cảm trong xã hội.
             </p>
             <div className="flex items-center gap-2 pt-2 text-xs font-semibold text-emerald-400">

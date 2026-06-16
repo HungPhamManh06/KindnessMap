@@ -4,12 +4,88 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --app-bg: #f8fafc;
+  --app-surface: #ffffff;
+  --app-surface-muted: #f8fafc;
+  --app-text: #0f172a;
+  --app-text-soft: #475569;
+  --app-border: #e2e8f0;
+}
+
+html.dark {
+  --app-bg: #020617;
+  --app-surface: #0f172a;
+  --app-surface-muted: #111827;
+  --app-text: #f8fafc;
+  --app-text-soft: #cbd5e1;
+  --app-border: #334155;
+}
+
 @layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
   body {
-    @apply bg-[#F8FAFC] text-slate-800 antialiased selection:bg-brand-green selection:text-white;
+    @apply antialiased selection:bg-brand-green selection:text-white;
+    background: radial-gradient(circle at top, rgba(16, 185, 129, 0.08), transparent 28%), var(--app-bg);
+    color: var(--app-text);
+    transition: background-color 240ms ease, color 240ms ease;
+  }
+
+  html.dark body {
+    background: radial-gradient(circle at top, rgba(16, 185, 129, 0.08), transparent 22%), var(--app-bg);
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    transition: background-color 220ms ease, border-color 220ms ease, color 220ms ease, box-shadow 220ms ease, transform 220ms ease;
   }
 }
 
+@layer components {
+  .km-glass {
+    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-white/50 dark:border-slate-700/60;
+  }
+
+  .km-panel {
+    @apply rounded-3xl border border-slate-200/90 bg-white shadow-xl dark:border-slate-800/80 dark:bg-slate-900/90;
+  }
+
+  .km-panel-soft {
+    @apply rounded-2xl border border-slate-200/80 bg-slate-50/80 dark:border-slate-700/70 dark:bg-slate-800/70;
+  }
+
+  .km-panel-hero {
+    @apply relative overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xl dark:border-slate-800/80 dark:bg-slate-900/90;
+    box-shadow: 0 22px 50px -28px rgba(15, 23, 42, 0.35);
+  }
+
+  .km-modal-shell {
+    @apply rounded-3xl border border-slate-100 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900/95;
+    box-shadow: 0 30px 80px -35px rgba(2, 6, 23, 0.65);
+  }
+
+  .km-input {
+    @apply bg-slate-50 border border-slate-200 dark:bg-slate-800/70 dark:border-slate-700;
+  }
+}
+
+html.dark input,
+html.dark textarea,
+html.dark select {
+  color: #f8fafc;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #64748b;
+}
 
 /* Custom CSS animations and smooth transitions */
 @keyframes fadeIn {
@@ -35,24 +111,83 @@
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
-  background: #F1F5F9;
-}
-::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #f1f5f9;
 }
 
-/* ── MapLibre GL JS popup overrides ──────────────────────────────────────── */
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* OpenLayers controls */
+.ol-zoom,
+.ol-attribution {
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+
+.ol-control button {
+  background: rgba(255, 255, 255, 0.94) !important;
+  color: #0f172a !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+}
+
+.ol-control button:hover {
+  background: #ffffff !important;
+}
+
+html.dark .ol-control button {
+  background: rgba(15, 23, 42, 0.94) !important;
+  color: #f8fafc !important;
+  border-color: rgba(51, 65, 85, 0.95) !important;
+}
+
+html.dark .ol-control button:hover {
+  background: #1e293b !important;
+}
+
+html.dark .ol-attribution {
+  background: rgba(15, 23, 42, 0.94) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(51, 65, 85, 0.95) !important;
+}
+
+html.dark .ol-attribution ul,
+html.dark .ol-attribution a {
+  color: #cbd5e1 !important;
+}
+
+/* ── Popup overrides ─────────────────────────────────────────────────────── */
 .maplibregl-popup-content {
   border-radius: 20px !important;
   box-shadow: 0 8px 32px rgba(15, 23, 42, 0.18) !important;
   border: 1px solid #e2e8f0 !important;
   padding: 14px 16px 12px !important;
   font-family: 'Inter', Arial, sans-serif;
+}
+
+html.dark .maplibregl-popup-content {
+  background: #0f172a !important;
+  color: #e2e8f0 !important;
+  border-color: #334155 !important;
 }
 
 .maplibregl-popup-close-button {
@@ -69,7 +204,10 @@
   background: transparent;
 }
 
+html.dark .maplibregl-popup-close-button:hover {
+  color: #f8fafc;
+}
+
 .maplibregl-ctrl-attrib {
   font-size: 10px !important;
 }
-

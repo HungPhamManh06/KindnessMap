@@ -53,14 +53,14 @@ export const Home = () => {
         </div>
 
         {/* Main Headline */}
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 max-w-5xl leading-[1.15]">
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-slate-100 max-w-5xl leading-[1.15]">
           Hãy Cùng Nhau Thắp Sáng <br className="hidden sm:inline" />
           <span className="bg-gradient-to-r from-brand-green via-brand-teal to-emerald-600 bg-clip-text text-transparent">
             Bản Đồ Việc Tốt Cộng Đồng
           </span>
         </h1>
 
-        <p className="mt-6 text-base sm:text-xl text-slate-600 max-w-3xl leading-relaxed font-normal">
+        <p className="mt-6 text-base sm:text-xl text-slate-600 dark:text-slate-300 dark:text-slate-400 max-w-3xl leading-relaxed font-normal">
           KindnessMap là nơi lan tỏa những hành động tử tế bình dị xung quanh bạn. Hãy chia sẻ câu chuyện của mình, ghim dấu ấn lên bản đồ, tích lũy điểm công dân số và truyền cảm hứng cho hàng triệu người khác!
         </p>
 
@@ -79,7 +79,7 @@ export const Home = () => {
 
           <button
             onClick={() => navigate('/explore')}
-            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white hover:bg-slate-50 text-slate-800 font-extrabold text-base border border-slate-200 shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 dark:bg-slate-800/70 text-slate-800 dark:text-slate-100 font-extrabold text-base border border-slate-200 dark:border-slate-700 shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
           >
             <span>Khám Phá Bản Đồ</span>
             <ArrowRight className="w-5 h-5 text-brand-green" />
@@ -87,7 +87,7 @@ export const Home = () => {
         </div>
 
         {/* Target Audiences Floating Bar */}
-        <div className="mt-16 pt-8 border-t border-slate-200/80 max-w-4xl w-full flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-xs sm:text-sm font-bold text-slate-500">
+        <div className="mt-16 pt-8 border-t border-slate-200 dark:border-slate-700/80 dark:border-slate-700/70 max-w-4xl w-full flex flex-wrap items-center justify-center gap-6 sm:gap-12 text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400">
           <span className="flex items-center gap-2">👨‍🎓 Sinh viên tích cực</span>
           <span className="flex items-center gap-2">💚 Tình nguyện viên</span>
           <span className="flex items-center gap-2">🏡 Cư dân địa phương</span>
@@ -125,7 +125,7 @@ export const Home = () => {
             <div className="inline-flex items-center gap-2 text-brand-green font-extrabold text-xs uppercase tracking-wider">
               <MapPin className="w-4 h-4" /> Bản Đồ Việc Tốt Trực Tuyến
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
               Khám Phá Lòng Tốt Quanh Bạn
             </h2>
           </div>
@@ -140,7 +140,7 @@ export const Home = () => {
 
         {/* Map Component Container */}
         {loading ? (
-          <div className="h-[550px] w-full bg-slate-200 animate-pulse rounded-3xl flex items-center justify-center text-slate-500 font-bold">
+          <div className="h-[550px] w-full bg-slate-200 dark:bg-slate-700 animate-pulse rounded-3xl flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold">
             🗺️ Đang tải dữ liệu Bản Đồ Việc Tốt...
           </div>
         ) : (
@@ -155,7 +155,7 @@ export const Home = () => {
             <div className="inline-flex items-center gap-2 text-rose-500 font-extrabold text-xs uppercase tracking-wider">
               <Star className="w-4 h-4 fill-rose-500" /> Câu Chuyện Lan Tỏa
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
               Những Câu Chuyện Truyền Cảm Hứng
             </h2>
           </div>
@@ -171,23 +171,23 @@ export const Home = () => {
         {/* Stories Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {featuredStories.length === 0 ? (
-            <div className="col-span-3 p-12 text-center text-slate-400 font-medium">
+            <div className="col-span-3 p-12 text-center text-slate-400 dark:text-slate-500 font-medium">
               Hiện chưa có câu chuyện nổi bật nào.
             </div>
           ) : (
             featuredStories.map((story) => (
               <div
                 key={story.id}
-                className="bg-white rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-100 flex flex-col overflow-hidden group hover:-translate-y-1"
+                className="bg-white dark:bg-slate-900 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-100 dark:border-slate-800 flex flex-col overflow-hidden group hover:-translate-y-1"
               >
                 {/* Story Image */}
-                <div className="relative h-56 overflow-hidden bg-slate-100">
+                <div className="relative h-56 overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <img
                     src={story.imageUrl}
                     alt={story.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <span className="absolute top-4 left-4 px-3 py-1 bg-white/95 backdrop-blur-md rounded-full text-xs font-black text-brand-deepGreen shadow-md">
+                  <span className="absolute top-4 left-4 px-3 py-1 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md rounded-full text-xs font-black text-brand-deepGreen shadow-md">
                     {story.category}
                   </span>
                 </div>
@@ -195,28 +195,28 @@ export const Home = () => {
                 {/* Content info */}
                 <div className="p-6 flex flex-col flex-1 justify-between gap-4">
                   <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
+                    <div className="flex items-center justify-between text-xs text-slate-400 dark:text-slate-500 font-medium">
                       <span>📍 {story.locationName}</span>
                       <span>📅 {new Date(story.createdAt).toLocaleDateString('vi-VN')}</span>
                     </div>
 
-                    <h3 className="font-extrabold text-base text-slate-900 group-hover:text-brand-green transition-colors leading-snug line-clamp-2">
+                    <h3 className="font-extrabold text-base text-slate-900 dark:text-slate-100 group-hover:text-brand-green transition-colors leading-snug line-clamp-2">
                       {story.title}
                     </h3>
 
-                    <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 dark:text-slate-400 line-clamp-3 leading-relaxed">
                       {story.description}
                     </p>
                   </div>
 
                   {/* Author footer */}
-                  <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <img src={story.authorAvatar} alt={story.authorName} className="w-8 h-8 rounded-full object-cover bg-slate-200" />
-                      <span className="font-bold text-xs text-slate-800">{story.authorName}</span>
+                      <img src={story.authorAvatar} alt={story.authorName} className="w-8 h-8 rounded-full object-cover bg-slate-200 dark:bg-slate-700" />
+                      <span className="font-bold text-xs text-slate-800 dark:text-slate-100">{story.authorName}</span>
                     </div>
 
-                    <div className="flex items-center gap-3 text-xs font-bold text-slate-500">
+                    <div className="flex items-center gap-3 text-xs font-bold text-slate-500 dark:text-slate-400">
                       <span className="flex items-center gap-1 hover:text-rose-500 transition-colors">
                         <Heart className="w-4 h-4 text-rose-500 fill-rose-500/20" />
                         <span>{story.likesCount}</span>
@@ -245,32 +245,32 @@ export const Home = () => {
           <h2 className="text-3xl sm:text-5xl font-black tracking-tight">
             Gieo Mầm Lòng Tốt – Nhận Quả Ngọt
           </h2>
-          <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+          <p className="text-slate-400 dark:text-slate-500 text-sm sm:text-base leading-relaxed">
             Mỗi hành động tử tế của bạn, dù nhỏ bé nhất, đều có giá trị to lớn. KindnessMap ghi nhận và trao tặng bạn những danh hiệu cao quý cùng phần thưởng hàng tháng từ cộng đồng.
           </p>
 
           {/* Steps */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-10 w-full text-left">
-            <div className="p-6 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-md flex flex-col gap-2">
+            <div className="p-6 rounded-2xl bg-white/10 dark:bg-slate-800/50 border border-white/10 backdrop-blur-md flex flex-col gap-2">
               <span className="w-8 h-8 rounded-xl bg-brand-green text-white font-black flex items-center justify-center text-sm">1</span>
               <h4 className="font-bold text-sm text-white mt-1">Làm Việc Tốt</h4>
-              <p className="text-xs text-slate-300 leading-relaxed">Nhặt rác, giúp đỡ người già, hiến máu hay tổ chức dạy học miễn phí.</p>
+              <p className="text-xs text-slate-300 dark:text-slate-400 leading-relaxed">Nhặt rác, giúp đỡ người già, hiến máu hay tổ chức dạy học miễn phí.</p>
             </div>
-            <div className="p-6 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-md flex flex-col gap-2">
+            <div className="p-6 rounded-2xl bg-white/10 dark:bg-slate-800/50 border border-white/10 backdrop-blur-md flex flex-col gap-2">
               <span className="w-8 h-8 rounded-xl bg-brand-teal text-white font-black flex items-center justify-center text-sm">2</span>
               <h4 className="font-bold text-sm text-white mt-1">Ghim Lên Bản Đồ</h4>
-              <p className="text-xs text-slate-300 leading-relaxed">Đăng bài viết cùng hình ảnh thực tế và chọn vị trí chính xác trên bản đồ.</p>
+              <p className="text-xs text-slate-300 dark:text-slate-400 leading-relaxed">Đăng bài viết cùng hình ảnh thực tế và chọn vị trí chính xác trên bản đồ.</p>
             </div>
-            <div className="p-6 rounded-2xl bg-white/10 border border-white/10 backdrop-blur-md flex flex-col gap-2">
+            <div className="p-6 rounded-2xl bg-white/10 dark:bg-slate-800/50 border border-white/10 backdrop-blur-md flex flex-col gap-2">
               <span className="w-8 h-8 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-white font-black flex items-center justify-center text-sm">3</span>
               <h4 className="font-bold text-sm text-white mt-1">Thăng Hạng & Huy Hiệu</h4>
-              <p className="text-xs text-slate-300 leading-relaxed">Tích lũy từ 10 đến 50 điểm mỗi bài, nhận huy hiệu Hiệp Sĩ và giải thưởng tháng.</p>
+              <p className="text-xs text-slate-300 dark:text-slate-400 leading-relaxed">Tích lũy từ 10 đến 50 điểm mỗi bài, nhận huy hiệu Hiệp Sĩ và giải thưởng tháng.</p>
             </div>
           </div>
 
           <button
             onClick={() => navigate('/leaderboard')}
-            className="mt-8 px-8 py-3.5 rounded-xl bg-white text-slate-900 font-extrabold text-xs hover:bg-slate-100 transition-colors flex items-center gap-2"
+            className="mt-8 px-8 py-3.5 rounded-xl bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-extrabold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 dark:bg-slate-800 transition-colors flex items-center gap-2"
           >
             <Trophy className="w-4 h-4 text-amber-500" />
             <span>Xem Danh Sách Top Dẫn Đầu</span>

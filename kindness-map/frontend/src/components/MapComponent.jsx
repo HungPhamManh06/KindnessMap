@@ -15,6 +15,7 @@ import { Translate } from 'ol/interaction';
 import { apply } from 'ol-mapbox-style';
 import { fromLonLat } from 'ol/proj';
 import api from '../services/api';
+import { useTheme } from '../context/ThemeContext';
 
 
 // ---------------------------------------------------------------------------
@@ -112,10 +113,39 @@ export const MapComponent = ({
   const [heatmapMode, setHeatmapMode] = useState(false);
   const [mapReady,    setMapReady]    = useState(false);
   const [mapError,    setMapError]    = useState(null);
+  const { isDark } = useTheme();
+
+  const popupPalette = isDark
+    ? {
+        surface: '#0f172a',
+        mutedSurface: '#111827',
+        cardBorder: '#334155',
+        title: '#f8fafc',
+        text: '#cbd5e1',
+        subtle: '#94a3b8',
+        categoryBg: 'rgba(16,185,129,0.16)',
+        categoryText: '#6ee7b7',
+        buttonBg: '#10b981',
+        buttonText: '#ffffff',
+      }
+    : {
+        surface: '#ffffff',
+        mutedSurface: '#f8fafc',
+        cardBorder: '#e2e8f0',
+        title: '#0f172a',
+        text: '#475569',
+        subtle: '#64748b',
+        categoryBg: '#dcfce7',
+        categoryText: '#166534',
+        buttonBg: '#059669',
+        buttonText: '#ffffff',
+      };
 
   // ── 1. Init Map ───────────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
+    setMapReady(false);
+    setMapError(null);
 
     const initMap = async () => {
       try {
@@ -149,7 +179,8 @@ export const MapComponent = ({
           }),
         });
 
-        const STYLE_URL = `https://api.maptiler.com/maps/streets-v2/style.json?key=${MAPTILER_KEY}`;
+        const mapStyle = isDark ? 'streets-v2-dark' : 'streets-v2';
+        const STYLE_URL = `https://api.maptiler.com/maps/${mapStyle}/style.json?key=${MAPTILER_KEY}`;
         const response = await fetch(STYLE_URL);
         const styleJson = await response.json();
         
@@ -251,7 +282,7 @@ export const MapComponent = ({
                 text: new Text({
                   text: text,
                   font: `600 ${fontSize}px Inter, Arial, sans-serif`,
-                  fill: new Fill({ color: '#1e293b' }),
+                  fill: new Fill({ color: isDark ? '#f8fafc' : '#1e293b' }),
                   stroke: new Stroke({ color: '#ffffff', width: 2.5 }),
                   offsetY: -(radius + 7),
                 })
@@ -291,7 +322,7 @@ export const MapComponent = ({
         mapRef.current = null;
       }
     };
-  }, []); // run once
+  }, [isDark]);
 
   // ── 2. Render markers OR heatmap ──────────────────────────────────────────
   useEffect(() => {
@@ -340,9 +371,9 @@ export const MapComponent = ({
         if (feature) {
           const { name, count } = feature.getProperties();
           popupElementRef.current.innerHTML = `
-            <div style="font-family:Inter,Arial,sans-serif;font-size:12px;font-weight:800;color:#0f172a;background:white;padding:12px;border-radius:12px;box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.1);">
+            <div style="font-family:Inter,Arial,sans-serif;font-size:12px;font-weight:800;color:${popupPalette.title};background:${popupPalette.surface};padding:12px;border-radius:12px;box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.18);border:1px solid ${popupPalette.cardBorder};">
                🔥 ${escapeHtml(name)}<br/>
-               <span style="font-weight:600;color:#64748b;">Hơn ${count} hành động việc tốt</span>
+               <span style="font-weight:600;color:${popupPalette.subtle};">Hơn ${count} hành động việc tốt</span>
             </div>`;
           popupOverlayRef.current.setPosition(e.coordinate);
         } else {
@@ -379,27 +410,27 @@ export const MapComponent = ({
         : '';
 
       const popupHtml = `
-        <div style="width:250px;font-family:Inter,Arial,sans-serif;background:white;padding:12px;border-radius:16px;box-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);">
+        <div style="width:250px;font-family:Inter,Arial,sans-serif;background:${popupPalette.surface};padding:12px;border-radius:16px;box-shadow:0 20px 25px -5px rgb(0 0 0 / 0.18), 0 8px 10px -6px rgb(0 0 0 / 0.18);border:1px solid ${popupPalette.cardBorder};">
           <span style="display:inline-block;padding:3px 10px;border-radius:999px;
-            background:#dcfce7;color:#166534;font-size:10px;font-weight:900;text-transform:uppercase;">
+            background:${popupPalette.categoryBg};color:${popupPalette.categoryText};font-size:10px;font-weight:900;text-transform:uppercase;">
             ${escapeHtml(post.category)}
           </span>
           ${image}
-          <h4 style="font-size:13px;line-height:1.35;margin:8px 0 4px;color:#0f172a;font-weight:900;">
+          <h4 style="font-size:13px;line-height:1.35;margin:8px 0 4px;color:${popupPalette.title};font-weight:900;">
             ${escapeHtml(post.title)}
           </h4>
-          <p style="font-size:11px;line-height:1.45;margin:0 0 8px;color:#475569;">
+          <p style="font-size:11px;line-height:1.45;margin:0 0 8px;color:${popupPalette.text};">
             ${escapeHtml((post.description || '').slice(0, 140))}
           </p>
-          <div style="display:flex;justify-content:space-between;border-top:1px solid #e2e8f0;
-            padding-top:8px;font-size:10px;color:#64748b;font-weight:700;">
+          <div style="display:flex;justify-content:space-between;border-top:1px solid ${popupPalette.cardBorder};
+            padding-top:8px;font-size:10px;color:${popupPalette.subtle};font-weight:700;">
             <span>👤 ${escapeHtml(post.authorName || 'Người dùng')}</span>
             <span>📍 ${escapeHtml(post.locationName || 'Việt Nam')}</span>
           </div>
           <a href="/stories?id=${encodeURIComponent(post.id)}"
              style="display:block;text-align:center;text-decoration:none;width:100%;
                margin-top:10px;padding:9px 0;border-radius:12px;
-               background:#059669;color:white;font-size:12px;font-weight:900;">
+               background:${popupPalette.buttonBg};color:${popupPalette.buttonText};font-size:12px;font-weight:900;">
             Xem Chi Tiết
           </a>
         </div>`;
@@ -427,7 +458,7 @@ export const MapComponent = ({
     map.on('singleclick', closePopup);
     return () => map.un('singleclick', closePopup);
 
-  }, [posts, heatmapMode, mapReady]);
+  }, [posts, heatmapMode, mapReady, isDark]);
 
   // ── 3. Pan to selectedCenter when parent updates it ──────────────────────
   useEffect(() => {
@@ -474,7 +505,9 @@ export const MapComponent = ({
             backdrop-blur-md transition-all duration-300 ${
               heatmapMode
                 ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white scale-105'
-                : 'bg-white/95 text-slate-700 hover:bg-white border border-slate-100 hover:scale-105'
+                : isDark
+                  ? 'bg-slate-900/95 text-slate-100 hover:bg-slate-800 border border-slate-700 hover:scale-105'
+                  : 'bg-white/95 text-slate-700 hover:bg-white border border-slate-100 hover:scale-105'
             }`}
         >
           <Flame className={`w-4 h-4 ${heatmapMode ? 'animate-bounce text-yellow-200' : 'text-rose-500'}`} />
@@ -483,9 +516,11 @@ export const MapComponent = ({
       </div>
 
       {/* Attribution badge */}
-      <div className="absolute bottom-4 left-4 z-[5] bg-white/95 text-slate-700 text-[10px]
-        font-black px-3 py-1.5 rounded-xl shadow-lg backdrop-blur-md flex items-center
-        gap-1.5 border border-slate-100">
+      <div className={`absolute bottom-4 left-4 z-[5] text-[10px] font-black px-3 py-1.5 rounded-xl shadow-lg backdrop-blur-md flex items-center gap-1.5 border ${
+        isDark
+          ? 'bg-slate-900/95 text-slate-200 border-slate-700'
+          : 'bg-white/95 text-slate-700 border-slate-100'
+      }`}>
         <MapPin className="w-3.5 h-3.5 text-emerald-600" />
         <span>OpenLayers · MapTiler</span>
       </div>
