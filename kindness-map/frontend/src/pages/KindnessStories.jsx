@@ -47,6 +47,7 @@ export const KindnessStories = () => {
   const [sendingComment, setSendingComment] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
   const commentsCacheRef = useRef(new Map());
+  const modalBodyRef = useRef(null);
 
   // Share Modal State
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -61,6 +62,12 @@ export const KindnessStories = () => {
   useEffect(() => {
     fetchStories();
   }, [selectedCat]);
+
+  useEffect(() => {
+    if (activeStory && modalBodyRef.current) {
+      modalBodyRef.current.scrollTop = 0;
+    }
+  }, [activeStory?.id]);
 
   const fetchStories = async () => {
     try {
@@ -411,7 +418,7 @@ export const KindnessStories = () => {
             </div>
 
             {/* Modal Scroll Body */}
-            <div className="overflow-y-auto flex-1 p-6 sm:p-8 flex flex-col gap-6 relative z-10">
+            <div ref={modalBodyRef} className="overflow-y-auto flex-1 p-6 sm:p-8 flex flex-col gap-6 relative z-10">
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <span className="px-3 py-1 bg-brand-lightGreen text-brand-deepGreen font-black text-xs rounded-full border border-brand-green/20">
