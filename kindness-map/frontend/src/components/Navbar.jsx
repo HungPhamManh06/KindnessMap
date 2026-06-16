@@ -124,7 +124,7 @@ export const Navbar = () => {
 
           {/* Action Tools Center */}
           <div className="hidden lg:flex items-center gap-3">
-            {!isAuthenticated && <ThemeToggle />}
+            {!isAuthenticated && <ThemeToggle compact />}
 
             {/* Quick Demo Switcher */}
             <div className="relative" ref={demoRef}>

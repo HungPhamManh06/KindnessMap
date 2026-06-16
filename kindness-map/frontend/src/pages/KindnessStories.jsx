@@ -70,15 +70,17 @@ export const KindnessStories = () => {
     const cachedComments = commentsCacheRef.current.get(story.id);
     if (cachedComments) {
       setComments(cachedComments);
-      return;
     }
 
     try {
-      setDetailLoading(true);
+      setDetailLoading(!cachedComments);
       const res = await api.get(`/posts/${story.id}`);
       const nextComments = res.data.comments || [];
       commentsCacheRef.current.set(story.id, nextComments);
       setComments(nextComments);
+      if (res.data.post) {
+        setActiveStory((prev) => ({ ...(prev || story), ...res.data.post }));
+      }
     } catch (e) {
       console.error('Failed to get story comments');
     } finally {
@@ -389,14 +391,6 @@ export const KindnessStories = () => {
 
             {/* Modal Scroll Body */}
             <div className="overflow-y-auto flex-1 p-6 sm:p-8 flex flex-col gap-6 relative z-10">
-              <div className="rounded-[28px] overflow-hidden border border-slate-200/80 dark:border-slate-800/80 shadow-xl bg-slate-100 dark:bg-slate-800/60">
-                <img
-                  src={activeStory.imageUrl}
-                  alt={activeStory.title}
-                  className="w-full h-72 sm:h-96 object-cover"
-                />
-              </div>
-
               <div className="flex flex-col gap-3">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <span className="px-3 py-1 bg-brand-lightGreen text-brand-deepGreen font-black text-xs rounded-full border border-brand-green/20">
@@ -410,7 +404,20 @@ export const KindnessStories = () => {
                 <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 leading-snug">
                   {activeStory.title}
                 </h1>
+              </div>
 
+              <div className="rounded-[28px] overflow-hidden border border-slate-200/80 dark:border-slate-800/80 shadow-xl bg-slate-100 dark:bg-slate-800/60">
+                <img
+                  key={activeStory.id}
+                  src={activeStory.imageUrl}
+                  alt={activeStory.title}
+                  loading="eager"
+                  decoding="async"
+                  className="w-full h-72 sm:h-96 object-cover"
+                />
+              </div>
+
+              <div className="flex flex-col gap-3">
                 <p className="text-slate-700 dark:text-slate-200 text-base leading-relaxed whitespace-pre-line bg-slate-50/90 dark:bg-slate-800/70 p-6 rounded-[24px] border border-slate-200 dark:border-slate-700/60 shadow-sm">
                   {activeStory.description}
                 </p>

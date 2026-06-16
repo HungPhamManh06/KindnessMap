@@ -30,6 +30,7 @@ export const SubmitLocationPicker = ({ position, setPosition }) => {
   const mapRef = React.useRef(null);
   const markerFeatureRef = React.useRef(null);
   const tileLayerRef = React.useRef(null);
+  const resizeObserverRef = React.useRef(null);
   const [pickerError, setPickerError] = React.useState(null);
   const [ready, setReady] = React.useState(false);
   const [maptilerKey, setMaptilerKey] = React.useState('');
@@ -60,6 +61,8 @@ export const SubmitLocationPicker = ({ position, setPosition }) => {
           preload: 1,
           zIndex: 0,
         });
+
+        if (!containerRef.current) return;
 
         const map = new Map({
           target: containerRef.current,
@@ -109,6 +112,16 @@ export const SubmitLocationPicker = ({ position, setPosition }) => {
           setPosition([Number(coords[1].toFixed(6)), Number(coords[0].toFixed(6))]);
         });
 
+        const syncMapSize = () => {
+          requestAnimationFrame(() => {
+            map.updateSize();
+          });
+        };
+
+        resizeObserverRef.current = new ResizeObserver(syncMapSize);
+        resizeObserverRef.current.observe(containerRef.current);
+        syncMapSize();
+
         mapRef.current = map;
         setReady(true);
       } catch (error) {
@@ -121,6 +134,8 @@ export const SubmitLocationPicker = ({ position, setPosition }) => {
 
     return () => {
       cancelled = true;
+      resizeObserverRef.current?.disconnect();
+      resizeObserverRef.current = null;
       if (mapRef.current) {
         mapRef.current.setTarget(null);
         mapRef.current = null;
@@ -147,29 +162,29 @@ export const SubmitLocationPicker = ({ position, setPosition }) => {
     mapRef.current.getView().animate({ center: coords, zoom: 14, duration: 400 });
   }, [position]);
 
-  if (pickerError) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-slate-50 dark:bg-slate-800/70 rounded-2xl border border-rose-200">
-        <div className="text-center px-6 py-4 flex flex-col items-center gap-2">
-          <MapPin className="w-6 h-6 text-rose-400" />
-          <p className="text-xs font-bold text-rose-700">{pickerError}</p>
-          <p className="text-[10px] text-slate-400 dark:text-slate-500">Vui lòng liên hệ quản trị viên.</p>
-        </div>
-      </div>
-    );
-  }
+  return (
+    <div className="w-full h-full relative">
+      <div ref={containerRef} className="w-full h-full" />
 
-  if (!ready) {
-    return (
-      <div className="w-full h-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 animate-pulse">
-        <div className="text-center px-6 py-4">
-          <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Đang tải location picker...</p>
+      {pickerError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-rose-200 z-10">
+          <div className="text-center px-6 py-4 flex flex-col items-center gap-2">
+            <MapPin className="w-6 h-6 text-rose-400" />
+            <p className="text-xs font-bold text-rose-700">{pickerError}</p>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500">Vui lòng liên hệ quản trị viên.</p>
+          </div>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  return <div ref={containerRef} className="w-full h-full" />;
+      {!pickerError && !ready && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 animate-pulse z-10">
+          <div className="text-center px-6 py-4">
+            <p className="text-xs font-bold text-slate-500 dark:text-slate-400">Đang tải location picker...</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default SubmitLocationPicker;
