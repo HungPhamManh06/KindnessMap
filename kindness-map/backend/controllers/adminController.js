@@ -259,24 +259,27 @@ const getAnalytics = async (req, res) => {
     }, { Pending: 0, Approved: 0, Rejected: 0 });
 
     // Real monthly activity from approved posts in the last 6 months.
-    const monthlyRows = await queryAll(`
-      SELECT
-        DATE_FORMAT(createdAt, '%Y-%m') as monthKey,
-        DATE_FORMAT(createdAt, 'Tháng %c/%Y') as month,
-        COUNT(*) as posts,
-        SUM(${pointCaseSql}) as points
-      FROM Posts
-      WHERE status = 'Approved'
-        AND createdAt >= DATE_SUB(CURDATE(), INTERVAL 5 MONTH)
-      GROUP BY monthKey, month
-      ORDER BY monthKey ASC
-    `);
-
+    // Database-agnostic: fetch raw approved posts in the window and group in JS.
     const now = new Date();
+    const windowStart = new Date(now.getFullYear(), now.getMonth() - 5, 1, 0, 0, 0, 0);
+    const monthlyRows = await queryAll(
+      `SELECT createdAt, category FROM Posts WHERE status = 'Approved' AND createdAt >= ? ORDER BY createdAt ASC`,
+      [windowStart.toISOString()]
+    );
+
+    const monthlyMap = {};
+    for (const row of monthlyRows) {
+      const d = new Date(row.createdAt);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      if (!monthlyMap[key]) monthlyMap[key] = { posts: 0, points: 0 };
+      monthlyMap[key].posts += 1;
+      monthlyMap[key].points += getPointForCategory(row.category);
+    }
+
     const monthlyActivity = Array.from({ length: 6 }, (_, idx) => {
       const d = new Date(now.getFullYear(), now.getMonth() - (5 - idx), 1);
       const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-      const matched = monthlyRows.find((row) => row.monthKey === monthKey);
+      const matched = monthlyMap[monthKey];
       return {
         month: `Tháng ${d.getMonth() + 1}/${d.getFullYear()}`,
         posts: matched ? Number(matched.posts) : 0,
