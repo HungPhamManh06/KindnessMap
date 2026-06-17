@@ -12,13 +12,9 @@ const waitForDefaultUser = async () => {
       const admin = await queryGet(
         `SELECT id FROM Users WHERE role = 'admin' ORDER BY id LIMIT 1`
       );
-
       if (admin) return admin;
 
-      const anyUser = await queryGet(
-        `SELECT id FROM Users ORDER BY id LIMIT 1`
-      );
-
+      const anyUser = await queryGet(`SELECT id FROM Users ORDER BY id LIMIT 1`);
       if (anyUser) return anyUser;
     } catch (error) {
       lastError = error;
@@ -33,7 +29,6 @@ const waitForDefaultUser = async () => {
 
 const main = async () => {
   const owner = await waitForDefaultUser();
-
   const dataPath = path.join(__dirname, '..', 'data', 'community_posts_300.json');
   const posts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
 
@@ -41,11 +36,7 @@ const main = async () => {
   let skipped = 0;
 
   for (const post of posts) {
-    const existing = await queryGet(
-      `SELECT id FROM Posts WHERE title = ? LIMIT 1`,
-      [post.title]
-    );
-
+    const existing = await queryGet(`SELECT id FROM Posts WHERE title = ? LIMIT 1`, [post.title]);
     if (existing) {
       skipped += 1;
       continue;
@@ -67,7 +58,6 @@ const main = async () => {
         owner.id,
       ]
     );
-
     inserted += 1;
   }
 

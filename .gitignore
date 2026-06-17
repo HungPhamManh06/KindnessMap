@@ -2,13 +2,12 @@
 node_modules/
 jspm_packages/
 web_modules/
-kindness-map/frontend/node_modules/
-kindness-map/backend/node_modules/
+backend/node_modules/
+frontend/node_modules/
 
 # Build outputs
-/dist/
 dist/
-kindness-map/frontend/dist/
+frontend/dist/
 tmp/
 out/
 build/
@@ -18,7 +17,7 @@ coverage/
 
 # Deploy / local tool metadata
 .vercel/
-kindness-map/frontend/.vercel/
+frontend/.vercel/
 
 # Environment files
 .env
@@ -27,15 +26,15 @@ kindness-map/frontend/.vercel/
 .env.test.local
 .env.production.local
 *.env
-kindness-map/backend/.env
-kindness-map/frontend/.env.local
+backend/.env
+frontend/.env.local
 
 # SQLite database files
 *.db
 *.sqlite
 *.sqlite3
-kindness-map/backend/kindness_map.db
-kindness-map/kindness_map.db
+backend/kindness_map.db
+kindness_map.db
 
 # Log files
 logs
