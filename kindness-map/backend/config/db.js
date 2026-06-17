@@ -5,6 +5,54 @@ const bcrypt = require('bcryptjs');
 
 const dbUrl = process.env.DATABASE_URL || 'mysql://localhost:3306/kindness_map';
 
+const safeDecode = (value = '') => {
+  try {
+    return decodeURIComponent(value);
+  } catch (error) {
+    return value;
+  }
+};
+
+const formatDbError = (err) => {
+  if (!err) return 'Unknown database error';
+  const parts = [err.code, err.errno, err.sqlState, err.message].filter(Boolean);
+  if (parts.length) return parts.join(' | ');
+  if (Array.isArray(err.errors) && err.errors.length) {
+    return err.errors.map((item) => [item.code, item.message].filter(Boolean).join(': ')).join(' || ');
+  }
+  return String(err);
+};
+
+const createMySqlPoolFromUrl = (databaseUrl) => {
+  const commonConfig = {
+    waitForConnections: true,
+    connectionLimit: 3,
+    queueLimit: 0,
+    multipleStatements: true,
+    ssl: { rejectUnauthorized: false },
+    connectTimeout: 15000,
+  };
+
+  try {
+    const parsed = new URL(databaseUrl);
+    if (!parsed.protocol.startsWith('mysql')) {
+      return mysql.createPool({ uri: databaseUrl, ...commonConfig });
+    }
+
+    return mysql.createPool({
+      host: parsed.hostname,
+      port: Number(parsed.port || 3306),
+      user: safeDecode(parsed.username),
+      password: safeDecode(parsed.password),
+      database: parsed.pathname.replace(/^\//, '') || undefined,
+      ...commonConfig,
+    });
+  } catch (error) {
+    console.warn('⚠️ DATABASE_URL không parse được, thử kết nối bằng URI gốc:', formatDbError(error));
+    return mysql.createPool({ uri: databaseUrl, ...commonConfig });
+  }
+};
+
 let dbType = 'mysql';
 let pool = null;
 let sqliteDb = null;
@@ -507,15 +555,7 @@ async function initSqliteDb() {
 async function initDb() {
   try {
     console.log('🔄 Đang thử kết nối tới MySQL Cloud...');
-    pool = mysql.createPool({
-      uri: dbUrl,
-      waitForConnections: true,
-      connectionLimit: 3,
-      queueLimit: 0,
-      multipleStatements: true,
-      ssl: { rejectUnauthorized: false },
-      connectTimeout: 5000 // Chờ kết nối tối đa 5 giây
-    });
+    pool = createMySqlPoolFromUrl(dbUrl);
     // Test thử một query để xác minh kết nối có thực sự tồn tại
     const conn = await pool.getConnection();
     conn.release();
@@ -523,7 +563,7 @@ async function initDb() {
     console.log('✅ Kết nối MySQL Cloud thành công!');
     await initMySqlDb();
   } catch (err) {
-    console.warn('⚠️ Lỗi kết nối MySQL Cloud:', err.message);
+    console.warn('⚠️ Lỗi kết nối MySQL Cloud:', formatDbError(err));
     console.log('🔄 Đang chuyển sang sử dụng Cơ sở dữ liệu dự phòng SQLite cục bộ...');
     dbType = 'sqlite';
     if (pool) {
