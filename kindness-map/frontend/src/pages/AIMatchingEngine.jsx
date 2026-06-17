@@ -303,7 +303,7 @@ export const AIMatchingEngine = () => {
                     Cập nhật kỹ năng, khu vực, thời gian rảnh và mối quan tâm để AI ghép nối chính xác hơn.
                   </p>
                 </div>
-                <div className="px-3 py-1 rounded-full bg-brand-lightGreen text-brand-deepGreen text-xs font-black uppercase tracking-wide">
+                <div className="shrink-0 whitespace-nowrap min-w-fit px-4 py-2 rounded-full bg-brand-lightGreen text-brand-deepGreen text-xs font-black uppercase tracking-wide text-center">
                   {profileSummary?.communityExperience || 'Beginner'}
                 </div>
               </div>
@@ -374,7 +374,7 @@ export const AIMatchingEngine = () => {
                 </div>
 
                 <div>
-                  <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Latitude</label>
+                  <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Vĩ độ</label>
                   <input
                     type="number"
                     step="0.000001"
@@ -385,7 +385,7 @@ export const AIMatchingEngine = () => {
                 </div>
 
                 <div>
-                  <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Longitude</label>
+                  <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Kinh độ</label>
                   <input
                     type="number"
                     step="0.000001"
@@ -452,7 +452,7 @@ export const AIMatchingEngine = () => {
                     disabled={savingProfile}
                     className="px-6 py-3 rounded-2xl bg-brand-green text-white font-black text-sm shadow-lg shadow-brand-green/20 hover:opacity-95 disabled:opacity-60"
                   >
-                    {savingProfile ? 'Đang lưu...' : 'Lưu Kindness Vector'}
+                    {savingProfile ? 'Đang lưu...' : 'Lưu'}
                   </button>
                 </div>
               </form>
@@ -462,7 +462,7 @@ export const AIMatchingEngine = () => {
               <div>
                 <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
                   <HeartHandshake className="w-6 h-6 text-brand-blue" />
-                  Tạo Need Vector cho nhu cầu hỗ trợ
+                  Tạo yêu cầu hỗ trợ
                 </h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                   Mỗi yêu cầu hỗ trợ sẽ được AI chuyển thành Need Vector, tính Match Score và chủ động gửi thông báo đến hồ sơ phù hợp nhất.
@@ -546,7 +546,7 @@ export const AIMatchingEngine = () => {
                 </div>
 
                 <div>
-                  <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Latitude</label>
+                  <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Vĩ độ</label>
                   <input
                     type="number"
                     step="0.000001"
@@ -557,7 +557,7 @@ export const AIMatchingEngine = () => {
                 </div>
 
                 <div>
-                  <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Longitude</label>
+                  <label className="text-xs font-black text-slate-700 dark:text-slate-200 uppercase tracking-wider">Kinh độ</label>
                   <input
                     type="number"
                     step="0.000001"
@@ -576,7 +576,7 @@ export const AIMatchingEngine = () => {
                     disabled={submittingRequest}
                     className="px-6 py-3 rounded-2xl bg-brand-blue text-white font-black text-sm shadow-lg shadow-brand-blue/20 hover:opacity-95 disabled:opacity-60"
                   >
-                    {submittingRequest ? 'Đang phân tích AI...' : 'Tạo Need Vector'}
+                    {submittingRequest ? 'Đang phân tích AI...' : 'Tạo'}
                   </button>
                 </div>
               </form>
