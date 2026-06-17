@@ -4,39 +4,48 @@ const { queryGet, queryRun } = require('../config/db');
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const waitForDatabase = async () => {
+const waitForDefaultUser = async () => {
   let lastError;
-  for (let attempt = 1; attempt <= 30; attempt += 1) {
+
+  for (let attempt = 1; attempt <= 120; attempt += 1) {
     try {
-      await queryGet('SELECT id FROM Users LIMIT 1');
-      return;
+      const admin = await queryGet(
+        `SELECT id FROM Users WHERE role = 'admin' ORDER BY id LIMIT 1`
+      );
+
+      if (admin) return admin;
+
+      const anyUser = await queryGet(
+        `SELECT id FROM Users ORDER BY id LIMIT 1`
+      );
+
+      if (anyUser) return anyUser;
     } catch (error) {
       lastError = error;
-      await sleep(500);
     }
+
+    console.log(`⏳ Đang chờ database seed user mặc định... (${attempt}/120)`);
+    await sleep(500);
   }
-  throw lastError || new Error('Database is not ready');
+
+  throw lastError || new Error('Database is not ready or no default user was seeded.');
 };
 
 const main = async () => {
-  await waitForDatabase();
+  const owner = await waitForDefaultUser();
 
   const dataPath = path.join(__dirname, '..', 'data', 'community_posts_300.json');
   const posts = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-
-  const owner = await queryGet(
-    `SELECT id FROM Users WHERE role = 'admin' ORDER BY id LIMIT 1`
-  ) || await queryGet(`SELECT id FROM Users ORDER BY id LIMIT 1`);
-
-  if (!owner) {
-    throw new Error('No user found. Please start the backend once so default users are created first.');
-  }
 
   let inserted = 0;
   let skipped = 0;
 
   for (const post of posts) {
-    const existing = await queryGet(`SELECT id FROM Posts WHERE title = ? LIMIT 1`, [post.title]);
+    const existing = await queryGet(
+      `SELECT id FROM Posts WHERE title = ? LIMIT 1`,
+      [post.title]
+    );
+
     if (existing) {
       skipped += 1;
       continue;
@@ -58,6 +67,7 @@ const main = async () => {
         owner.id,
       ]
     );
+
     inserted += 1;
   }
 
