@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { X, Mail, Lock, User, Shield, ArrowRight, Sparkles } from 'lucide-react';
+import { X, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-react';
 
 export const AuthModals = () => {
   const { activeModal, setActiveModal, login, register, resetPassword } = useAuth();
@@ -8,7 +8,6 @@ export const AuthModals = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [role, setRole] = useState('user');
   const [newPassword, setNewPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -29,7 +28,7 @@ export const AuthModals = () => {
       const res = await login(email, password);
       if (!res.success) setErrorMsg(res.message);
     } else if (activeModal === 'register') {
-      const res = await register(fullName, email, password, role);
+      const res = await register(fullName, email, password);
       if (!res.success) setErrorMsg(res.message);
     } else if (activeModal === 'reset') {
       const res = await resetPassword(email, newPassword);
@@ -155,35 +154,6 @@ export const AuthModals = () => {
             </div>
           )}
 
-          {activeModal === 'register' && (
-            <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 dark:text-slate-400 mb-1">Loại tài khoản</label>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setRole('user')}
-                  className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
-                    role === 'user'
-                      ? 'bg-brand-lightGreen border-brand-green text-brand-deepGreen shadow-sm'
-                      : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 dark:bg-slate-800'
-                  }`}
-                >
-                  <User className="w-4 h-4" /> Công dân / TNV
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole('admin')}
-                  className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border text-xs font-semibold transition-all ${
-                    role === 'admin'
-                      ? 'bg-brand-lightGreen border-brand-green text-brand-deepGreen shadow-sm'
-                      : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 dark:bg-slate-800'
-                  }`}
-                >
-                  <Shield className="w-4 h-4" /> Quản trị viên
-                </button>
-              </div>
-            </div>
-          )}
 
           <button
             type="submit"

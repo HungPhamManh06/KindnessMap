@@ -84,9 +84,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (fullName, email, password, role = 'user') => {
+  const register = async (fullName, email, password) => {
     try {
-      const res = await api.post('/auth/register', { fullName, email, password, role });
+      const res = await api.post('/auth/register', { fullName, email, password });
       const newUser = res.data.user;
 
       localStorage.setItem('kindness_token', res.data.token);
@@ -95,6 +95,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticated(true);
       await fetchUserData();
 
+      window.dispatchEvent(new Event('kindnessmap:stats-updated'));
       addToast('Đăng ký thành công!', 'Bạn đã được tặng ngay +10 điểm công dân số khởi đầu.', 'success');
       setActiveModal(null);
       return { success: true };

@@ -6,12 +6,21 @@ import { ArrowRight, Sparkles, MapPin, Heart, MessageSquare, PlusCircle, Trophy,
 
 const LazyMapComponent = lazy(() => import('../components/MapComponent').then((module) => ({ default: module.MapComponent })));
 
-const stats = [
-  { value: '1,240+', label: 'Việc Tốt Đã Được Ghim' },
-  { value: '580+', label: 'Công Dân Tích Cực' },
-  { value: '15,400+', label: 'Điểm Việc Tốt Tích Lũy' },
-  { value: '12+', label: 'Tỉnh / Thành Phố Phủ Sóng' },
+const statDefinitions = [
+  { key: 'pinnedGoodDeeds', label: 'Việc Tốt Đã Được Ghim' },
+  { key: 'activeCitizens', label: 'Công Dân Tích Cực' },
+  { key: 'kindnessPoints', label: 'Điểm Việc Tốt Tích Lũy' },
+  { key: 'coveredCities', label: 'Tỉnh / Thành Phố Phủ Sóng' },
 ];
+
+const emptySiteStats = {
+  pinnedGoodDeeds: 0,
+  activeCitizens: 0,
+  kindnessPoints: 0,
+  coveredCities: 0,
+};
+
+const formatStatValue = (value) => Number(value || 0).toLocaleString('en-US');
 
 const audiences = ['👨‍🎓 Sinh viên tích cực', '💚 Tình nguyện viên', '🏡 Cư dân địa phương', '🏢 Câu lạc bộ & CLB'];
 
@@ -48,11 +57,18 @@ export const Home = () => {
 
   const [featuredStories, setFeaturedStories] = useState([]);
   const [mapPosts, setMapPosts] = useState([]);
+  const [siteStats, setSiteStats] = useState(emptySiteStats);
   const [loading, setLoading] = useState(true);
   const [enableMap, setEnableMap] = useState(false);
 
   useEffect(() => {
     fetchInitialData();
+  }, []);
+
+  useEffect(() => {
+    const handleStatsUpdated = () => fetchInitialData();
+    window.addEventListener('kindnessmap:stats-updated', handleStatsUpdated);
+    return () => window.removeEventListener('kindnessmap:stats-updated', handleStatsUpdated);
   }, []);
 
   useEffect(() => {
@@ -63,12 +79,14 @@ export const Home = () => {
   const fetchInitialData = async () => {
     try {
       setLoading(true);
-      const [storiesRes, mapRes] = await Promise.all([
+      const [storiesRes, mapRes, statsRes] = await Promise.all([
         api.get('/posts/featured'),
         api.get('/posts/map'),
+        api.get('/posts/stats'),
       ]);
       setFeaturedStories(storiesRes.data);
       setMapPosts(mapRes.data);
+      setSiteStats({ ...emptySiteStats, ...(statsRes.data || {}) });
     } catch (error) {
       console.error('Failed to fetch home data');
     } finally {
@@ -135,10 +153,10 @@ export const Home = () => {
 
       <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full -mt-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat) => (
-            <div key={stat.label} className="km-panel p-5 sm:p-6 text-center">
+          {statDefinitions.map((stat) => (
+            <div key={stat.key} className="km-panel p-5 sm:p-6 text-center">
               <div className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
-                {stat.value}
+                {formatStatValue(siteStats[stat.key])}
               </div>
               <div className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mt-3">
                 {stat.label}

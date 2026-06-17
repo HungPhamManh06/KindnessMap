@@ -133,6 +133,49 @@ const getFeaturedStories = async (req, res) => {
   }
 };
 
+const normalizeCoveredArea = (locationName = '') => {
+  const raw = String(locationName || '').trim();
+  if (!raw) return null;
+
+  const parts = raw.split(',').map((part) => part.trim()).filter(Boolean);
+  const candidate = parts.length > 1 ? parts[parts.length - 1] : parts[0];
+  const normalized = candidate
+    .replace(/^TP\.?\s*/i, '')
+    .replace(/^Thành phố\s+/i, '')
+    .replace(/^Tỉnh\s+/i, '')
+    .trim();
+
+  return normalized || raw;
+};
+
+const getPublicStats = async (req, res) => {
+  try {
+    const [approvedPosts, activeUsers, totalPoints, locations] = await Promise.all([
+      queryGet(`SELECT COUNT(*) as cnt FROM Posts WHERE status = 'Approved'`),
+      queryGet(`SELECT COUNT(*) as cnt FROM Users WHERE role IN ('user', 'admin')`),
+      queryGet(`SELECT COALESCE(SUM(points), 0) as total FROM Users WHERE role IN ('user', 'admin')`),
+      queryAll(`SELECT locationName FROM Posts WHERE status = 'Approved' AND locationName IS NOT NULL`),
+    ]);
+
+    const coveredAreas = new Set(
+      locations
+        .map((row) => normalizeCoveredArea(row.locationName))
+        .filter(Boolean)
+        .map((area) => area.toLocaleLowerCase('vi-VN'))
+    );
+
+    res.status(200).json({
+      pinnedGoodDeeds: Number(approvedPosts?.cnt || 0),
+      activeCitizens: Number(activeUsers?.cnt || 0),
+      kindnessPoints: Number(totalPoints?.total || 0),
+      coveredCities: coveredAreas.size,
+    });
+  } catch (error) {
+    console.error('Get public stats error:', error);
+    res.status(500).json({ message: 'Có lỗi khi lấy số liệu tổng quan.' });
+  }
+};
+
 const getPostById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -230,6 +273,7 @@ module.exports = {
   getPublicPosts,
   getMapPosts,
   getFeaturedStories,
+  getPublicStats,
   getPostById,
   likePost,
   commentPost

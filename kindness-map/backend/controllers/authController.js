@@ -25,7 +25,7 @@ async function checkAndUpdateLevel(userId) {
 
 const register = async (req, res) => {
   try {
-    const { fullName, email, password, role } = req.body;
+    const { fullName, email, password } = req.body;
     if (!fullName || !email || !password) {
       return res.status(400).json({ message: 'Vui lòng điền đầy đủ họ tên, email và mật khẩu.' });
     }
@@ -36,7 +36,9 @@ const register = async (req, res) => {
     }
 
     const hashedPw = await bcrypt.hash(password, 10);
-    const userRole = role === 'admin' ? 'admin' : 'user';
+    // Public registration always creates a normal user account.
+    // Admin rights must be granted later by an existing admin from the Admin Panel.
+    const userRole = 'user';
     const avatar = `https://api.dicebear.com/8.x/thumbs/svg?seed=${encodeURIComponent(fullName)}`;
 
     const result = await queryRun(
