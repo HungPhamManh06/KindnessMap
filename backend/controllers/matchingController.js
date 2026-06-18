@@ -24,6 +24,33 @@ const CATEGORY_SKILL_MAP = {
   'Tình nguyện': ['Điều phối tình nguyện', 'Gây quỹ', 'Hậu cần cộng đồng'],
   'Cộng đồng': ['Kết nối cộng đồng', 'Điều phối sự kiện', 'Hỗ trợ khẩn cấp'],
 };
+const buildUserVector = (user) => {
+  return {
+    skills: user.skills || [],
+    interests: user.interests || [],
+    reputation: user.points || 0,
+    location: {
+      lat: user.baseLatitude,
+      lng: user.baseLongitude
+    }
+  };
+};
+const buildNeedVector = (request) => {
+  return {
+    skills: request.requiredSkills,
+    urgency: request.urgency,
+    location: {
+      lat: request.latitude,
+      lng: request.longitude
+    }
+  };
+};
+const similarity = (arr1, arr2) => {
+  const common =
+      arr1.filter(x => arr2.includes(x)).length;
+
+  return common / Math.max(arr1.length, arr2.length);
+};
 
 const PROFILE_DEFAULTS = {
   skills: [],
@@ -543,6 +570,7 @@ const createSupportRequest = async (req, res) => {
       ]
     );
 
+
     const updatedRequest = await getRequestById(request.id);
 
     res.status(201).json({
@@ -555,8 +583,8 @@ const createSupportRequest = async (req, res) => {
     console.error('createSupportRequest error:', error);
     res.status(500).json({ message: 'Không thể tạo yêu cầu hỗ trợ.' });
   }
-};
 
+}
 const listSupportRequests = async (req, res) => {
   try {
     const scope = cleanText(req.query.scope || 'all');
@@ -644,6 +672,90 @@ const getRecommendations = async (req, res) => {
     res.status(500).json({ message: 'Không thể tải gợi ý AI dành cho bạn.' });
   }
 };
+const getEmergencyTeams = async (req, res) => {
+  try {
+
+    const candidates = await queryAll(`
+      SELECT userId
+      FROM UserCapabilityProfiles 
+      WHERE availabilityStatus = 'available'
+    `);
+
+    const medicalTeam = [];
+    const transportTeam = [];
+    const logisticsTeam = [];
+    const mediaTeam = [];
+
+    for (const row of candidates) {
+
+      const profile =
+        await getRequestProfileSnapshot(row.userId);
+
+      const skills = profile.skills || [];
+
+      if (
+        skills.some(skill =>
+          cleanText(skill).includes('y te') ||
+          cleanText(skill).includes('so cuu')
+        )
+      ) {
+        medicalTeam.push(profile);
+      }
+
+      if (
+        skills.some(skill =>
+          cleanText(skill).includes('lai xe') ||
+          cleanText(skill).includes('van chuyen')
+        )
+      ) {
+        transportTeam.push(profile);
+      }
+
+      if (
+        skills.some(skill =>
+          cleanText(skill).includes('hau can') ||
+          cleanText(skill).includes('dieu phoi')
+        )
+      ) {
+        logisticsTeam.push(profile);
+      }
+
+      if (
+        skills.some(skill =>
+          cleanText(skill).includes('truyen thong')
+        )
+      ) {
+        mediaTeam.push(profile);
+      }
+    }
+
+    res.json([
+      {
+        name: '🚑 Đội Y tế',
+        members: medicalTeam.length
+      },
+      {
+        name: '🚚 Đội Vận chuyển',
+        members: transportTeam.length
+      },
+      {
+        name: '📦 Đội Hậu cần',
+        members: logisticsTeam.length
+      },
+      {
+        name: '📢 Đội Truyền thông',
+        members: mediaTeam.length
+      }
+    ]);
+
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      message: 'AI Emergency Error'
+    });
+  }
+};
 
 module.exports = {
   getProfile,
@@ -652,4 +764,6 @@ module.exports = {
   listSupportRequests,
   getSupportRequestMatches,
   getRecommendations,
+  getEmergencyTeams,
+
 };

@@ -6,6 +6,7 @@ import View from 'ol/View';
 import Overlay from 'ol/Overlay';
 import Feature from 'ol/Feature';
 import Polygon from 'ol/geom/Polygon';
+import Point from 'ol/geom/Point';
 import TileLayer from 'ol/layer/Tile';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Vector as VectorSource, XYZ } from 'ol/source';
@@ -14,6 +15,7 @@ import GeoJSON from 'ol/format/GeoJSON';
 import { fromLonLat } from 'ol/proj';
 import api from '../services/api';
 import { useTheme } from '../context/ThemeContext';
+import CircleGeom from 'ol/geom/Circle';
 
 const getCategoryColor = (category) => {
   switch (category) {
@@ -39,6 +41,7 @@ const getCategoryColor = (category) => {
       return '#0891b2';
   }
 };
+
 
 const HEATMAP_HOTSPOTS = [
   { name: 'Khu vực Hồ Tây, Hà Nội', lat: 21.0583, lng: 105.8159, radius: 8000, count: 28 },
@@ -105,6 +108,7 @@ const MapComponentBase = ({
   selectedCenter = null,
   className = 'h-[550px] w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200',
 }) => {
+  const [responseTeams, setResponseTeams] = useState([]);
   const containerRef = useRef(null);
   const popupElementRef = useRef(null);
   const mapRef = useRef(null);
@@ -113,11 +117,16 @@ const MapComponentBase = ({
   const tileLayerRef = useRef(null);
   const territoryLayerRef = useRef(null);
   const overlaysRef = useRef([]);
+  const userLocationOverlayRef = useRef(null);
+  const [emergencyTeams,setEmergencyTeams] = useState([]);
 
   const [heatmapMode, setHeatmapMode] = useState(false);
+  const [emergencyMode, setEmergencyMode] = useState(false);
   const [mapReady, setMapReady] = useState(false);
   const [mapError, setMapError] = useState(null);
   const [maptilerKey, setMaptilerKey] = useState('');
+  const [userLocation, setUserLocation] =
+  useState(null);
   const { isDark } = useTheme();
 
   const popupPalette = useMemo(
@@ -147,6 +156,37 @@ const MapComponentBase = ({
           },
     [isDark]
   );
+  useEffect(() => {
+  const loadEmergencyTeams = async () => {
+    try {
+      const token = localStorage.getItem("kindness_token");
+
+      const res = await fetch(
+        "http://localhost:5000/api/matching/emergency",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+     const data = await res.json();
+
+console.log("Emergency API:", data);
+
+if (Array.isArray(data)) {
+  setResponseTeams(data);
+} else {
+  console.error("Emergency API Error:", data);
+  setResponseTeams([]);
+}
+    } catch (err) {
+      console.error("Emergency API Error:", err);
+    }
+  };
+
+  loadEmergencyTeams();
+}, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -261,7 +301,6 @@ const MapComponentBase = ({
         if (!cancelled) setMapError('Không thể kết nối đến máy chủ để tải cấu hình bản đồ.');
       }
     };
-
     initMap();
 
     return () => {
@@ -278,7 +317,124 @@ const MapComponentBase = ({
       setMapReady(false);
     };
   }, []);
+  useEffect(() => {
+  if (!mapRef.current || !userLocation) return;
 
+  const marker = new Feature({
+    geometry: new Point(
+      fromLonLat([userLocation.lng, userLocation.lat])
+    ),
+  });
+
+  marker.setStyle(
+    new Style({
+      image: new CircleStyle({
+        radius: 8,
+        fill: new Fill({ color: '#2563eb' }),
+        stroke: new Stroke({
+          color: '#ffffff',
+          width: 2,
+        }),
+      }),
+    })
+  );
+
+  const source = new VectorSource({
+    features: [marker],
+  });
+
+  const layer = new VectorLayer({
+    source,
+    zIndex: 9999,
+  });
+
+  mapRef.current.addLayer(layer);
+
+  return () => {
+  if (mapRef.current) {
+    mapRef.current.removeLayer(layer);
+  }
+};
+},[userLocation]);
+const emergencyLayerRef = useRef(null);
+useEffect(() => {
+
+  if (!mapRef.current || !userLocation) return;
+
+  if (!emergencyMode) {
+
+    if (emergencyLayerRef.current) {
+      mapRef.current.removeLayer(
+        emergencyLayerRef.current
+      );
+      emergencyLayerRef.current = null;
+    }
+
+    return;
+  }
+
+  const emergencyFeature = new Feature({
+    geometry: new CircleGeom(
+      fromLonLat([
+        userLocation.lng,
+        userLocation.lat
+      ]),
+      5000
+    ),
+  });
+
+  emergencyFeature.setStyle(
+    new Style({
+      fill: new Fill({
+        color: 'rgba(255,0,0,0.2)',
+      }),
+      stroke: new Stroke({
+        color: '#ff0000',
+        width: 3,
+      }),
+    })
+  );
+
+  const source = new VectorSource({
+    features: [emergencyFeature],
+  });
+
+  const layer = new VectorLayer({
+    source,
+    zIndex: 9000,
+  });
+
+  mapRef.current.addLayer(layer);
+
+  emergencyLayerRef.current = layer;
+
+  return () => {
+    if (mapRef.current && layer) {
+      mapRef.current.removeLayer(layer);
+    }
+  };
+
+}, [emergencyMode, userLocation]);
+  useEffect(() => {
+  if (!mapRef.current || !userLocation) return;
+
+  mapRef.current.getView().animate({
+    center: fromLonLat([
+      userLocation.lng,
+      userLocation.lat,
+    ]),
+    zoom: 15,
+    duration: 1000,
+  });
+}, [userLocation]);
+  useEffect(() => {
+  if (!emergencyMode) return;
+
+  api.get('/matching/emergency')
+    .then(res => {
+      setEmergencyTeams(res.data);
+    });
+}, [emergencyMode]);
   useEffect(() => {
     if (!maptilerKey || !tileLayerRef.current) return;
     tileLayerRef.current.setSource(createRasterSource(maptilerKey, isDark));
@@ -404,7 +560,54 @@ const MapComponentBase = ({
       map.un('singleclick', closePopup);
     };
   }, [posts, heatmapMode, mapReady, popupPalette]);
+  useEffect(() => {
+  if (!navigator.geolocation) {
+    console.log("GPS không được hỗ trợ");
+    return;
+  }
 
+  const watchId = navigator.geolocation.watchPosition(
+    (position) => {
+      console.log("GPS:", position.coords.latitude, position.coords.longitude);
+
+      setUserLocation({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
+    },
+    (error) => {
+      console.error("GPS Error:", error);
+    },
+    {
+      enableHighAccuracy: true,
+    }
+  );
+
+  return () => navigator.geolocation.clearWatch(watchId);
+}, []);
+
+  useEffect(() => {
+  if (!emergencyMode) return;
+
+  const loadEmergencyTeams = async () => {
+    try {
+      const res = await api.get('/matching/emergency');
+
+      setResponseTeams(
+        res.data.map(team => ({
+          type: team.name,
+          members: team.members,
+          eta: '5-15 phút'
+        }))
+      );
+
+    } catch (err) {
+      console.error('Emergency API Error:', err);
+    }
+  };
+
+  loadEmergencyTeams();
+}, [emergencyMode]);
   useEffect(() => {
     if (!mapReady || !mapRef.current || !selectedCenter) return;
     const lat = Number(selectedCenter[0]);
@@ -418,52 +621,74 @@ const MapComponentBase = ({
     });
   }, [selectedCenter, mapReady]);
 
-  if (mapError) {
-    return (
-      <div className={`relative ${className} flex items-center justify-center bg-slate-50 border border-rose-200`}>
-        <div className="flex flex-col items-center gap-3 text-center px-8 py-10">
-          <div className="w-14 h-14 rounded-full bg-rose-100 flex items-center justify-center">
-            <MapPin className="w-7 h-7 text-rose-500" />
-          </div>
-          <h3 className="text-slate-800 font-black text-base">Không Thể Tải Bản Đồ</h3>
-          <p className="text-slate-500 text-xs leading-relaxed max-w-xs">{mapError}</p>
-          <p className="text-slate-400 text-[10px]">Lỗi cấu hình máy chủ — Vui lòng liên hệ quản trị viên.</p>
-        </div>
-      </div>
-    );
-  }
-
+if (mapError) {
   return (
-    <div className={`relative ${className}`}>
-      <div className="absolute top-4 right-4 z-[5] flex items-center gap-2">
-        <button
-          onClick={() => setHeatmapMode((prev) => !prev)}
-          className={`flex items-center gap-1.5 px-4 py-2 rounded-2xl font-bold text-xs shadow-xl backdrop-blur-md transition-all duration-300 ${
-            heatmapMode
-              ? 'bg-gradient-to-r from-rose-500 to-amber-500 text-white scale-105'
-              : isDark
-                ? 'bg-slate-900/95 text-slate-100 hover:bg-slate-800 border border-slate-700 hover:scale-105'
-                : 'bg-white/95 text-slate-700 hover:bg-white border border-slate-100 hover:scale-105'
-          }`}
-        >
-          <Flame className={`w-4 h-4 ${heatmapMode ? 'animate-bounce text-yellow-200' : 'text-rose-500'}`} />
-          <span>{heatmapMode ? '🔥 Đang Xem Mật Độ' : '📊 Xem Heatmap Việc Tốt'}</span>
-        </button>
-      </div>
-
-      <div
-        className={`absolute bottom-4 left-4 z-[5] text-[10px] font-black px-3 py-1.5 rounded-xl shadow-lg backdrop-blur-md flex items-center gap-1.5 border ${
-          isDark ? 'bg-slate-900/95 text-slate-200 border-slate-700' : 'bg-white/95 text-slate-700 border-slate-100'
-        }`}
-      >
-        <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-        <span>OpenLayers · MapTiler</span>
-      </div>
-
-      <div ref={containerRef} className="w-full h-full" />
-      <div ref={popupElementRef} className="absolute z-50" />
+    <div className={`relative ${className} flex items-center justify-center bg-slate-50`}>
+      <p>{mapError}</p>
     </div>
   );
-};
+}
+  return (
+  <div className={`relative ${className}`}>
 
+    <div className="absolute top-4 right-4 z-[5] flex items-center gap-2">
+
+      <button
+        onClick={() => setHeatmapMode((prev) => !prev)}
+      >
+        Heatmap
+      </button>
+
+      <button
+        onClick={() => setEmergencyMode(prev => !prev)}
+      >
+        🚨 Khẩn cấp
+      </button>
+
+    </div>
+    {emergencyMode && (
+  <div className="absolute top-20 right-4 z-50 w-80 bg-red-900 text-white rounded-2xl p-4 shadow-2xl">
+
+    <h3 className="font-bold text-lg mb-3">
+      🚨 Emergency Response
+    </h3>
+
+    {responseTeams.length === 0 ? (
+      <div>Đang tải dữ liệu AI...</div>
+    ) : (
+      responseTeams.map((team, index) => (
+        <div
+          key={index}
+          className="mb-2 p-2 rounded bg-red-800"
+        >
+          <div className="font-bold">
+            {team.name}
+          </div>
+
+          <div>
+            {team.members} thành viên
+          </div>
+        </div>
+      ))
+    )}
+
+  </div>
+)}
+    <div
+      className={`absolute bottom-4 left-4 z-[5] text-[10px] font-black px-3 py-1.5 rounded-xl shadow-lg backdrop-blur-md flex items-center gap-1.5 border ${
+        isDark
+          ? 'bg-slate-900/95 text-slate-200 border-slate-700'
+          : 'bg-white/95 text-slate-700 border-slate-100'
+      }`}
+    >
+      <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+      <span>OpenLayers · MapTiler</span>
+    </div>
+
+    <div ref={containerRef} className="w-full h-full" />
+    <div ref={popupElementRef} className="absolute z-50" />
+
+  </div>
+);
+}
 export const MapComponent = memo(MapComponentBase);
