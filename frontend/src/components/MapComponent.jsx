@@ -156,38 +156,7 @@ const MapComponentBase = ({
           },
     [isDark]
   );
-  useEffect(() => {
-  const loadEmergencyTeams = async () => {
-    try {
-      const token = localStorage.getItem("kindness_token");
-
-      const res = await fetch(
-        "http://localhost:5000/api/matching/emergency",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-     const data = await res.json();
-
-console.log("Emergency API:", data);
-
-if (Array.isArray(data)) {
-  setResponseTeams(data);
-} else {
-  console.error("Emergency API Error:", data);
-  setResponseTeams([]);
-}
-    } catch (err) {
-      console.error("Emergency API Error:", err);
-    }
-  };
-
-  loadEmergencyTeams();
-}, []);
-
+ 
   useEffect(() => {
     let cancelled = false;
 

@@ -1,0 +1,4 @@
+node_modules/
+.DS_Store
+*.log
+kindness_map.db
