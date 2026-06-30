@@ -1,102 +1,110 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   KindnessMap · Cinematic Theme
-   Fade-rise animations + display typography + brand-specific utilities
+   KindnessMap · Cinematic + Nature Theme
    ────────────────────────────────────────────────────────────────────────── */
 
-/* Fade-rise keyframe */
+/* ── Fade-rise keyframe (hero content entrance) ──────────────────────────── */
 @keyframes fade-rise {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Utility classes */
-.animate-fade-rise {
-  animation: fade-rise 0.8s ease-out both;
+.animate-fade-rise          { animation: fade-rise 0.85s cubic-bezier(0.16,1,0.3,1) both; }
+.animate-fade-rise-delay    { animation: fade-rise 0.85s cubic-bezier(0.16,1,0.3,1) 0.18s both; }
+.animate-fade-rise-delay-2  { animation: fade-rise 0.85s cubic-bezier(0.16,1,0.3,1) 0.36s both; }
+.animate-fade-rise-delay-3  { animation: fade-rise 0.85s cubic-bezier(0.16,1,0.3,1) 0.52s both; }
+
+/* ── Nature background animations ───────────────────────────────────────── */
+
+/* Clouds drift left → right, looping infinitely */
+@keyframes km-cloud-1 { from { transform: translateX(-260px) scale(1.3); } to { transform: translateX(105vw) scale(1.3); } }
+@keyframes km-cloud-2 { from { transform: translateX(-200px) scale(0.85); } to { transform: translateX(105vw) scale(0.85); } }
+@keyframes km-cloud-3 { from { transform: translateX(-160px) scale(0.6);  } to { transform: translateX(105vw) scale(0.6);  } }
+
+/* Sun gentle pulse */
+@keyframes km-sun-pulse {
+  0%, 100% { transform: scale(1);    opacity: 0.88; }
+  50%       { transform: scale(1.10); opacity: 1; }
+}
+.km-sun-pulse { animation: km-sun-pulse 5s ease-in-out infinite; }
+
+/* River shimmer */
+@keyframes km-river-shimmer {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.8; }
+}
+.km-river-shimmer { animation: km-river-shimmer 3s ease-in-out infinite; }
+
+/* Flowers bob */
+@keyframes km-flower-bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
 }
 
-.animate-fade-rise-delay {
-  animation: fade-rise 0.8s ease-out 0.2s both;
+/* Birds float */
+@keyframes km-bird-1 {
+  0%   { transform: translate(0, 0)      scaleX(1); }
+  25%  { transform: translate(12px,-6px) scaleX(1); }
+  50%  { transform: translate(24px,0)    scaleX(1); }
+  75%  { transform: translate(12px, 5px) scaleX(1); }
+  100% { transform: translate(0, 0)      scaleX(1); }
 }
+.km-bird-1 { animation: km-bird-1 8s ease-in-out infinite; }
 
-.animate-fade-rise-delay-2 {
-  animation: fade-rise 0.8s ease-out 0.4s both;
-}
-
-/* ── Font helpers ────────────────────────────────────────────────────────── */
-.km-font-display {
-  font-family: var(--font-display);
-}
-
-.km-font-body {
-  font-family: var(--font-body);
-}
-
-/* ── Cinematic hero typography ───────────────────────────────────────────── */
+/* ── Hero cinematic typography ───────────────────────────────────────────── */
 .km-cinematic-title {
   font-family: var(--font-display);
-  font-weight: 400;
-  line-height: 0.95;
-  letter-spacing: -2.46px;
-  color: #ffffff;
+  font-weight: 600;
+  /* Reduced from -2.46px — prevents diacritic collision */
+  letter-spacing: -0.5px;
+  line-height: 1.05;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'kern' 1, 'liga' 1;
 }
 
 .km-cinematic-copy {
   font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ── KindnessMap brand gradient text helper ──────────────────────────────── */
+/* ── Brand gradient text ─────────────────────────────────────────────────── */
 .km-brand-gradient-text {
-  background: linear-gradient(90deg, #34d399 0%, #14b8a6 50%, #67e8f9 100%);
+  background: linear-gradient(90deg, #059669 0%, #0d9488 50%, #0e7490 100%);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: transparent;
 }
 
-/* ── Emerald glow drop shadow ────────────────────────────────────────────── */
-.km-text-glow-emerald {
-  text-shadow: 0 0 28px rgba(52, 211, 153, 0.40), 0 0 60px rgba(52, 211, 153, 0.18);
+/* ── Glass cards for nature hero ─────────────────────────────────────────── */
+.km-nature-glass {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(16px) saturate(1.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
 }
 
-.km-text-glow-cyan {
-  text-shadow: 0 0 28px rgba(103, 232, 249, 0.35), 0 0 55px rgba(103, 232, 249, 0.15);
-}
-
-/* ── Cinematic card glass ────────────────────────────────────────────────── */
-.km-glass-card {
-  background: rgba(255, 255, 255, 0.055);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-/* ── Stat pill (hero stats strip) ───────────────────────────────────────── */
-.km-stat-pill {
-  border-radius: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(2, 6, 23, 0.55);
+.km-nature-glass-dark {
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+}
+
+/* ── Stat pill ───────────────────────────────────────────────────────────── */
+.km-stat-pill {
+  border-radius: 1.25rem;
   padding: 1rem;
   text-align: center;
 }
 
-/* ── Reduced-motion overrides ────────────────────────────────────────────── */
+/* ── Reduced motion ──────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-rise,
   .animate-fade-rise-delay,
-  .animate-fade-rise-delay-2 {
-    animation: none !important;
-  }
-
-  .km-text-glow-emerald,
-  .km-text-glow-cyan {
-    text-shadow: none;
-  }
+  .animate-fade-rise-delay-2,
+  .animate-fade-rise-delay-3,
+  .km-sun-pulse,
+  .km-river-shimmer,
+  .km-bird-1 { animation: none !important; }
 }
