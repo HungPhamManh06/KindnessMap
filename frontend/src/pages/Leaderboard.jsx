@@ -87,8 +87,8 @@ export const Leaderboard = () => {
   const remainder = rankings.slice(3);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10">
-      <section className="relative overflow-hidden rounded-[32px] bg-gradient-to-r from-slate-900 via-brand-dark to-slate-900 p-8 sm:p-12 text-white shadow-2xl border border-slate-800">
+    <div className="km-page-modern relative max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10">
+      <section className="km-dark-hero p-8 sm:p-12 text-white">
         <div className="absolute left-1/2 top-0 -translate-x-1/2 w-[500px] h-[500px] bg-brand-green/10 blur-3xl rounded-full pointer-events-none" />
         <div className="absolute -bottom-24 -left-12 w-72 h-72 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
 

@@ -2,7 +2,7 @@ import React, { lazy, Suspense, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { ArrowRight, Sparkles, MapPin, Heart, MessageSquare, PlusCircle, Trophy, Star } from 'lucide-react';
+import { ArrowRight, Sparkles, MapPin, Heart, MessageSquare, PlusCircle, Trophy, Star, ShieldCheck, Users, MapPinned, Navigation } from 'lucide-react';
 
 const LazyMapComponent = lazy(() => import('../components/MapComponent').then((module) => ({ default: module.MapComponent })));
 
@@ -103,71 +103,151 @@ export const Home = () => {
   };
 
   return (
-    <div className="flex flex-col gap-16 pb-14 overflow-x-hidden">
-      <section className="relative pt-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="km-panel-hero px-6 sm:px-10 lg:px-14 py-12 sm:py-16 text-center overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.14),_transparent_32%)] dark:bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.18),_transparent_28%)] pointer-events-none" />
-          <div className="absolute -top-16 -right-10 w-60 h-60 rounded-full bg-emerald-400/10 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-20 -left-10 w-72 h-72 rounded-full bg-cyan-400/10 blur-3xl pointer-events-none" />
+    <div className="relative flex flex-col gap-20 pb-16 overflow-x-hidden km-modern-home">
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="km-aurora-orb km-aurora-orb-1" />
+        <div className="km-aurora-orb km-aurora-orb-2" />
+        <div className="km-aurora-orb km-aurora-orb-3" />
+        <div className="absolute inset-0 opacity-[0.055] dark:opacity-[0.08] km-grid-bg" />
+      </div>
 
-          <div className="relative z-10 flex flex-col items-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-lightGreen border border-brand-green/30 text-brand-deepGreen text-xs font-bold shadow-xs mb-8 animate-fade-in">
-              <Sparkles className="w-4 h-4 text-brand-green animate-spin" style={{ animationDuration: '5s' }} />
-              <span>Chiến dịch Nụ Cười & Việc Tốt Việt Nam 2026</span>
+      <section className="relative px-4 sm:px-6 lg:px-8 max-w-[1500px] mx-auto w-full pt-8 lg:pt-12">
+        <div className="relative overflow-hidden rounded-[2rem] sm:rounded-[3rem] border border-white/10 bg-slate-950 text-white shadow-[0_35px_120px_-55px_rgba(16,185,129,0.8)]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(16,185,129,0.32),transparent_28%),radial-gradient(circle_at_82%_12%,rgba(20,184,166,0.24),transparent_30%),linear-gradient(135deg,rgba(15,23,42,0.92),rgba(2,6,23,0.98))]" />
+          <div className="absolute inset-0 km-grid-bg opacity-[0.08]" />
+          <div className="absolute left-1/2 top-0 h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-emerald-300/70 to-transparent" />
+
+          <div className="relative z-10 grid lg:grid-cols-[1.03fr_0.97fr] gap-10 lg:gap-12 items-center px-5 sm:px-9 lg:px-14 py-12 sm:py-16 lg:py-20">
+            <div className="flex flex-col items-start text-left">
+              <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/10 border border-white/15 text-emerald-100 text-xs sm:text-sm font-extrabold shadow-2xl shadow-emerald-500/10 backdrop-blur-xl animate-fade-in">
+                <Sparkles className="w-4 h-4 text-emerald-300 animate-pulse" />
+                <span>Social Good Platform · Việt Nam 2026</span>
+              </div>
+
+              <h1 className="mt-7 text-4xl sm:text-6xl xl:text-7xl font-black tracking-[-0.055em] leading-[0.95] max-w-5xl">
+                Biến mỗi việc tốt thành
+                <span className="block mt-2 bg-gradient-to-r from-emerald-200 via-teal-200 to-cyan-200 bg-clip-text text-transparent drop-shadow-[0_0_28px_rgba(45,212,191,0.22)]">
+                  một điểm sáng trên bản đồ.
+                </span>
+              </h1>
+
+              <p className="mt-6 text-base sm:text-xl text-slate-300 max-w-2xl leading-relaxed">
+                KindnessMap kết hợp bản đồ trực tuyến, câu chuyện cộng đồng, điểm công dân số và AI để lan tỏa lòng tốt theo cách hiện đại, trực quan và truyền cảm hứng.
+              </p>
+
+              <div className="mt-9 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+                <button
+                  onClick={() => {
+                    if (!isAuthenticated) setActiveModal('login');
+                    else navigate('/submit');
+                  }}
+                  className="group relative overflow-hidden px-7 py-4 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 font-black text-base shadow-[0_18px_55px_-18px_rgba(45,212,191,0.95)] hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-3"
+                >
+                  <span className="absolute inset-0 translate-x-[-120%] bg-gradient-to-r from-transparent via-white/50 to-transparent group-hover:translate-x-[120%] transition-transform duration-700" />
+                  <PlusCircle className="relative w-5 h-5 group-hover:rotate-90 transition-transform" />
+                  <span className="relative">Ghim Việc Tốt Của Bạn</span>
+                </button>
+
+                <button
+                  onClick={() => navigate('/explore')}
+                  className="px-7 py-4 rounded-2xl bg-white/8 hover:bg-white/12 text-white font-extrabold text-base border border-white/15 backdrop-blur-xl hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2"
+                >
+                  <span>Khám Phá Bản Đồ</span>
+                  <ArrowRight className="w-5 h-5 text-emerald-300 group-hover:translate-x-1" />
+                </button>
+              </div>
+
+              <div className="mt-9 flex flex-wrap gap-3">
+                {audiences.map((item) => (
+                  <div key={item} className="rounded-full border border-white/12 bg-white/[0.06] px-4 py-2 text-xs sm:text-sm font-bold text-slate-200 backdrop-blur-xl">
+                    {item}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50 max-w-5xl leading-[1.08]">
-              Hãy Cùng Nhau Thắp Sáng <br className="hidden sm:inline" />
-              <span className="bg-gradient-to-r from-brand-green via-brand-teal to-emerald-600 bg-clip-text text-transparent">
-                Bản Đồ Việc Tốt Cộng Đồng
-              </span>
-            </h1>
+            <div className="relative min-h-[520px] lg:min-h-[610px]">
+              <div className="absolute inset-4 rounded-[2.5rem] bg-gradient-to-br from-emerald-400/20 via-cyan-400/10 to-purple-500/20 blur-3xl" />
 
-            <p className="mt-6 text-base sm:text-xl text-slate-600 dark:text-slate-300 max-w-3xl leading-relaxed">
-              KindnessMap là nơi lan tỏa những hành động tử tế bình dị xung quanh bạn. Hãy chia sẻ câu chuyện của mình, ghim dấu ấn lên bản đồ, tích lũy điểm công dân số và truyền cảm hứng cho hàng triệu người khác!
-            </p>
-
-            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
-              <button
-                onClick={() => {
-                  if (!isAuthenticated) setActiveModal('login');
-                  else navigate('/submit');
-                }}
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gradient-to-r from-brand-green to-brand-teal text-white font-black text-base shadow-xl shadow-brand-green/25 hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-3 group"
-              >
-                <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition-transform" />
-                <span>Ghim Việc Tốt Của Bạn</span>
-              </button>
-
-              <button
-                onClick={() => navigate('/explore')}
-                className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-800 dark:text-slate-100 font-extrabold text-base border border-slate-200 dark:border-slate-700 shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
-              >
-                <span>Khám Phá Bản Đồ</span>
-                <ArrowRight className="w-5 h-5 text-brand-green" />
-              </button>
-            </div>
-
-            <div className="mt-14 pt-8 border-t border-slate-200/80 dark:border-slate-800 max-w-4xl w-full grid grid-cols-2 lg:grid-cols-4 gap-4 text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400">
-              {audiences.map((item) => (
-                <div key={item} className="km-panel-soft px-4 py-3 text-center">
-                  {item}
+              <div className="relative h-full rounded-[2rem] border border-white/12 bg-white/[0.07] p-4 sm:p-5 backdrop-blur-2xl shadow-2xl overflow-hidden km-float-slow">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.18),transparent_38%)]" />
+                <div className="relative rounded-[1.5rem] overflow-hidden border border-white/10 bg-slate-900/80 h-[300px] sm:h-[360px]">
+                  {loading || !enableMap ? (
+                    <div className="h-full w-full flex items-center justify-center text-slate-400 font-bold bg-slate-900/80">
+                      Đang tải bản đồ sống...
+                    </div>
+                  ) : (
+                    <Suspense fallback={<div className="h-full w-full flex items-center justify-center text-slate-400 font-bold">Đang tải bản đồ sống...</div>}>
+                      <LazyMapComponent posts={mapPosts} className="h-full w-full overflow-hidden" />
+                    </Suspense>
+                  )}
+                  <div className="absolute left-4 top-4 rounded-2xl border border-white/10 bg-slate-950/70 px-4 py-3 backdrop-blur-xl">
+                    <div className="flex items-center gap-2 text-xs font-black text-emerald-200">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-75" />
+                        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-300" />
+                      </span>
+                      LIVE KINDNESS MAP
+                    </div>
+                    <div className="mt-1 text-[11px] text-slate-300">{mapPosts.length || 0} điểm tốt đang hiển thị</div>
+                  </div>
                 </div>
-              ))}
+
+                <div className="relative grid grid-cols-2 gap-3 mt-4">
+                  <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/55 p-4 backdrop-blur-xl">
+                    <div className="flex items-center justify-between">
+                      <MapPinned className="w-5 h-5 text-emerald-300" />
+                      <span className="text-[10px] font-black text-emerald-200 uppercase tracking-wider">Pins</span>
+                    </div>
+                    <div className="mt-4 text-3xl font-black tracking-tight">{formatStatValue(siteStats.pinnedGoodDeeds)}</div>
+                    <div className="text-[11px] text-slate-400 font-bold">Việc tốt đã ghim</div>
+                  </div>
+
+                  <div className="rounded-[1.35rem] border border-white/10 bg-slate-950/55 p-4 backdrop-blur-xl">
+                    <div className="flex items-center justify-between">
+                      <Users className="w-5 h-5 text-cyan-300" />
+                      <span className="text-[10px] font-black text-cyan-200 uppercase tracking-wider">Community</span>
+                    </div>
+                    <div className="mt-4 text-3xl font-black tracking-tight">{formatStatValue(siteStats.activeCitizens)}</div>
+                    <div className="text-[11px] text-slate-400 font-bold">Công dân tích cực</div>
+                  </div>
+                </div>
+
+                <div className="relative mt-3 rounded-[1.35rem] border border-white/10 bg-gradient-to-r from-emerald-400/15 to-cyan-400/10 p-4 backdrop-blur-xl flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-xs font-black text-emerald-200 uppercase tracking-wider">AI Ghép Nối</div>
+                    <div className="mt-1 text-sm font-bold text-white">Gợi ý người cần giúp ↔ người có thể hỗ trợ</div>
+                  </div>
+                  <button onClick={() => navigate('/ai-matching')} className="shrink-0 w-11 h-11 rounded-2xl bg-white text-slate-950 flex items-center justify-center hover:scale-105 transition-transform">
+                    <Navigation className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="hidden sm:block absolute -right-2 top-10 rounded-3xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-2xl shadow-2xl km-float-fast">
+                <div className="flex items-center gap-2 text-sm font-black text-white"><ShieldCheck className="w-4 h-4 text-emerald-300" /> Verified stories</div>
+              </div>
+              <div className="hidden sm:block absolute -left-3 bottom-20 rounded-3xl border border-white/15 bg-slate-950/70 px-4 py-3 backdrop-blur-2xl shadow-2xl km-float-medium">
+                <div className="text-[11px] uppercase tracking-wider text-slate-400 font-black">Điểm tích lũy</div>
+                <div className="text-2xl font-black text-white">{formatStatValue(siteStats.kindnessPoints)}</div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full -mt-6">
+      <section className="px-4 sm:px-6 lg:px-8 max-w-[1500px] mx-auto w-full -mt-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {statDefinitions.map((stat) => (
-            <div key={stat.key} className="km-panel p-5 sm:p-6 text-center">
-              <div className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-slate-50 tracking-tight">
+          {statDefinitions.map((stat, index) => (
+            <div key={stat.key} className="km-stat-card group p-5 sm:p-6 text-center">
+              <div className="text-3xl sm:text-5xl font-black tracking-[-0.04em] bg-gradient-to-r from-slate-950 to-emerald-700 bg-clip-text text-transparent dark:from-white dark:to-emerald-200">
                 {formatStatValue(siteStats[stat.key])}
               </div>
-              <div className="text-[11px] sm:text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mt-3">
+              <div className="text-[10px] sm:text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mt-3">
                 {stat.label}
+              </div>
+              <div className="mt-4 h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400" style={{ width: `${Math.min(95, 42 + index * 14)}%` }} />
               </div>
             </div>
           ))}

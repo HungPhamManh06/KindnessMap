@@ -90,10 +90,10 @@ export const AuthModals = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/72 backdrop-blur-xl p-4 animate-fade-in">
+      <div className="relative w-full max-w-md km-auth-card overflow-hidden">
         {/* Banner header */}
-        <div className="bg-gradient-to-r from-brand-green to-brand-teal p-6 text-white text-center relative">
+        <div className="km-auth-banner p-7 text-white text-center relative">
           <button
             onClick={handleClose}
             className="absolute top-4 right-4 p-2 rounded-full bg-white/10 dark:bg-slate-800/50 hover:bg-white/20 dark:bg-slate-800/60 transition-colors"
@@ -134,7 +134,7 @@ export const AuthModals = () => {
                   placeholder="Ví dụ: Trần Minh Tuấn"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white dark:bg-slate-900 transition-all"
+                  className="w-full pl-11 pr-4 py-3.5 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
                 />
               </div>
             </div>
@@ -150,7 +150,7 @@ export const AuthModals = () => {
                 placeholder="name@example.vn"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white dark:bg-slate-900 transition-all"
+                className="w-full pl-11 pr-4 py-3.5 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
               />
             </div>
           </div>
@@ -166,7 +166,7 @@ export const AuthModals = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white dark:bg-slate-900 transition-all"
+                  className="w-full pl-11 pr-4 py-3.5 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
                 />
               </div>
               {activeModal === 'login' && (
@@ -194,7 +194,7 @@ export const AuthModals = () => {
                   placeholder="••••••••"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-green focus:bg-white dark:bg-slate-900 transition-all"
+                  className="w-full pl-11 pr-4 py-3.5 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
                 />
               </div>
             </div>
@@ -230,7 +230,7 @@ export const AuthModals = () => {
           <button
             type="submit"
             disabled={submitting || googleLoading}
-            className="w-full mt-2 py-3.5 rounded-2xl bg-gradient-to-r from-brand-green to-brand-teal text-white font-bold text-sm shadow-lg shadow-emerald-500/20 hover:opacity-95 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+            className="w-full mt-2 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 hover:opacity-95 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
           >
             {submitting ? (
               <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

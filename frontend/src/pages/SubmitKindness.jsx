@@ -135,7 +135,7 @@ export const SubmitKindness = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-20 text-center flex flex-col items-center gap-4">
+      <div className="km-page-modern relative max-w-3xl mx-auto px-4 py-20 text-center flex flex-col items-center gap-4">
         <AlertTriangle className="w-16 h-16 text-amber-500" />
         <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100">Vui Lòng Đăng Nhập</h2>
         <p className="text-slate-600 dark:text-slate-300 dark:text-slate-400 max-w-md text-xs leading-relaxed">
@@ -154,7 +154,7 @@ export const SubmitKindness = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-8">
+    <div className="km-page-modern relative max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-8">
       <button
         onClick={() => navigate('/')}
         className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 w-fit transition-colors"
@@ -163,7 +163,7 @@ export const SubmitKindness = () => {
       </button>
 
       {successPost ? (
-        <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 sm:p-12 shadow-2xl border border-emerald-100 text-center flex flex-col items-center gap-6 animate-fade-in max-w-2xl mx-auto w-full">
+        <div className="km-submit-card p-8 sm:p-12 text-center flex flex-col items-center gap-6 animate-fade-in max-w-2xl mx-auto w-full">
           <div className="w-20 h-20 bg-emerald-100 text-brand-green rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/20">
             <CheckCircle2 className="w-12 h-12" />
           </div>
@@ -194,7 +194,7 @@ export const SubmitKindness = () => {
           <div className="flex flex-col sm:flex-row items-center gap-4 w-full mt-4">
             <button
               onClick={() => navigate('/explore')}
-              className="w-full py-4 bg-brand-green text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-brand-green/20 hover:opacity-95 transition-all"
+              className="w-full py-4 bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-extrabold text-xs rounded-2xl shadow-lg shadow-brand-green/20 hover:opacity-95 transition-all"
             >
               🗺️ Xem Trên Bản Đồ
             </button>
@@ -213,7 +213,7 @@ export const SubmitKindness = () => {
           </div>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-10 shadow-xl border border-slate-200 dark:border-slate-700/80 flex flex-col gap-8">
+        <form onSubmit={handleSubmit} className="km-submit-card p-6 sm:p-10 flex flex-col gap-8">
           <div className="flex flex-col gap-2 pb-6 border-b border-slate-100 dark:border-slate-800">
             <div className="inline-flex items-center gap-2 text-brand-green font-black text-xs uppercase tracking-wider">
               <Sparkles className="w-4 h-4" /> Chia Sẻ Điều Tử Tế Mỗi Ngày
@@ -243,7 +243,7 @@ export const SubmitKindness = () => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="VD: Nhóm bạn trẻ dọn rác cuối tuần"
-                className="px-4 py-3.5 rounded-2xl km-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+                className="px-4 py-3.5 rounded-2xl km-auth-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-emerald-400/10 focus:border-emerald-400"
                 required
               />
             </div>
@@ -253,7 +253,7 @@ export const SubmitKindness = () => {
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="px-4 py-3.5 rounded-2xl km-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+                className="px-4 py-3.5 rounded-2xl km-auth-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-emerald-400/10 focus:border-emerald-400"
               >
                 {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
               </select>
@@ -282,7 +282,7 @@ export const SubmitKindness = () => {
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               placeholder="Dán URL hình ảnh hoặc chọn ảnh mẫu bên dưới"
-              className="px-4 py-3.5 rounded-2xl km-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+              className="px-4 py-3.5 rounded-2xl km-auth-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-emerald-400/10 focus:border-emerald-400"
             />
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -319,7 +319,7 @@ export const SubmitKindness = () => {
               value={locationName}
               onChange={(e) => setLocationName(e.target.value)}
               placeholder="VD: Hồ Tây, Hà Nội"
-              className="px-4 py-3.5 rounded-2xl km-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-brand-green/10 focus:border-brand-green"
+              className="px-4 py-3.5 rounded-2xl km-auth-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-emerald-400/10 focus:border-emerald-400"
               required
             />
 

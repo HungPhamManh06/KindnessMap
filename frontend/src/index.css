@@ -229,3 +229,289 @@ html.dark .maplibregl-popup-close-button:hover {
 .maplibregl-ctrl-attrib {
   font-size: 10px !important;
 }
+
+/* TikTok-inspired modern landing visuals */
+.km-modern-home {
+  isolation: isolate;
+}
+
+.km-grid-bg {
+  background-image:
+    linear-gradient(rgba(20, 184, 166, 0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20, 184, 166, 0.5) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(circle at center, black, transparent 74%);
+}
+
+.km-aurora-orb {
+  position: absolute;
+  width: 42rem;
+  height: 42rem;
+  border-radius: 9999px;
+  filter: blur(70px);
+  opacity: 0.22;
+  animation: kmAurora 16s ease-in-out infinite alternate;
+}
+
+.km-aurora-orb-1 {
+  left: -16rem;
+  top: 4rem;
+  background: #10b981;
+}
+
+.km-aurora-orb-2 {
+  right: -18rem;
+  top: 16rem;
+  background: #22d3ee;
+  animation-delay: -4s;
+}
+
+.km-aurora-orb-3 {
+  left: 28%;
+  bottom: 8rem;
+  width: 34rem;
+  height: 34rem;
+  background: #8b5cf6;
+  animation-delay: -8s;
+}
+
+.km-stat-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.75rem;
+  border: 1px solid rgba(226, 232, 240, 0.75);
+  background: linear-gradient(145deg, rgba(255,255,255,0.92), rgba(248,250,252,0.72));
+  box-shadow: 0 24px 70px -40px rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(20px);
+}
+
+.km-stat-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: radial-gradient(circle at top, rgba(16,185,129,0.16), transparent 42%);
+  pointer-events: none;
+}
+
+html.dark .km-stat-card {
+  border-color: rgba(51, 65, 85, 0.76);
+  background: linear-gradient(145deg, rgba(15,23,42,0.88), rgba(2,6,23,0.72));
+  box-shadow: 0 24px 80px -42px rgba(16, 185, 129, 0.5);
+}
+
+.km-float-slow {
+  animation: kmFloat 8s ease-in-out infinite;
+}
+
+.km-float-medium {
+  animation: kmFloat 6.5s ease-in-out infinite;
+}
+
+.km-float-fast {
+  animation: kmFloat 5.8s ease-in-out infinite reverse;
+}
+
+@keyframes kmFloat {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -12px, 0); }
+}
+
+@keyframes kmAurora {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  100% { transform: translate3d(36px, -28px, 0) scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .km-float-slow,
+  .km-float-medium,
+  .km-float-fast,
+  .km-aurora-orb {
+    animation: none;
+  }
+}
+
+/* Modern glass auth modal */
+.km-auth-card {
+  border-radius: 2rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(145deg, rgba(255,255,255,0.94), rgba(248,250,252,0.88));
+  box-shadow: 0 40px 120px -55px rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(24px);
+}
+
+html.dark .km-auth-card {
+  background: linear-gradient(145deg, rgba(15,23,42,0.92), rgba(2,6,23,0.92));
+  border-color: rgba(148, 163, 184, 0.14);
+  box-shadow: 0 40px 130px -52px rgba(16, 185, 129, 0.42);
+}
+
+.km-auth-banner {
+  background:
+    radial-gradient(circle at 50% -20%, rgba(255,255,255,0.28), transparent 36%),
+    linear-gradient(135deg, #34d399 0%, #14b8a6 45%, #06b6d4 100%);
+}
+
+.km-auth-input {
+  border: 1px solid rgba(226, 232, 240, 0.88);
+  background: rgba(248, 250, 252, 0.88);
+  color: #0f172a;
+}
+
+.km-auth-input:focus {
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+}
+
+html.dark .km-auth-input {
+  border-color: rgba(51, 65, 85, 0.95);
+  background: rgba(15, 23, 42, 0.78);
+  color: #f8fafc;
+}
+
+html.dark .km-auth-input:focus {
+  background: rgba(15, 23, 42, 0.96);
+}
+
+/* Modern story cards */
+.km-story-shell {
+  position: relative;
+}
+
+.km-story-card-modern {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2rem;
+  border: 1px solid rgba(226, 232, 240, 0.75);
+  background: linear-gradient(145deg, rgba(255,255,255,0.96), rgba(248,250,252,0.86));
+  box-shadow: 0 24px 80px -48px rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(18px);
+}
+
+.km-story-card-modern::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at top left, rgba(16,185,129,0.13), transparent 38%);
+  opacity: 0;
+  transition: opacity 260ms ease;
+}
+
+.km-story-card-modern:hover::before {
+  opacity: 1;
+}
+
+html.dark .km-story-card-modern {
+  border-color: rgba(51, 65, 85, 0.86);
+  background: linear-gradient(145deg, rgba(15,23,42,0.9), rgba(2,6,23,0.72));
+  box-shadow: 0 26px 90px -52px rgba(16, 185, 129, 0.44);
+}
+
+.km-modern-sidebar-card {
+  border-radius: 2rem;
+  border: 1px solid rgba(226,232,240,0.75);
+  background: rgba(255,255,255,0.78);
+  box-shadow: 0 24px 80px -52px rgba(15,23,42,0.55);
+  backdrop-filter: blur(22px);
+}
+
+html.dark .km-modern-sidebar-card {
+  border-color: rgba(51,65,85,0.75);
+  background: rgba(15,23,42,0.72);
+}
+
+/* Shared modern pages */
+.km-page-modern::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 8% 18%, rgba(16,185,129,0.12), transparent 28%),
+    radial-gradient(circle at 88% 16%, rgba(34,211,238,0.10), transparent 28%),
+    radial-gradient(circle at 50% 90%, rgba(139,92,246,0.09), transparent 34%);
+}
+
+.km-dark-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2.5rem;
+  border: 1px solid rgba(255,255,255,0.1);
+  background:
+    radial-gradient(circle at 16% 12%, rgba(16,185,129,0.34), transparent 32%),
+    radial-gradient(circle at 86% 18%, rgba(34,211,238,0.22), transparent 30%),
+    linear-gradient(135deg, rgba(15,23,42,0.98), rgba(2,6,23,0.98));
+  box-shadow: 0 34px 110px -55px rgba(16,185,129,0.75);
+}
+
+.km-dark-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(20,184,166,0.38) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(20,184,166,0.38) 1px, transparent 1px);
+  background-size: 42px 42px;
+  opacity: 0.08;
+  mask-image: radial-gradient(circle at center, black, transparent 76%);
+  pointer-events: none;
+}
+
+.km-dark-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+.km-submit-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2rem;
+  border: 1px solid rgba(226,232,240,0.78);
+  background: linear-gradient(145deg, rgba(255,255,255,0.96), rgba(248,250,252,0.84));
+  box-shadow: 0 32px 95px -56px rgba(15,23,42,0.7);
+  backdrop-filter: blur(20px);
+}
+
+html.dark .km-submit-card {
+  border-color: rgba(51,65,85,0.84);
+  background: linear-gradient(145deg, rgba(15,23,42,0.9), rgba(2,6,23,0.78));
+  box-shadow: 0 32px 100px -60px rgba(16,185,129,0.48);
+}
+
+.km-submit-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(16,185,129,0.11), transparent 34%);
+  pointer-events: none;
+}
+
+.km-submit-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Make legacy panels feel like the new style on redesigned pages */
+.km-page-modern .km-panel {
+  border-color: rgba(226,232,240,0.76);
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 24px 85px -58px rgba(15,23,42,0.62);
+}
+
+html.dark .km-page-modern .km-panel {
+  border-color: rgba(51,65,85,0.78);
+  background: rgba(15,23,42,0.72);
+}
+
+.km-page-modern .km-panel-soft {
+  border-color: rgba(226,232,240,0.72);
+  background: rgba(248,250,252,0.72);
+  backdrop-filter: blur(14px);
+}
+
+html.dark .km-page-modern .km-panel-soft {
+  border-color: rgba(51,65,85,0.74);
+  background: rgba(15,23,42,0.58);
+}

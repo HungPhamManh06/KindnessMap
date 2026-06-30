@@ -378,9 +378,9 @@ export const AdminDashboard = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10">
+    <div className="km-page-modern relative max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10">
       {/* 1. Admin Banner Header */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-8 sm:p-12 rounded-3xl text-white shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+      <div className="km-dark-hero p-8 sm:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-6">
         <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="flex flex-col gap-2 relative z-10 text-center md:text-left">

@@ -83,10 +83,10 @@ export const Navbar = () => {
   }, []);
 
   const navLinkClass = ({ isActive }) =>
-    `flex items-center gap-1.5 min-[1700px]:gap-2 px-1.5 min-[1700px]:px-2 py-2 rounded-2xl font-bold text-[12px] min-[1700px]:text-[13px] whitespace-nowrap transition-all duration-300 ${
+    `flex items-center gap-1.5 min-[1700px]:gap-2 px-2.5 min-[1700px]:px-3 py-2 rounded-2xl font-black text-[12px] min-[1700px]:text-[13px] whitespace-nowrap transition-all duration-300 ${
       isActive
-        ? 'bg-brand-green/10 text-brand-deepGreen dark:text-brand-green'
-        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80'
+        ? 'bg-gradient-to-r from-emerald-400/18 to-cyan-400/12 text-emerald-700 dark:text-emerald-200 shadow-[inset_0_0_0_1px_rgba(16,185,129,0.28)]'
+        : 'text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-white hover:bg-emerald-500/10'
     }`;
 
   const mobileNavLinkClass = ({ isActive }) =>
@@ -97,16 +97,16 @@ export const Navbar = () => {
     }`;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 shadow-sm">
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-white/78 dark:bg-slate-950/72 backdrop-blur-2xl shadow-[0_18px_60px_-38px_rgba(15,23,42,0.65)]">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center h-20 gap-2 min-[1700px]:gap-4">
           {/* Logo brand */}
-          <NavLink to="/" className="flex items-center gap-3 min-w-0 group">
-            <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-brand-green via-brand-teal to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-brand-green/20 group-hover:scale-105 transition-transform duration-300">
+          <NavLink to="/" className="flex items-center gap-3 min-w-0 group rounded-3xl pr-3 hover:bg-emerald-500/5 transition-colors">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-400 via-teal-400 to-cyan-300 flex items-center justify-center text-slate-950 shadow-[0_16px_45px_-18px_rgba(45,212,191,0.95)] ring-1 ring-white/30 group-hover:scale-105 group-hover:rotate-3 transition-transform duration-300">
               <HeartHandshake className="w-6 h-6" />
             </div>
             <div className="flex flex-col">
-              <span className="font-black text-xl tracking-tight bg-gradient-to-r from-brand-deepGreen to-emerald-600 bg-clip-text text-transparent leading-none">
+              <span className="font-black text-xl tracking-tight bg-gradient-to-r from-emerald-700 via-teal-600 to-cyan-600 dark:from-emerald-200 dark:via-teal-200 dark:to-cyan-200 bg-clip-text text-transparent leading-none">
                 KindnessMap
               </span>
               <span className="text-[10px] font-extrabold tracking-[0.05em] uppercase text-slate-400 dark:text-slate-500 mt-1">
@@ -142,7 +142,7 @@ export const Navbar = () => {
               {isAuthenticated && user?.role === 'admin' && (
                 <NavLink
                   to="/admin"
-                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-2xl bg-brand-green text-white font-bold text-[12px] min-[1700px]:text-[13px] whitespace-nowrap shadow-lg shadow-brand-green/25 hover:opacity-90 transition-all"
+                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 font-bold text-[12px] min-[1700px]:text-[13px] whitespace-nowrap shadow-lg shadow-brand-green/25 hover:opacity-90 transition-all"
                 >
                   <Shield className="w-4 h-4 shrink-0" />
                   <span className="hidden min-[1700px]:inline">Quản Trị Admin</span>
@@ -154,7 +154,7 @@ export const Navbar = () => {
               <div className="relative" ref={demoRef}>
                 <button
                   onClick={() => setDemoDropdownOpen(!demoDropdownOpen)}
-                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-2xl bg-amber-500 text-white font-bold text-[12px] min-[1700px]:text-[13px] whitespace-nowrap shadow-lg shadow-amber-500/20 hover:bg-amber-600 transition-all"
+                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-2xl bg-gradient-to-r from-amber-300 to-orange-400 text-slate-950 font-bold text-[12px] min-[1700px]:text-[13px] whitespace-nowrap shadow-lg shadow-amber-500/20 hover:bg-amber-600 transition-all"
                   title="Chuyển nhanh các tài khoản người dùng mẫu"
                 >
                   <Sparkles className="w-4 h-4 animate-spin-slow" />
@@ -234,7 +234,7 @@ export const Navbar = () => {
                   if (!isAuthenticated) setActiveModal('login');
                   else navigate('/submit');
                 }}
-                className="flex items-center gap-1.5 px-2 min-[1700px]:px-3 py-1.5 rounded-2xl bg-gradient-to-r from-brand-deepGreen to-brand-green text-white font-bold text-[12px] min-[1700px]:text-[13px] whitespace-nowrap shadow-lg shadow-brand-green/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                className="flex items-center gap-1.5 px-2 min-[1700px]:px-3 py-1.5 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-bold text-[12px] min-[1700px]:text-[13px] whitespace-nowrap shadow-lg shadow-brand-green/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 <PlusCircle className="w-5 h-5" />
                 <span className="hidden min-[1500px]:inline">Gửi Việc Tốt</span>
@@ -394,13 +394,13 @@ export const Navbar = () => {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setActiveModal('login')}
-                    className="px-5 py-2.5 rounded-2xl text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-bold text-[13px] whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all"
+                    className="px-5 py-2.5 rounded-2xl text-slate-600 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white font-bold text-[13px] whitespace-nowrap hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all"
                   >
                     Đăng Nhập
                   </button>
                   <button
                     onClick={() => setActiveModal('register')}
-                    className="px-6 py-2.5 rounded-2xl bg-brand-lightGreen border-2 border-brand-green text-brand-deepGreen font-black text-[13px] whitespace-nowrap hover:bg-brand-green hover:text-white transition-all shadow-sm"
+                    className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 border border-white/30 text-slate-950 font-black text-[13px] whitespace-nowrap hover:bg-brand-green hover:text-white transition-all shadow-sm"
                   >
                     Đăng Ký
                   </button>

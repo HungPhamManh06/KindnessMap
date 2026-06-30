@@ -193,8 +193,8 @@ export const AIMatchingEngine = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="max-w-5xl mx-auto px-4 py-16 flex flex-col gap-8">
-        <div className="km-panel-hero p-8 sm:p-12 text-center flex flex-col items-center gap-5 overflow-hidden">
+      <div className="km-page-modern relative max-w-5xl mx-auto px-4 py-16 flex flex-col gap-8">
+        <div className="km-dark-hero p-8 sm:p-12 text-center flex flex-col items-center gap-5 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.14),_transparent_30%)] pointer-events-none" />
           <div className="relative z-10 flex flex-col items-center gap-5 max-w-3xl">
             <div className="w-20 h-20 rounded-full bg-brand-lightGreen text-brand-green flex items-center justify-center shadow-lg shadow-brand-green/20">
@@ -213,7 +213,7 @@ export const AIMatchingEngine = () => {
             <div className="flex flex-col sm:flex-row gap-4 mt-2">
               <button
                 onClick={() => setActiveModal('login')}
-                className="px-8 py-3.5 rounded-2xl bg-brand-green text-white font-black text-sm shadow-lg shadow-brand-green/20"
+                className="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-black text-sm shadow-lg shadow-brand-green/20"
               >
                 Đăng nhập để kích hoạt AI Matching
               </button>
@@ -231,8 +231,8 @@ export const AIMatchingEngine = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-8">
-      <section className="km-panel-hero p-8 sm:p-10 overflow-hidden">
+    <div className="km-page-modern relative max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-9">
+      <section className="km-dark-hero p-8 sm:p-10 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.16),_transparent_28%)] dark:bg-[radial-gradient(circle_at_top_right,_rgba(34,197,94,0.18),_transparent_26%)] pointer-events-none" />
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
           <div className="max-w-4xl flex flex-col gap-3">
@@ -450,7 +450,7 @@ export const AIMatchingEngine = () => {
                   <button
                     type="submit"
                     disabled={savingProfile}
-                    className="px-6 py-3 rounded-2xl bg-brand-green text-white font-black text-sm shadow-lg shadow-brand-green/20 hover:opacity-95 disabled:opacity-60"
+                    className="px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-black text-sm shadow-lg shadow-brand-green/20 hover:opacity-95 disabled:opacity-60"
                   >
                     {savingProfile ? 'Đang lưu...' : 'Lưu'}
                   </button>

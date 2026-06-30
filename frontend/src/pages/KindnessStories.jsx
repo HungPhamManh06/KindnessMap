@@ -205,11 +205,11 @@ export const KindnessStories = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10">
+    <div className="relative max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-10 km-story-shell">
       
       {/* Page Title & Intro */}
-      <div className="bg-gradient-to-r from-brand-deepGreen via-brand-green to-brand-teal p-8 sm:p-12 rounded-3xl text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-        <div className="absolute right-0 bottom-0 translate-x-12 translate-y-12 w-80 h-80 bg-white/10 dark:bg-slate-800/50 rounded-full blur-2xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-slate-950 p-8 sm:p-12 text-white shadow-[0_34px_110px_-55px_rgba(16,185,129,0.8)] flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(16,185,129,0.36),transparent_32%),radial-gradient(circle_at_88%_20%,rgba(34,211,238,0.24),transparent_30%)] pointer-events-none" /><div className="absolute inset-0 km-grid-bg opacity-[0.08] pointer-events-none" />
         
         <div className="flex flex-col gap-3 relative z-10 max-w-2xl">
           <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 dark:bg-slate-800/60 backdrop-blur-md text-xs font-black w-fit tracking-wider uppercase">
@@ -228,7 +228,7 @@ export const KindnessStories = () => {
             if (!isAuthenticated) setActiveModal('login');
             else navigate('/submit');
           }}
-          className="px-8 py-4 rounded-2xl bg-white dark:bg-slate-900 text-brand-deepGreen font-black text-sm shadow-2xl hover:scale-105 active:scale-95 transition-all shrink-0 self-center md:self-end"
+          className="px-8 py-4 rounded-2xl bg-gradient-to-r from-emerald-300 to-cyan-300 text-slate-950 font-black text-sm shadow-2xl hover:scale-105 active:scale-95 transition-all shrink-0 self-center md:self-end"
         >
           ✍️ Viết Câu Chuyện Của Bạn
         </button>
@@ -241,15 +241,15 @@ export const KindnessStories = () => {
         <div className="lg:col-span-8 flex flex-col gap-6">
           
           {/* Category Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+          <div className="sticky top-24 z-20 flex items-center gap-2 overflow-x-auto pb-3 scrollbar-none rounded-[1.75rem] border border-slate-200/70 dark:border-slate-800/80 bg-white/70 dark:bg-slate-950/62 p-2 backdrop-blur-2xl shadow-[0_18px_60px_-45px_rgba(15,23,42,0.7)]">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCat(cat)}
                 className={`px-4 py-2.5 rounded-2xl text-xs font-black shrink-0 transition-all ${
                   selectedCat === cat
-                    ? 'bg-slate-900 text-white shadow-md shadow-slate-900/20 scale-105'
-                    : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
+                    ? 'bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 shadow-md shadow-emerald-500/20 scale-105'
+                    : 'bg-white/80 dark:bg-slate-900/70 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-slate-700/80'
                 }`}
               >
                 {cat === 'All' ? '🌟 Tất Cả Danh Mục' : cat}
@@ -276,10 +276,10 @@ export const KindnessStories = () => {
                     setSearchParams({ id: story.id });
                     openStoryDetail(story);
                   }}
-                  className="bg-white dark:bg-slate-900 rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-700/90 dark:border-slate-700/80 overflow-hidden flex flex-col group cursor-pointer"
+                  className="km-story-card-modern group hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
                 >
                   {/* Image full width */}
-                  <div className="relative h-72 sm:h-96 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                  <div className="relative h-72 sm:h-96 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden rounded-b-[2rem]">
                     <img
                       src={story.imageUrl || FALLBACK_STORY_IMAGE}
                       alt={story.title}
@@ -301,7 +301,7 @@ export const KindnessStories = () => {
                   </div>
 
                   {/* Info Box */}
-                  <div className="p-6 sm:p-8 flex flex-col gap-4">
+                  <div className="relative p-6 sm:p-8 flex flex-col gap-4">
                     <div className="flex items-center justify-between text-xs font-bold text-slate-400 dark:text-slate-500">
                       <span className="flex items-center gap-1 text-slate-600 dark:text-slate-300 dark:text-slate-400">
                         <MapPin className="w-4 h-4 text-brand-green" /> {story.locationName}
@@ -367,7 +367,7 @@ export const KindnessStories = () => {
 
         {/* Sidebar Column (Trending Stories) */}
         <aside className="lg:col-span-4 flex flex-col gap-6 sticky top-28">
-          <div className="km-panel p-6 flex flex-col gap-4">
+          <div className="km-modern-sidebar-card p-6 flex flex-col gap-4">
             <div className="flex items-center gap-2 text-rose-500 font-black text-sm uppercase tracking-wider pb-3 border-b border-slate-100 dark:border-slate-800">
               <Flame className="w-5 h-5 fill-rose-500" />
               <span>Xu Hướng Cộng Đồng</span>
@@ -401,7 +401,7 @@ export const KindnessStories = () => {
           </div>
 
           {/* Inspirational Digital Quote Box */}
-          <div className="bg-gradient-to-tr from-brand-deepGreen to-brand-teal p-6 rounded-3xl text-white shadow-xl flex flex-col gap-3">
+          <div className="relative overflow-hidden bg-slate-950 p-6 rounded-[2rem] text-white shadow-[0_24px_80px_-50px_rgba(16,185,129,0.8)] border border-white/10 flex flex-col gap-3">
             <QuoteIcon className="w-8 h-8 text-emerald-200 opacity-60" />
             <p className="text-xs font-semibold leading-relaxed italic">
               "Lòng tốt là thứ ngôn ngữ mà người điếc có thể nghe và người mù có thể thấy."

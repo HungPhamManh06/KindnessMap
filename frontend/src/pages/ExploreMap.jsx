@@ -69,8 +69,8 @@ export const ExploreMap = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
-      <section className="km-panel-hero p-6 sm:p-8 lg:p-10 overflow-hidden">
+    <div className="km-page-modern relative max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-8">
+      <section className="km-dark-hero p-6 sm:p-8 lg:p-10 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.12),_transparent_28%)] dark:bg-[radial-gradient(circle_at_top_right,_rgba(34,197,94,0.16),_transparent_24%)] pointer-events-none" />
         <div className="relative z-10 flex flex-col gap-6">
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5">
@@ -120,7 +120,7 @@ export const ExploreMap = () => {
                   onClick={() => setSelectedCategory(cat)}
                   className={`px-4 py-2 rounded-2xl text-xs font-black shrink-0 transition-all ${
                     selectedCategory === cat
-                      ? 'bg-brand-green text-white shadow-md shadow-brand-green/25 scale-105'
+                      ? 'bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 shadow-md shadow-emerald-500/25 scale-105'
                       : 'bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 shadow-xs'
                   }`}
                 >
