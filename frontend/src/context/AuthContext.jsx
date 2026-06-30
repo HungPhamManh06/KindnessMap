@@ -128,6 +128,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (credential) => {
+    try {
+      const res = await api.post('/auth/google', { credential });
+      const loggedUser = res.data.user;
+
+      localStorage.setItem('kindness_token', res.data.token);
+
+      setUser(loggedUser);
+      setIsAuthenticated(true);
+      await fetchUserData();
+
+      addToast('Đăng nhập Google thành công!', `Chào mừng ${loggedUser.fullName} đến với KindnessMap.`, 'success');
+      setActiveModal(null);
+      return { success: true };
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Không thể đăng nhập bằng Google. Vui lòng thử lại!';
+      addToast('Đăng nhập Google thất bại', msg, 'warning');
+      return { success: false, message: msg };
+    }
+  };
+
   const quickDemoLogin = async (demoRole) => {
     let demoEmail = 'tuan.tran@student.vn';
     let demoPw = 'password123';
@@ -156,6 +177,7 @@ export const AuthProvider = ({ children }) => {
         register,
         logout,
         resetPassword,
+        loginWithGoogle,
         fetchUserData,
         quickDemoLogin,
       }}

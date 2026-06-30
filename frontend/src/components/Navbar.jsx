@@ -156,7 +156,7 @@ export const Navbar = () => {
                   title="Chuyển nhanh các tài khoản người dùng mẫu"
                 >
                   <Sparkles className="w-4 h-4 animate-spin-slow" />
-                  <span className="hidden xl:inline">Thử Vai Trò Demo</span>
+                  <span className="hidden xl:inline">Tài Khoản Demo</span>
                   <span className="xl:hidden">Demo</span>
                   <ChevronDown className="w-3.5 h-3.5 opacity-80" />
                 </button>

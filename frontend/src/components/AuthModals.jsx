@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { X, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-react';
 
 export const AuthModals = () => {
-  const { activeModal, setActiveModal, login, register, resetPassword } = useAuth();
+  const { activeModal, setActiveModal, login, register, resetPassword, loginWithGoogle } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -11,6 +11,52 @@ export const AuthModals = () => {
   const [newPassword, setNewPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleReady, setGoogleReady] = useState(typeof window !== 'undefined' && Boolean(window.google?.accounts?.id));
+  const googleButtonRef = useRef(null);
+
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+  useEffect(() => {
+    if (googleReady) return;
+
+    if (typeof window === 'undefined') return;
+
+    const timer = window.setInterval(() => {
+      if (window.google?.accounts?.id) {
+        setGoogleReady(true);
+        window.clearInterval(timer);
+      }
+    }, 250);
+
+    return () => window.clearInterval(timer);
+  }, [googleReady]);
+
+  useEffect(() => {
+    if (!activeModal || !googleClientId || !googleReady || !googleButtonRef.current) return;
+
+    googleButtonRef.current.innerHTML = '';
+    window.google.accounts.id.initialize({
+      client_id: googleClientId,
+      callback: async (response) => {
+        if (!response?.credential) return;
+        setErrorMsg('');
+        setGoogleLoading(true);
+        const res = await loginWithGoogle(response.credential);
+        if (!res.success) setErrorMsg(res.message);
+        setGoogleLoading(false);
+      },
+    });
+
+    window.google.accounts.id.renderButton(googleButtonRef.current, {
+      theme: document.documentElement.classList.contains('dark') ? 'filled_black' : 'outline',
+      size: 'large',
+      shape: 'pill',
+      text: activeModal === 'register' ? 'signup_with' : 'signin_with',
+      width: 368,
+      locale: 'vi',
+    });
+  }, [activeModal, googleClientId, googleReady, loginWithGoogle]);
 
   if (!activeModal) return null;
 
@@ -155,9 +201,35 @@ export const AuthModals = () => {
           )}
 
 
+          {activeModal !== 'reset' && (
+            <div className="flex flex-col gap-3">
+              <div className="relative flex items-center justify-center">
+                <div className="absolute inset-x-0 top-1/2 border-t border-slate-100 dark:border-slate-800" />
+                <span className="relative px-3 bg-white dark:bg-slate-900 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  hoặc
+                </span>
+              </div>
+
+              {googleClientId && googleReady ? (
+                <div className="relative min-h-[44px] flex items-center justify-center">
+                  <div ref={googleButtonRef} className="w-full flex justify-center" />
+                  {googleLoading && (
+                    <div className="absolute inset-0 rounded-2xl bg-white/70 dark:bg-slate-900/70 flex items-center justify-center">
+                      <span className="inline-block w-5 h-5 border-2 border-brand-green border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-[11px] font-semibold border border-amber-200 dark:border-amber-500/20">
+                  {googleClientId ? 'Đang tải nút đăng nhập Google...' : 'Chưa cấu hình VITE_GOOGLE_CLIENT_ID nên nút đăng nhập Google đang bị ẩn.'}
+                </div>
+              )}
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || googleLoading}
             className="w-full mt-2 py-3.5 rounded-2xl bg-gradient-to-r from-brand-green to-brand-teal text-white font-bold text-sm shadow-lg shadow-emerald-500/20 hover:opacity-95 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
           >
             {submitting ? (
