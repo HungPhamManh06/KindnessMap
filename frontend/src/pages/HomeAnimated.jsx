@@ -1,10 +1,11 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { ArrowRight, Sparkles, MapPin, Heart, MessageSquare, PlusCircle, Trophy, Star, Users, MapPinned, Navigation } from 'lucide-react';
 import { AnimatedNumber } from '../components/AnimatedNumber';
+import { useGsapHomeAnimations } from '../hooks/useGsapHomeAnimations';
 
 const LazyMapComponent = lazy(() => import('../components/MapComponent').then((module) => ({ default: module.MapComponent })));
 
@@ -126,6 +127,8 @@ export const HomeAnimated = () => {
   const isSmallScreen = useIsSmallScreen();
   const shouldReduceHomeMotion = Boolean(shouldReduceMotion || isSmallScreen);
   const enableParallax = !shouldReduceHomeMotion;
+  const homeScopeRef = useRef(null);
+  useGsapHomeAnimations({ scopeRef: homeScopeRef, disabled: shouldReduceHomeMotion });
   const heroMouseX = useMotionValue(0);
   const heroMouseY = useMotionValue(0);
   const smoothHeroX = useSpring(heroMouseX, { stiffness: 90, damping: 24 });
@@ -175,11 +178,11 @@ export const HomeAnimated = () => {
   };
 
   return (
-    <div className="relative flex flex-col gap-20 pb-16 overflow-x-hidden km-modern-home">
+    <div ref={homeScopeRef} className="relative flex flex-col gap-20 pb-16 overflow-x-hidden km-modern-home">
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="km-aurora-orb km-aurora-orb-1" />
-        <div className="km-aurora-orb km-aurora-orb-2" />
-        <div className="km-aurora-orb km-aurora-orb-3" />
+        <div className="km-aurora-orb km-aurora-orb-1 km-gsap-orb" />
+        <div className="km-aurora-orb km-aurora-orb-2 km-gsap-orb" />
+        <div className="km-aurora-orb km-aurora-orb-3 km-gsap-orb" />
         <div className="absolute inset-0 opacity-[0.055] dark:opacity-[0.08] km-grid-bg" />
       </div>
 
@@ -191,7 +194,7 @@ export const HomeAnimated = () => {
 
           <motion.div className="relative z-10 grid lg:grid-cols-[1.03fr_0.97fr] gap-10 lg:gap-12 items-center px-5 sm:px-9 lg:px-14 py-12 sm:py-16 lg:py-20" variants={motionContainer} initial={shouldReduceHomeMotion ? false : "hidden"} animate="show">
             <motion.div className="flex flex-col items-start text-left" variants={motionContainer}>
-              <motion.div variants={motionRise} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/10 border border-white/15 text-emerald-100 text-xs sm:text-sm font-extrabold shadow-2xl shadow-emerald-500/10 backdrop-blur-xl animate-fade-in">
+              <motion.div variants={motionRise} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/10 border border-white/15 text-emerald-100 text-xs sm:text-sm font-extrabold shadow-2xl shadow-emerald-500/10 backdrop-blur-xl animate-fade-in km-gsap-eyebrow">
                 <Sparkles className="w-4 h-4 text-emerald-300 animate-pulse" />
                 <span>Social Good Platform · Việt Nam 2026</span>
               </motion.div>
@@ -201,7 +204,7 @@ export const HomeAnimated = () => {
                   {heroTitleLine1.map((word, index) => (
                     <motion.span
                       key={word}
-                      className="inline-block mr-[0.18em]"
+                      className="inline-block mr-[0.18em] km-gsap-title-word"
                       initial={shouldReduceHomeMotion ? false : { opacity: 0, y: 34, rotateX: -34, filter: 'blur(10px)' }}
                       animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }}
                       transition={{ duration: 0.72, delay: 0.16 + index * 0.045, ease: easeOutExpo }}
@@ -214,7 +217,7 @@ export const HomeAnimated = () => {
                   {heroTitleLine2.map((word, index) => (
                     <motion.span
                       key={word}
-                      className="inline-block mr-[0.18em] bg-gradient-to-r from-emerald-200 via-teal-100 to-cyan-200 bg-clip-text text-transparent"
+                      className="inline-block mr-[0.18em] bg-gradient-to-r from-emerald-200 via-teal-100 to-cyan-200 bg-clip-text text-transparent km-gsap-title-word"
                       initial={shouldReduceHomeMotion ? false : { opacity: 0, y: 34, rotateX: -34, filter: 'blur(10px)' }}
                       animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }}
                       transition={{ duration: 0.72, delay: 0.38 + index * 0.045, ease: easeOutExpo }}
@@ -225,11 +228,11 @@ export const HomeAnimated = () => {
                 </span>
               </motion.h1>
 
-              <motion.p variants={motionRise} className="mt-6 text-base sm:text-xl text-slate-300 max-w-2xl leading-relaxed">
+              <motion.p variants={motionRise} className="mt-6 text-base sm:text-xl text-slate-300 max-w-2xl leading-relaxed km-gsap-copy">
                 KindnessMap kết hợp bản đồ trực tuyến, câu chuyện cộng đồng, điểm công dân số và AI để lan tỏa lòng tốt theo cách hiện đại, trực quan và truyền cảm hứng.
               </motion.p>
 
-              <motion.div variants={motionRise} className="mt-9 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+              <motion.div variants={motionRise} className="mt-9 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto km-gsap-cta">
                 <motion.button
                   whileHover={shouldReduceHomeMotion ? undefined : { y: -4, scale: 1.035 }}
                   whileTap={{ scale: 0.97 }}
@@ -257,14 +260,14 @@ export const HomeAnimated = () => {
 
               <motion.div variants={motionRise} className="mt-9 flex flex-wrap gap-3">
                 {audiences.map((item) => (
-                  <div key={item} className="rounded-full border border-white/12 bg-white/[0.06] px-4 py-2 text-xs sm:text-sm font-bold text-slate-200 backdrop-blur-xl">
+                  <div key={item} className="rounded-full border border-white/12 bg-white/[0.06] px-4 py-2 text-xs sm:text-sm font-bold text-slate-200 backdrop-blur-xl km-gsap-pill">
                     {item}
                   </div>
                 ))}
               </motion.div>
             </motion.div>
 
-            <motion.div variants={motionScale} style={enableParallax ? { rotateX: heroRotateX, rotateY: heroRotateY, transformPerspective: 1200 } : undefined} className="relative min-h-[520px] lg:min-h-[610px]">
+            <motion.div variants={motionScale} style={enableParallax ? { rotateX: heroRotateX, rotateY: heroRotateY, transformPerspective: 1200 } : undefined} className="relative min-h-[520px] lg:min-h-[610px] km-gsap-map-card">
               <div className="absolute inset-4 rounded-[2.5rem] bg-gradient-to-br from-emerald-400/20 via-cyan-400/10 to-purple-500/20 blur-3xl" />
 
               <div className="relative h-full rounded-[2rem] border border-white/12 bg-white/[0.07] p-4 sm:p-5 backdrop-blur-2xl shadow-2xl overflow-hidden km-float-slow">
@@ -334,7 +337,7 @@ export const HomeAnimated = () => {
       <section className="px-4 sm:px-6 lg:px-8 max-w-[1500px] mx-auto w-full -mt-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {statDefinitions.map((stat, index) => (
-            <motion.div key={stat.key} initial={shouldReduceHomeMotion ? false : { opacity: 0, y: 24, scale: 0.96 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.55, delay: index * 0.06, ease: easeOutExpo }} whileHover={shouldReduceHomeMotion ? undefined : { y: -8, rotateX: 1.2, rotateY: -1.2 }} className="km-stat-card km-magnetic-card group p-5 sm:p-6 text-center">
+            <motion.div key={stat.key} initial={shouldReduceHomeMotion ? false : { opacity: 0, y: 24, scale: 0.96 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.55, delay: index * 0.06, ease: easeOutExpo }} whileHover={shouldReduceHomeMotion ? undefined : { y: -8, rotateX: 1.2, rotateY: -1.2 }} className="km-stat-card km-magnetic-card km-gsap-card km-gsap-magnetic group p-5 sm:p-6 text-center">
               <div className="text-3xl sm:text-5xl font-black tracking-[-0.04em] bg-gradient-to-r from-slate-950 to-emerald-700 bg-clip-text text-transparent dark:from-white dark:to-emerald-200">
                 <AnimatedNumber value={siteStats[stat.key]} disabled={shouldReduceHomeMotion} />
               </div>
@@ -389,7 +392,7 @@ export const HomeAnimated = () => {
       </section>
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col gap-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 km-gsap-reveal">
           <div className="flex flex-col gap-2">
             <div className="inline-flex items-center gap-2 text-rose-500 font-extrabold text-xs uppercase tracking-wider">
               <Star className="w-4 h-4 fill-rose-500" /> Câu Chuyện Lan Tỏa
@@ -426,7 +429,7 @@ export const HomeAnimated = () => {
                 viewport={{ once: true, margin: "-70px" }}
                 transition={{ duration: 0.55, ease: easeOutExpo }}
                 whileHover={shouldReduceHomeMotion ? undefined : { y: -8, scale: 1.01 }}
-                className="km-panel overflow-hidden group hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                className="km-panel overflow-hidden group hover:-translate-y-1 transition-all duration-300 cursor-pointer km-gsap-card km-gsap-magnetic"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
@@ -489,7 +492,7 @@ export const HomeAnimated = () => {
       </section>
 
       <section className="px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="bg-slate-900 text-white py-16 px-6 sm:px-10 lg:px-14 rounded-[32px] relative overflow-hidden shadow-2xl border border-slate-800">
+        <div className="bg-slate-900 text-white py-16 px-6 sm:px-10 lg:px-14 rounded-[32px] relative overflow-hidden shadow-2xl border border-slate-800 km-gsap-reveal">
           <div className="absolute -right-20 -bottom-20 w-96 h-96 bg-brand-green/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.15),_transparent_30%)] pointer-events-none" />
 
