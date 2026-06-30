@@ -231,7 +231,7 @@ const chatWithGemini = async (req, res) => {
     }
 
     const errors = [];
-    const providers = [askGemini, askGroq, askOpenRouter];
+    const providers = [askOpenRouter, askGroq, askGemini];
 
     for (const provider of providers) {
       const result = await provider({ message, history });
