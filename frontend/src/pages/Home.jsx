@@ -1,9 +1,10 @@
 import React, { lazy, Suspense, useEffect, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { ArrowRight, Sparkles, MapPin, Heart, MessageSquare, PlusCircle, Trophy, Star, Users, MapPinned, Navigation } from 'lucide-react';
+import { AnimatedNumber } from '../components/AnimatedNumber';
 
 const LazyMapComponent = lazy(() => import('../components/MapComponent').then((module) => ({ default: module.MapComponent })));
 
@@ -98,6 +99,14 @@ export const Home = () => {
   const navigate = useNavigate();
   const { isAuthenticated, setActiveModal } = useAuth();
   const shouldReduceMotion = useReducedMotion();
+  const heroMouseX = useMotionValue(0);
+  const heroMouseY = useMotionValue(0);
+  const smoothHeroX = useSpring(heroMouseX, { stiffness: 90, damping: 24 });
+  const smoothHeroY = useSpring(heroMouseY, { stiffness: 90, damping: 24 });
+  const heroRotateY = useTransform(smoothHeroX, [-0.5, 0.5], [-6, 6]);
+  const heroRotateX = useTransform(smoothHeroY, [-0.5, 0.5], [5, -5]);
+  const heroTitleLine1 = ['Biến', 'mỗi', 'việc', 'tốt', 'thành'];
+  const heroTitleLine2 = ['một', 'điểm', 'sáng', 'trên', 'bản', 'đồ.'];
 
   const [featuredStories, setFeaturedStories] = useState([]);
   const [mapPosts, setMapPosts] = useState([]);
@@ -148,7 +157,7 @@ export const Home = () => {
       </div>
 
       <section className="relative px-4 sm:px-6 lg:px-8 max-w-[1500px] mx-auto w-full pt-8 lg:pt-12">
-        <div className="relative overflow-hidden rounded-[2rem] sm:rounded-[3rem] border border-white/10 bg-slate-950 text-white shadow-[0_35px_120px_-55px_rgba(16,185,129,0.8)]">
+        <div className="relative overflow-hidden rounded-[2rem] sm:rounded-[3rem] border border-white/10 bg-slate-950 text-white shadow-[0_35px_120px_-55px_rgba(16,185,129,0.8)]" onMouseMove={(event) => { if (shouldReduceMotion) return; const rect = event.currentTarget.getBoundingClientRect(); heroMouseX.set((event.clientX - rect.left) / rect.width - 0.5); heroMouseY.set((event.clientY - rect.top) / rect.height - 0.5); }} onMouseLeave={() => { heroMouseX.set(0); heroMouseY.set(0); }}>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(16,185,129,0.32),transparent_28%),radial-gradient(circle_at_82%_12%,rgba(20,184,166,0.24),transparent_30%),linear-gradient(135deg,rgba(15,23,42,0.92),rgba(2,6,23,0.98))]" />
           <div className="absolute inset-0 km-grid-bg opacity-[0.08]" />
           <div className="absolute left-1/2 top-0 h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-emerald-300/70 to-transparent" />
@@ -161,9 +170,31 @@ export const Home = () => {
               </motion.div>
 
               <motion.h1 variants={motionRise} className="mt-7 text-4xl sm:text-6xl xl:text-7xl font-black tracking-[-0.055em] leading-[0.95] max-w-5xl">
-                Biến mỗi việc tốt thành
+                <span className="block">
+                  {heroTitleLine1.map((word, index) => (
+                    <motion.span
+                      key={word}
+                      className="inline-block mr-[0.18em]"
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 34, rotateX: -34, filter: 'blur(10px)' }}
+                      animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }}
+                      transition={{ duration: 0.72, delay: 0.16 + index * 0.045, ease: easeOutExpo }}
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+                </span>
                 <span className="block mt-2 bg-gradient-to-r from-emerald-200 via-teal-200 to-cyan-200 bg-clip-text text-transparent drop-shadow-[0_0_28px_rgba(45,212,191,0.22)]">
-                  một điểm sáng trên bản đồ.
+                  {heroTitleLine2.map((word, index) => (
+                    <motion.span
+                      key={word}
+                      className="inline-block mr-[0.18em]"
+                      initial={shouldReduceMotion ? false : { opacity: 0, y: 34, rotateX: -34, filter: 'blur(10px)' }}
+                      animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }}
+                      transition={{ duration: 0.72, delay: 0.38 + index * 0.045, ease: easeOutExpo }}
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
                 </span>
               </motion.h1>
 
@@ -206,7 +237,7 @@ export const Home = () => {
               </motion.div>
             </motion.div>
 
-            <motion.div variants={motionScale} className="relative min-h-[520px] lg:min-h-[610px]">
+            <motion.div variants={motionScale} style={shouldReduceMotion ? undefined : { rotateX: heroRotateX, rotateY: heroRotateY, transformPerspective: 1200 }} className="relative min-h-[520px] lg:min-h-[610px]">
               <div className="absolute inset-4 rounded-[2.5rem] bg-gradient-to-br from-emerald-400/20 via-cyan-400/10 to-purple-500/20 blur-3xl" />
 
               <div className="relative h-full rounded-[2rem] border border-white/12 bg-white/[0.07] p-4 sm:p-5 backdrop-blur-2xl shadow-2xl overflow-hidden km-float-slow">
@@ -239,7 +270,7 @@ export const Home = () => {
                       <MapPinned className="w-5 h-5 text-emerald-300" />
                       <span className="text-[10px] font-black text-emerald-200 uppercase tracking-wider">Pins</span>
                     </div>
-                    <div className="mt-4 text-3xl font-black tracking-tight">{formatStatValue(siteStats.pinnedGoodDeeds)}</div>
+                    <div className="mt-4 text-3xl font-black tracking-tight"><AnimatedNumber value={siteStats.pinnedGoodDeeds} /></div>
                     <div className="text-[11px] text-slate-400 font-bold">Việc tốt đã ghim</div>
                   </div>
 
@@ -248,7 +279,7 @@ export const Home = () => {
                       <Users className="w-5 h-5 text-cyan-300" />
                       <span className="text-[10px] font-black text-cyan-200 uppercase tracking-wider">Community</span>
                     </div>
-                    <div className="mt-4 text-3xl font-black tracking-tight">{formatStatValue(siteStats.activeCitizens)}</div>
+                    <div className="mt-4 text-3xl font-black tracking-tight"><AnimatedNumber value={siteStats.activeCitizens} /></div>
                     <div className="text-[11px] text-slate-400 font-bold">Công dân tích cực</div>
                   </div>
                 </div>
@@ -266,7 +297,7 @@ export const Home = () => {
 
               <div className="hidden sm:block absolute -left-3 bottom-20 rounded-3xl border border-white/15 bg-slate-950/70 px-4 py-3 backdrop-blur-2xl shadow-2xl km-float-medium">
                 <div className="text-[11px] uppercase tracking-wider text-slate-400 font-black">Điểm tích lũy</div>
-                <div className="text-2xl font-black text-white">{formatStatValue(siteStats.kindnessPoints)}</div>
+                <div className="text-2xl font-black text-white"><AnimatedNumber value={siteStats.kindnessPoints} /></div>
               </div>
             </motion.div>
           </motion.div>
@@ -278,7 +309,7 @@ export const Home = () => {
           {statDefinitions.map((stat, index) => (
             <motion.div key={stat.key} initial={shouldReduceMotion ? false : { opacity: 0, y: 24, scale: 0.96 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.55, delay: index * 0.06, ease: easeOutExpo }} whileHover={shouldReduceMotion ? undefined : { y: -8, rotateX: 1.2, rotateY: -1.2 }} className="km-stat-card km-magnetic-card group p-5 sm:p-6 text-center">
               <div className="text-3xl sm:text-5xl font-black tracking-[-0.04em] bg-gradient-to-r from-slate-950 to-emerald-700 bg-clip-text text-transparent dark:from-white dark:to-emerald-200">
-                {formatStatValue(siteStats[stat.key])}
+                <AnimatedNumber value={siteStats[stat.key]} />
               </div>
               <div className="text-[10px] sm:text-xs font-black uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400 mt-3">
                 {stat.label}

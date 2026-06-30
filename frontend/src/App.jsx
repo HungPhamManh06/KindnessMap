@@ -1,5 +1,6 @@
 import React, { Suspense, lazy } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { NotificationProvider } from './context/NotificationContext';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
@@ -40,6 +41,43 @@ const PageLoader = () => (
   </div>
 );
 
+
+const pageTransition = {
+  initial: { opacity: 0, y: 18, filter: 'blur(8px)' },
+  animate: { opacity: 1, y: 0, filter: 'blur(0px)' },
+  exit: { opacity: 0, y: -12, filter: 'blur(6px)' },
+};
+
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  const shouldReduceMotion = useReducedMotion();
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={shouldReduceMotion ? false : pageTransition.initial}
+        animate={pageTransition.animate}
+        exit={shouldReduceMotion ? undefined : pageTransition.exit}
+        transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <Routes location={location}>
+          <Route path="/" element={<Home />} />
+          <Route path="/explore" element={<ExploreMap />} />
+          <Route path="/stories" element={<KindnessStories />} />
+          <Route path="/submit" element={<SubmitKindness />} />
+          <Route path="/leaderboard" element={<Leaderboard />} />
+          <Route path="/matching" element={<AIMatchingEngine />} />
+          <Route path="/profile" element={<UserProfile />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/awards" element={<MonthlyAwards />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 export const App = () => {
   return (
     <LanguageProvider>
@@ -51,18 +89,7 @@ export const App = () => {
                 <Navbar />
                 <main className="flex-1">
                   <Suspense fallback={<PageLoader />}>
-                    <Routes>
-                      <Route path="/" element={<Home />} />
-                      <Route path="/explore" element={<ExploreMap />} />
-                      <Route path="/stories" element={<KindnessStories />} />
-                      <Route path="/submit" element={<SubmitKindness />} />
-                      <Route path="/leaderboard" element={<Leaderboard />} />
-                      <Route path="/matching" element={<AIMatchingEngine />} />
-                      <Route path="/profile" element={<UserProfile />} />
-                      <Route path="/admin" element={<AdminDashboard />} />
-                      <Route path="/awards" element={<MonthlyAwards />} />
-                      <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
+<AnimatedRoutes />
                   </Suspense>
                 </main>
                 <Footer />
