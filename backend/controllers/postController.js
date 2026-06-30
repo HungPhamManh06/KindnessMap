@@ -2,12 +2,16 @@ const { queryGet, queryRun, queryAll } = require('../config/db');
 
 const FALLBACK_IMAGE_URL = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%201200%20700%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20x2%3D%271%27%20y1%3D%270%27%20y2%3D%271%27%3E%3Cstop%20stop-color%3D%27%2310b981%27%2F%3E%3Cstop%20offset%3D%270.55%27%20stop-color%3D%27%230f766e%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%230f172a%27%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%27r%27%20cx%3D%2750%25%27%20cy%3D%2735%25%27%20r%3D%2760%25%27%3E%3Cstop%20stop-color%3D%27%23ffffff%27%20stop-opacity%3D%270.22%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23ffffff%27%20stop-opacity%3D%270%27%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%271200%27%20height%3D%27700%27%20fill%3D%27url(%23g)%27%2F%3E%3Crect%20width%3D%271200%27%20height%3D%27700%27%20fill%3D%27url(%23r)%27%2F%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%23ffffff%27%20stroke-width%3D%2718%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20opacity%3D%270.92%27%20transform%3D%27translate(510%20225)%20scale(3.3)%27%3E%3Cpath%20d%3D%27M20.8%204.6a5.5%205.5%200%200%200-7.8%200L12%205.7l-1-1.1a5.5%205.5%200%200%200-7.8%207.8l1%201L12%2021l7.8-7.6%201-1a5.5%205.5%200%200%200%200-7.8z%27%2F%3E%3Cpath%20d%3D%27M12%205.7l-2.6%202.6a2%202%200%200%200%200%202.8l.2.2a2%202%200%200%200%202.8%200L14%209.8%27%2F%3E%3C%2Fg%3E%3Ctext%20x%3D%27600%27%20y%3D%27525%27%20text-anchor%3D%27middle%27%20font-family%3D%27Inter%2CArial%2Csans-serif%27%20font-size%3D%2756%27%20font-weight%3D%27800%27%20fill%3D%27%23ffffff%27%3EKindnessMap%3C%2Ftext%3E%3Ctext%20x%3D%27600%27%20y%3D%27590%27%20text-anchor%3D%27middle%27%20font-family%3D%27Inter%2CArial%2Csans-serif%27%20font-size%3D%2728%27%20font-weight%3D%27600%27%20fill%3D%27%23d1fae5%27%3EB%E1%BA%A3n%20%C4%90%E1%BB%93%20Vi%E1%BB%87c%20T%E1%BB%91t%3C%2Ftext%3E%3C%2Fsvg%3E';
 
+
+const proxifyImageUrl = (raw) => `/api/posts/image-proxy?url=${encodeURIComponent(raw)}`;
+
 const normalizeImageUrl = (url) => {
   const raw = String(url || '').trim();
   if (!raw) return FALLBACK_IMAGE_URL;
   if (raw.startsWith('data:image/')) return raw;
-  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith('/api/posts/image-proxy')) return raw;
   if (raw.startsWith('/uploads/')) return raw;
+  if (/^https?:\/\//i.test(raw)) return proxifyImageUrl(raw);
   return FALLBACK_IMAGE_URL;
 };
 
@@ -44,7 +48,7 @@ const createPost = async (req, res) => {
       status = 'Rejected';
     }
 
-    const defaultImage = imageUrl || 'https://images.unsplash.com/photo-1593113598432-846f29edce7b?auto=format&fit=crop&w=800&q=80';
+    const defaultImage = imageUrl || FALLBACK_IMAGE_URL;
 
     const result = await queryRun(
       `INSERT INTO Posts (title, description, imageUrl, category, latitude, longitude, locationName, status, isFeatured, userId) 
@@ -292,12 +296,54 @@ const commentPost = async (req, res) => {
   }
 };
 
+
+const proxyImage = async (req, res) => {
+  try {
+    const rawUrl = String(req.query.url || '').trim();
+    if (!/^https?:\/\//i.test(rawUrl)) {
+      res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return res.send(decodeURIComponent(FALLBACK_IMAGE_URL.split(',')[1]));
+    }
+
+    const response = await fetch(rawUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; KindnessMapBot/1.0; +https://kindnessmap-vn.vercel.app)',
+        'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'Referer': new URL(rawUrl).origin,
+      },
+      redirect: 'follow',
+    });
+
+    const contentType = response.headers.get('content-type') || '';
+    if (!response.ok || !contentType.toLowerCase().startsWith('image/')) {
+      res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return res.send(decodeURIComponent(FALLBACK_IMAGE_URL.split(',')[1]));
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    return res.send(buffer);
+  } catch (error) {
+    console.error('Image proxy error:', error.message);
+    res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.send(decodeURIComponent(FALLBACK_IMAGE_URL.split(',')[1]));
+  }
+};
+
 module.exports = {
   createPost,
   getPublicPosts,
   getMapPosts,
   getFeaturedStories,
   getPublicStats,
+  proxyImage,
   getPostById,
   likePost,
   commentPost
