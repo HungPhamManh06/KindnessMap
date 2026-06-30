@@ -208,8 +208,16 @@ const askOpenRouter = async ({ message, history }) => {
     body: JSON.stringify({
       model,
       messages: buildOpenAiMessages(message, history),
-      temperature: 0.55,
-      max_tokens: 350
+      temperature: 0.4,
+      max_tokens: 220,
+      transforms: ['middle-out'],
+      route: 'fallback',
+      models: [
+        model,
+        'meta-llama/llama-3.3-70b-instruct:free',
+        'deepseek/deepseek-chat-v3-0324:free',
+        'google/gemma-3-27b-it:free'
+      ].filter((modelName, index, arr) => modelName && arr.indexOf(modelName) === index)
     })
   });
 
