@@ -205,22 +205,22 @@ export const HomeAnimated = () => {
                     <motion.span
                       key={word}
                       className="inline-block mr-[0.18em] km-gsap-title-word"
-                      initial={shouldReduceHomeMotion ? false : { opacity: 0, y: 34, rotateX: -34, filter: 'blur(10px)' }}
+                      initial={false}
                       animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }}
-                      transition={{ duration: 0.72, delay: 0.16 + index * 0.045, ease: easeOutExpo }}
+                      transition={{ duration: 0 }}
                     >
                       {word}
                     </motion.span>
                   ))}
                 </span>
-                <span className="block mt-2 text-emerald-100 drop-shadow-[0_0_28px_rgba(45,212,191,0.22)]">
+                <span className="block mt-2 text-emerald-100 drop-shadow-[0_0_28px_rgba(45,212,191,0.22)] km-hero-gradient-safe">
                   {heroTitleLine2.map((word, index) => (
                     <motion.span
                       key={word}
-                      className="inline-block mr-[0.18em] bg-gradient-to-r from-emerald-200 via-teal-100 to-cyan-200 bg-clip-text text-transparent km-gsap-title-word"
-                      initial={shouldReduceHomeMotion ? false : { opacity: 0, y: 34, rotateX: -34, filter: 'blur(10px)' }}
+                      className="inline-block mr-[0.18em] km-gsap-title-word"
+                      initial={false}
                       animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }}
-                      transition={{ duration: 0.72, delay: 0.38 + index * 0.045, ease: easeOutExpo }}
+                      transition={{ duration: 0 }}
                     >
                       {word}
                     </motion.span>

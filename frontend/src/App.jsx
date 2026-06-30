@@ -19,6 +19,7 @@ const AIMatchingEngine = lazy(() => import('./pages/AIMatchingEngine').then((mod
 const UserProfile = lazy(() => import('./pages/UserProfile').then((module) => ({ default: module.UserProfile })));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard').then((module) => ({ default: module.AdminDashboard })));
 const MonthlyAwards = lazy(() => import('./pages/MonthlyAwards').then((module) => ({ default: module.MonthlyAwards })));
+const ShowcaseIntro = lazy(() => import('./pages/ShowcaseIntro').then((module) => ({ default: module.ShowcaseIntro })));
 
 const PageLoader = () => (
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -51,6 +52,7 @@ const AppRoutes = () => (
     <Route path="/profile" element={<UserProfile />} />
     <Route path="/admin" element={<AdminDashboard />} />
     <Route path="/awards" element={<MonthlyAwards />} />
+    <Route path="/showcase" element={<ShowcaseIntro />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );
