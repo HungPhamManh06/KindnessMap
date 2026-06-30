@@ -32,8 +32,8 @@ export const FloatingChatbot = () => {
         message: text,
         history: apiHistory,
       });
-      const replyText = res.data.warning === 'GEMINI_QUOTA_EXCEEDED'
-        ? `${res.data.reply}\n\nLưu ý: Gemini API đang hết quota/free tier, đây là câu trả lời dự phòng của hệ thống.`
+      const replyText = ['GEMINI_QUOTA_EXCEEDED', 'AI_PROVIDERS_UNAVAILABLE', 'CHATBOT_FALLBACK_AFTER_ERROR'].includes(res.data.warning)
+        ? `${res.data.reply}\n\nLưu ý: AI miễn phí đang bị giới hạn/quá tải, hệ thống đã tự chuyển sang chế độ dự phòng.`
         : res.data.reply;
       setMessages((prev) => [...prev, { role: 'model', text: replyText }]);
     } catch (error) {
@@ -41,7 +41,7 @@ export const FloatingChatbot = () => {
         ...prev,
         {
           role: 'model',
-          text: error.response?.data?.message || 'Mình chưa kết nối được Gemini. Bạn kiểm tra GEMINI_API_KEY trên Render nhé.',
+          text: error.response?.data?.message || 'Mình chưa kết nối được trợ lý AI. Bạn kiểm tra API key chatbot trên Render nhé.',
         },
       ]);
     } finally {
@@ -59,7 +59,7 @@ export const FloatingChatbot = () => {
                 <Bot className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-black text-sm">KindnessBot Gemini</h3>
+                <h3 className="font-black text-sm">KindnessBot</h3>
                 <p className="text-[11px] text-emerald-50">Trợ lý AI cho Bản Đồ Việc Tốt</p>
               </div>
             </div>
@@ -89,7 +89,7 @@ export const FloatingChatbot = () => {
             {loading && (
               <div className="flex justify-start">
                 <div className="rounded-2xl rounded-bl-md px-4 py-3 bg-white border border-slate-200 dark:bg-slate-800 dark:border-slate-700 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-300">
-                  <Loader2 className="w-4 h-4 animate-spin text-brand-green" /> Gemini đang trả lời...
+                  <Loader2 className="w-4 h-4 animate-spin text-brand-green" /> KindnessBot đang trả lời...
                 </div>
               </div>
             )}
@@ -117,7 +117,7 @@ export const FloatingChatbot = () => {
       <button
         onClick={() => setOpen((prev) => !prev)}
         className="pointer-events-auto w-16 h-16 rounded-[24px] bg-gradient-to-tr from-brand-green via-brand-teal to-emerald-400 text-white shadow-2xl shadow-brand-green/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-all group relative"
-        title="Mở chatbot Gemini"
+        title="Mở KindnessBot"
       >
         <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-amber-400 border-2 border-white dark:border-slate-950 flex items-center justify-center">
           <Sparkles className="w-3 h-3 text-white" />
