@@ -1,5 +1,22 @@
 const { queryGet, queryRun, queryAll } = require('../config/db');
 
+const FALLBACK_IMAGE_URL = 'https://images.unsplash.com/photo-1593113598432-846f29edce7b?auto=format&fit=crop&w=1200&q=80';
+
+const normalizeImageUrl = (url) => {
+  const raw = String(url || '').trim();
+  if (!raw) return FALLBACK_IMAGE_URL;
+  if (raw.startsWith('data:image/')) return raw;
+  if (/^https?:\/\//i.test(raw)) return raw;
+  if (raw.startsWith('/uploads/')) return raw;
+  return FALLBACK_IMAGE_URL;
+};
+
+const normalizePostImages = (posts) => posts.map((post) => ({
+  ...post,
+  imageUrl: normalizeImageUrl(post.imageUrl),
+  authorAvatar: normalizeImageUrl(post.authorAvatar),
+}));
+
 // AI Moderation Mockup keywords
 const inappropriateKeywords = ['chửi', 'đánh', 'lừa đảo', 'giết', 'bạo lực', 'tệ nạn', 'spam', 'khốn', 'mẹ', 'fuck', 'hate'];
 
@@ -93,7 +110,7 @@ const getPublicPosts = async (req, res) => {
     }
 
     const posts = await queryAll(sql, params);
-    res.status(200).json(posts);
+    res.status(200).json(normalizePostImages(posts));
   } catch (error) {
     console.error('Get public posts error:', error);
     res.status(500).json({ message: 'Có lỗi khi lấy danh sách bài viết.' });
@@ -108,7 +125,7 @@ const getMapPosts = async (req, res) => {
       JOIN Users u ON p.userId = u.id
       WHERE p.status = 'Approved'
     `);
-    res.status(200).json(posts);
+    res.status(200).json(posts.map((post) => ({ ...post, imageUrl: normalizeImageUrl(post.imageUrl) })));
   } catch (error) {
     console.error('Get map posts error:', error);
     res.status(500).json({ message: 'Có lỗi khi lấy dữ liệu bản đồ.' });
@@ -126,7 +143,7 @@ const getFeaturedStories = async (req, res) => {
       WHERE p.status = 'Approved' AND p.isFeatured = 1
       ORDER BY p.createdAt DESC LIMIT 6
     `);
-    res.status(200).json(stories);
+    res.status(200).json(normalizePostImages(stories));
   } catch (error) {
     console.error('Get featured stories error:', error);
     res.status(500).json({ message: 'Có lỗi khi lấy danh sách câu chuyện nổi bật.' });
@@ -206,7 +223,11 @@ const getPostById = async (req, res) => {
       ORDER BY c.createdAt DESC
     `, [id]);
 
-    res.status(200).json({ post, isLikedByMe, comments });
+    res.status(200).json({
+      post: { ...post, imageUrl: normalizeImageUrl(post.imageUrl), authorAvatar: normalizeImageUrl(post.authorAvatar) },
+      isLikedByMe,
+      comments: comments.map((comment) => ({ ...comment, authorAvatar: normalizeImageUrl(comment.authorAvatar) }))
+    });
   } catch (error) {
     console.error('Get post by id error:', error);
     res.status(500).json({ message: 'Có lỗi khi chi tiết câu chuyện.' });
@@ -261,7 +282,10 @@ const commentPost = async (req, res) => {
       WHERE c.id = ?
     `, [result.lastID]);
 
-    res.status(201).json({ message: 'Bình luận thành công!', comment: newComment });
+    res.status(201).json({
+      message: 'Bình luận thành công!',
+      comment: { ...newComment, authorAvatar: normalizeImageUrl(newComment.authorAvatar) }
+    });
   } catch (error) {
     console.error('Comment post error:', error);
     res.status(500).json({ message: 'Có lỗi khi gửi bình luận.' });

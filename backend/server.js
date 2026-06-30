@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const http = require('http');
+const { queryAll } = require('./config/db');
 
 // Load env
 dotenv.config();
@@ -14,6 +15,7 @@ const leaderboardRoutes = require('./routes/leaderboardRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const awardRoutes = require('./routes/awardRoutes');
 const matchingRoutes = require('./routes/matchingRoutes');
+const chatbotRoutes = require('./routes/chatbotRoutes');
 
 const app = express();
 const server = http.createServer(app);
@@ -37,6 +39,7 @@ app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/awards', awardRoutes);
 app.use('/api/matching', matchingRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 // Health check and simulation endpoints
 app.get('/api/health', (req, res) => {
@@ -68,17 +71,31 @@ app.get('/api/stream/live-deeds', (req, res) => {
   // Send initial ping
   res.write(`data: ${JSON.stringify({ type: 'ping', time: new Date().toLocaleTimeString() })}\n\n`);
 
-  const sampleDeeds = [
-    { title: 'Một bạn sinh viên giúp cụ già qua đường ở Ngã Tư Sở', category: 'Người cao tuổi', location: 'Đống Đa, Hà Nội', author: 'Nguyễn Tuấn' },
-    { title: 'Tặng 20 lốc sữa cho trẻ em Viện Huyết học', category: 'Giáo dục', location: 'Cầu Giấy, Hà Nội', author: 'Hà Linh' },
-    { title: 'Nhóm bạn dọn sạch công viên Tao Đàn', category: 'Môi trường', location: 'Quận 1, TP. HCM', author: 'Lê Minh' },
-    { title: 'Hiến máu cứu người tại Bệnh viện Chợ Rẫy', category: 'Hiến máu', location: 'Quận 5, TP. HCM', author: 'Quốc Bảo' }
-  ];
+  const sendRandomRealDeed = async () => {
+    try {
+      const deeds = await queryAll(`
+        SELECT p.id, p.title, p.category, p.locationName as location, u.fullName as author
+        FROM Posts p
+        JOIN Users u ON p.userId = u.id
+        WHERE p.status = 'Approved'
+        ORDER BY p.createdAt DESC
+        LIMIT 80
+      `);
 
-  const interval = setInterval(() => {
-    const randomDeed = sampleDeeds[Math.floor(Math.random() * sampleDeeds.length)];
-    res.write(`data: ${JSON.stringify({ type: 'new_deed', deed: { ...randomDeed, time: new Date().toLocaleTimeString() } })}\n\n`);
-  }, 12000);
+      if (!deeds.length) return;
+
+      const randomDeed = deeds[Math.floor(Math.random() * deeds.length)];
+      res.write(`data: ${JSON.stringify({
+        type: 'new_deed',
+        deed: { ...randomDeed, time: new Date().toLocaleTimeString('vi-VN') }
+      })}\n\n`);
+    } catch (error) {
+      console.error('Live deeds stream error:', error.message);
+    }
+  };
+
+  sendRandomRealDeed();
+  const interval = setInterval(sendRandomRealDeed, 12000);
 
   req.on('close', () => {
     clearInterval(interval);

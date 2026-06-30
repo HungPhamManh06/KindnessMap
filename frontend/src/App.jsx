@@ -8,6 +8,7 @@ import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { AuthModals } from './components/AuthModals';
 import { NotificationToast } from './components/NotificationToast';
+import { FloatingChatbot } from './components/FloatingChatbot';
 
 const Home = lazy(() => import('./pages/Home').then((module) => ({ default: module.Home })));
 const ExploreMap = lazy(() => import('./pages/ExploreMap').then((module) => ({ default: module.ExploreMap })));
@@ -67,6 +68,7 @@ export const App = () => {
                 <Footer />
                 <AuthModals />
                 <NotificationToast />
+                <FloatingChatbot />
               </div>
             </Router>
           </AuthProvider>

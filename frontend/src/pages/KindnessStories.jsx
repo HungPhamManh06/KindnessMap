@@ -61,7 +61,7 @@ export const KindnessStories = () => {
 
   useEffect(() => {
     fetchStories();
-  }, [selectedCat]);
+  }, [selectedCat, targetId]);
 
   useEffect(() => {
     if (activeStory && modalBodyRef.current) {
@@ -79,10 +79,16 @@ export const KindnessStories = () => {
       const trending = [...res.data].sort((a, b) => b.likesCount - a.likesCount).slice(0, 4);
       setTrendingStories(trending);
 
-      // If targetId is present, open that story's modal
+      // If targetId is present, open that story's modal. If current category filter hides it, fetch directly by id.
       if (targetId) {
-        const matching = res.data.find((s) => s.id === parseInt(targetId));
-        if (matching) openStoryDetail(matching);
+        const numericTargetId = parseInt(targetId);
+        const matching = res.data.find((s) => s.id === numericTargetId);
+        if (matching) {
+          openStoryDetail(matching);
+        } else {
+          const detailRes = await api.get(`/posts/${numericTargetId}`);
+          if (detailRes.data?.post) openStoryDetail(detailRes.data.post);
+        }
       }
     } catch (error) {
       console.error('Failed to load stories');
@@ -265,7 +271,11 @@ export const KindnessStories = () => {
               stories.map((story) => (
                 <article
                   key={story.id}
-                  onClick={() => openStoryDetail(story)}
+                  id={`story-${story.id}`}
+                  onClick={() => {
+                    setSearchParams({ id: story.id });
+                    openStoryDetail(story);
+                  }}
                   className="bg-white dark:bg-slate-900 rounded-3xl shadow-md hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-700/90 dark:border-slate-700/80 overflow-hidden flex flex-col group cursor-pointer"
                 >
                   {/* Image full width */}
@@ -310,7 +320,7 @@ export const KindnessStories = () => {
                     {/* Footer interactions */}
                     <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between mt-2">
                       <div className="flex items-center gap-3">
-                        <img src={story.authorAvatar} alt={story.authorName} className="w-10 h-10 rounded-full object-cover bg-slate-200 dark:bg-slate-700 border" />
+                        <img src={story.authorAvatar || FALLBACK_STORY_IMAGE} alt={story.authorName} onError={applyFallbackImage} className="w-10 h-10 rounded-full object-cover bg-slate-200 dark:bg-slate-700 border" />
                         <div className="flex flex-col">
                           <span className="font-extrabold text-xs text-slate-900 dark:text-slate-100">{story.authorName}</span>
                           <span className="text-[10px] font-bold text-brand-green uppercase">Tác giả gieo duyên</span>
@@ -328,7 +338,10 @@ export const KindnessStories = () => {
                         </button>
 
                         <button
-                          onClick={() => openStoryDetail(story)}
+                          onClick={() => {
+                            setSearchParams({ id: story.id });
+                            openStoryDetail(story);
+                          }}
                           className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/70 hover:bg-brand-lightBlue text-slate-700 dark:text-slate-200 hover:text-brand-blue font-bold text-xs transition-all border border-slate-200 dark:border-slate-700"
                         >
                           <MessageSquare className="w-4 h-4 text-brand-blue" />
@@ -364,7 +377,10 @@ export const KindnessStories = () => {
               {trendingStories.map((ts, idx) => (
                 <div
                   key={ts.id}
-                  onClick={() => openStoryDetail(ts)}
+                  onClick={() => {
+                    setSearchParams({ id: ts.id });
+                    openStoryDetail(ts);
+                  }}
                   className="pt-4 first:pt-0 flex items-start gap-3.5 cursor-pointer group"
                 >
                   <span className="w-7 h-7 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-black flex items-center justify-center shrink-0 text-xs group-hover:bg-brand-green group-hover:text-white transition-colors">
@@ -456,7 +472,7 @@ export const KindnessStories = () => {
               {/* Author and Quick Tools */}
               <div className="py-4 px-5 rounded-[24px] border border-slate-200 dark:border-slate-700/70 bg-white/80 dark:bg-slate-900/70 backdrop-blur-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <img src={activeStory.authorAvatar} alt={activeStory.authorName} className="w-12 h-12 rounded-full object-cover border-2 border-brand-green shadow-md" />
+                  <img src={activeStory.authorAvatar || FALLBACK_STORY_IMAGE} alt={activeStory.authorName} onError={applyFallbackImage} className="w-12 h-12 rounded-full object-cover border-2 border-brand-green shadow-md" />
                   <div className="flex flex-col">
                     <span className="font-black text-sm text-slate-900 dark:text-slate-100">{activeStory.authorName}</span>
                     <span className="text-xs text-brand-green font-bold">Thành viên năng nổ • Người kể chuyện tử tế</span>
@@ -531,7 +547,7 @@ export const KindnessStories = () => {
                   ) : (
                     comments.map((cmt) => (
                       <div key={cmt.id} className="pt-4 first:pt-0 flex items-start gap-3.5 animate-fade-in">
-                        <img src={cmt.authorAvatar} alt={cmt.authorName} className="w-9 h-9 rounded-full object-cover bg-slate-200 dark:bg-slate-700 shrink-0 mt-0.5" />
+                        <img src={cmt.authorAvatar || FALLBACK_STORY_IMAGE} alt={cmt.authorName} onError={applyFallbackImage} className="w-9 h-9 rounded-full object-cover bg-slate-200 dark:bg-slate-700 shrink-0 mt-0.5" />
                         <div className="flex-1 bg-slate-50/90 dark:bg-slate-800/70 p-4 rounded-2xl border border-slate-200 dark:border-slate-700/60 shadow-sm flex flex-col">
                           <div className="flex items-center justify-between">
                             <span className="font-extrabold text-xs text-slate-900 dark:text-slate-100">{cmt.authorName}</span>

@@ -24,6 +24,14 @@ const formatStatValue = (value) => Number(value || 0).toLocaleString('en-US');
 
 const audiences = ['👨‍🎓 Sinh viên tích cực', '💚 Tình nguyện viên', '🏡 Cư dân địa phương', '🏢 Câu lạc bộ & CLB'];
 
+const FALLBACK_STORY_IMAGE = 'https://images.unsplash.com/photo-1593113598432-846f29edce7b?auto=format&fit=crop&w=1200&q=80';
+
+const applyFallbackImage = (event) => {
+  if (event.currentTarget.dataset.fallbackApplied === 'true') return;
+  event.currentTarget.dataset.fallbackApplied = 'true';
+  event.currentTarget.src = FALLBACK_STORY_IMAGE;
+};
+
 const journeySteps = [
   {
     number: '1',
@@ -236,14 +244,22 @@ export const Home = () => {
             featuredStories.map((story) => (
               <article
                 key={story.id}
-                className="km-panel overflow-hidden group hover:-translate-y-1 transition-all duration-300"
+                id={`home-story-${story.id}`}
+                onClick={() => navigate(`/stories?id=${story.id}`)}
+                className="km-panel overflow-hidden group hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') navigate(`/stories?id=${story.id}`);
+                }}
               >
                 <div className="relative h-56 overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <img
-                    src={story.imageUrl}
+                    src={story.imageUrl || FALLBACK_STORY_IMAGE}
                     alt={story.title}
                     loading="lazy"
                     decoding="async"
+                    onError={applyFallbackImage}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-slate-950/70 to-transparent pointer-events-none" />
@@ -270,7 +286,7 @@ export const Home = () => {
 
                   <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
-                      <img src={story.authorAvatar} alt={story.authorName} loading="lazy" decoding="async" className="w-8 h-8 rounded-full object-cover bg-slate-200 dark:bg-slate-700 ring-1 ring-black/5 dark:ring-white/5" />
+                      <img src={story.authorAvatar || FALLBACK_STORY_IMAGE} alt={story.authorName} loading="lazy" decoding="async" onError={applyFallbackImage} className="w-8 h-8 rounded-full object-cover bg-slate-200 dark:bg-slate-700 ring-1 ring-black/5 dark:ring-white/5" />
                       <span className="font-bold text-xs text-slate-800 dark:text-slate-100">{story.authorName}</span>
                     </div>
 
