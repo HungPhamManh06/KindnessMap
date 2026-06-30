@@ -5,6 +5,7 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { ArrowRight, Sparkles, MapPin, Heart, MessageSquare, PlusCircle, Trophy, Star, Users, MapPinned, Navigation } from 'lucide-react';
 import { AnimatedNumber } from '../components/AnimatedNumber';
+import { CinematicVideoBackground } from '../components/CinematicVideoBackground';
 import { useGsapHomeAnimations } from '../hooks/useGsapHomeAnimations';
 
 const LazyMapComponent = lazy(() => import('../components/MapComponent').then((module) => ({ default: module.MapComponent })));
@@ -135,8 +136,6 @@ export const HomeAnimated = () => {
   const smoothHeroY = useSpring(heroMouseY, { stiffness: 90, damping: 24 });
   const heroRotateY = useTransform(smoothHeroX, [-0.5, 0.5], [-6, 6]);
   const heroRotateX = useTransform(smoothHeroY, [-0.5, 0.5], [5, -5]);
-  const heroTitleLine1 = ['Biến', 'mỗi', 'việc', 'tốt', 'thành'];
-  const heroTitleLine2 = ['một', 'điểm', 'sáng', 'trên', 'bản', 'đồ.'];
 
   const [featuredStories, setFeaturedStories] = useState([]);
   const [mapPosts, setMapPosts] = useState([]);
@@ -187,48 +186,43 @@ export const HomeAnimated = () => {
       </div>
 
       <section className="relative px-4 sm:px-6 lg:px-8 max-w-[1500px] mx-auto w-full pt-8 lg:pt-12">
-        <div className="relative overflow-hidden rounded-[2rem] sm:rounded-[3rem] border border-white/10 bg-slate-950 text-white shadow-[0_35px_120px_-55px_rgba(16,185,129,0.8)]" onMouseMove={(event) => { if (!enableParallax) return; const rect = event.currentTarget.getBoundingClientRect(); heroMouseX.set((event.clientX - rect.left) / rect.width - 0.5); heroMouseY.set((event.clientY - rect.top) / rect.height - 0.5); }} onMouseLeave={() => { heroMouseX.set(0); heroMouseY.set(0); }}>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(16,185,129,0.32),transparent_28%),radial-gradient(circle_at_82%_12%,rgba(20,184,166,0.24),transparent_30%),linear-gradient(135deg,rgba(15,23,42,0.92),rgba(2,6,23,0.98))]" />
-          <div className="absolute inset-0 km-grid-bg opacity-[0.08]" />
-          <div className="absolute left-1/2 top-0 h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-emerald-300/70 to-transparent" />
+        <div className="relative min-h-[calc(100vh-9rem)] overflow-hidden rounded-[2rem] sm:rounded-[3rem] border border-white/10 bg-slate-950 text-white shadow-[0_35px_120px_-55px_rgba(16,185,129,0.8)]" onMouseMove={(event) => { if (!enableParallax) return; const rect = event.currentTarget.getBoundingClientRect(); heroMouseX.set((event.clientX - rect.left) / rect.width - 0.5); heroMouseY.set((event.clientY - rect.top) / rect.height - 0.5); }} onMouseLeave={() => { heroMouseX.set(0); heroMouseY.set(0); }}>
+          <CinematicVideoBackground className="inset-x-0 bottom-0 top-[300px] z-0 opacity-80" />
+          <div className="absolute inset-0 z-[1] bg-[radial-gradient(circle_at_18%_18%,rgba(16,185,129,0.26),transparent_28%),radial-gradient(circle_at_82%_12%,rgba(20,184,166,0.18),transparent_30%),linear-gradient(135deg,rgba(15,23,42,0.86),rgba(2,6,23,0.9)_48%,rgba(2,6,23,0.72))]" />
+          <div className="absolute inset-0 z-[2] km-grid-bg opacity-[0.08]" />
+          <div className="absolute left-1/2 top-0 z-[3] h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-emerald-300/70 to-transparent" />
 
-          <motion.div className="relative z-10 grid lg:grid-cols-[1.03fr_0.97fr] gap-10 lg:gap-12 items-center px-5 sm:px-9 lg:px-14 py-12 sm:py-16 lg:py-20" variants={motionContainer} initial={shouldReduceHomeMotion ? false : "hidden"} animate="show">
+          <motion.div className="relative z-10 grid min-h-[calc(100vh-9rem)] lg:grid-cols-[1.03fr_0.97fr] gap-10 lg:gap-12 items-center px-5 sm:px-9 lg:px-14 py-[calc(8rem-75px)] pb-40" variants={motionContainer} initial={shouldReduceHomeMotion ? false : "hidden"} animate="show">
             <motion.div className="flex flex-col items-start text-left" variants={motionContainer}>
               <motion.div variants={motionRise} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/10 border border-white/15 text-emerald-100 text-xs sm:text-sm font-extrabold shadow-2xl shadow-emerald-500/10 backdrop-blur-xl animate-fade-in km-gsap-eyebrow">
                 <Sparkles className="w-4 h-4 text-emerald-300 animate-pulse" />
                 <span>Social Good Platform · Việt Nam 2026</span>
               </motion.div>
 
-              <motion.h1 variants={motionRise} className="mt-7 text-4xl sm:text-6xl xl:text-7xl font-black tracking-[-0.055em] leading-[0.95] max-w-5xl">
-                <span className="block">
-                  {heroTitleLine1.map((word, index) => (
-                    <motion.span
-                      key={word}
-                      className="inline-block mr-[0.18em] km-gsap-title-word"
-                      initial={false}
-                      animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }}
-                      transition={{ duration: 0 }}
-                    >
-                      {word}
-                    </motion.span>
-                  ))}
+              <motion.h1 variants={motionRise} className="mt-7 max-w-5xl text-5xl sm:text-7xl md:text-8xl km-cinematic-title">
+                <span className="block overflow-visible pb-1">
+                  <motion.span className="inline-block km-gsap-title-word" initial={false} animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }} transition={{ duration: 0 }}>
+                    Biến mỗi việc tốt
+                  </motion.span>
                 </span>
-                <span className="block mt-2 text-emerald-100 drop-shadow-[0_0_28px_rgba(45,212,191,0.22)] km-hero-gradient-safe">
-                  {heroTitleLine2.map((word, index) => (
-                    <motion.span
-                      key={word}
-                      className="inline-block mr-[0.18em] km-gsap-title-word"
-                      initial={false}
-                      animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }}
-                      transition={{ duration: 0 }}
-                    >
-                      {word}
-                    </motion.span>
-                  ))}
+                <span className="block overflow-visible pb-1">
+                  <motion.span className="inline-block km-gsap-title-word" initial={false} animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }} transition={{ duration: 0 }}>
+                    thành
+                  </motion.span>
+                </span>
+                <span className="block overflow-visible pb-1 text-emerald-100 drop-shadow-[0_0_28px_rgba(45,212,191,0.22)]">
+                  <motion.span className="inline-block km-gsap-title-word" initial={false} animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }} transition={{ duration: 0 }}>
+                    một điểm sáng
+                  </motion.span>
+                </span>
+                <span className="block overflow-visible pb-1 text-cyan-100 drop-shadow-[0_0_28px_rgba(45,212,191,0.18)]">
+                  <motion.span className="inline-block km-gsap-title-word" initial={false} animate={{ opacity: 1, y: 0, rotateX: 0, filter: 'blur(0px)' }} transition={{ duration: 0 }}>
+                    trên bản đồ.
+                  </motion.span>
                 </span>
               </motion.h1>
 
-              <motion.p variants={motionRise} className="mt-6 text-base sm:text-xl text-slate-300 max-w-2xl leading-relaxed km-gsap-copy">
+              <motion.p variants={motionRise} className="mt-8 max-w-2xl text-base sm:text-lg leading-relaxed text-slate-300 km-cinematic-copy km-gsap-copy animate-fade-rise-delay">
                 KindnessMap kết hợp bản đồ trực tuyến, câu chuyện cộng đồng, điểm công dân số và AI để lan tỏa lòng tốt theo cách hiện đại, trực quan và truyền cảm hứng.
               </motion.p>
 
@@ -240,7 +234,7 @@ export const HomeAnimated = () => {
                     if (!isAuthenticated) setActiveModal('login');
                     else navigate('/submit');
                   }}
-                  className="group relative overflow-hidden km-shimmer px-7 py-4 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 font-black text-base shadow-[0_18px_55px_-18px_rgba(45,212,191,0.95)] hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-3"
+                  className="group relative overflow-hidden km-shimmer rounded-full bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300 px-10 sm:px-14 py-5 text-slate-950 font-black text-base shadow-[0_18px_55px_-18px_rgba(45,212,191,0.95)] hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-3"
                 >
                   <span className="absolute inset-0 translate-x-[-120%] bg-gradient-to-r from-transparent via-white/50 to-transparent group-hover:translate-x-[120%] transition-transform duration-700" />
                   <PlusCircle className="relative w-5 h-5 group-hover:rotate-90 transition-transform" />
@@ -251,7 +245,7 @@ export const HomeAnimated = () => {
                   whileHover={shouldReduceHomeMotion ? undefined : { y: -4, scale: 1.035 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => navigate('/explore')}
-                  className="px-7 py-4 rounded-2xl bg-white/8 hover:bg-white/12 text-white font-extrabold text-base border border-white/15 backdrop-blur-xl hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2"
+                  className="px-8 py-5 rounded-full bg-white/8 hover:bg-white/12 text-white font-extrabold text-base border border-white/15 backdrop-blur-xl hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
                   <span>Khám Phá Bản Đồ</span>
                   <ArrowRight className="w-5 h-5 text-emerald-300 group-hover:translate-x-1" />
