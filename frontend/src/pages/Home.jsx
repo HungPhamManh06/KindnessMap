@@ -1,8 +1,9 @@
 import React, { lazy, Suspense, useEffect, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { ArrowRight, Sparkles, MapPin, Heart, MessageSquare, PlusCircle, Trophy, Star, ShieldCheck, Users, MapPinned, Navigation } from 'lucide-react';
+import { ArrowRight, Sparkles, MapPin, Heart, MessageSquare, PlusCircle, Trophy, Star, Users, MapPinned, Navigation } from 'lucide-react';
 
 const LazyMapComponent = lazy(() => import('../components/MapComponent').then((module) => ({ default: module.MapComponent })));
 
@@ -59,9 +60,44 @@ const MapSkeleton = () => (
   </div>
 );
 
+
+const easeOutExpo = [0.16, 1, 0.3, 1];
+
+const motionContainer = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.09,
+      delayChildren: 0.08,
+    },
+  },
+};
+
+const motionRise = {
+  hidden: { opacity: 0, y: 32, filter: 'blur(10px)' },
+  show: {
+    opacity: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.78, ease: easeOutExpo },
+  },
+};
+
+const motionScale = {
+  hidden: { opacity: 0, scale: 0.94, y: 24, filter: 'blur(12px)' },
+  show: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    filter: 'blur(0px)',
+    transition: { duration: 0.9, ease: easeOutExpo },
+  },
+};
+
 export const Home = () => {
   const navigate = useNavigate();
   const { isAuthenticated, setActiveModal } = useAuth();
+  const shouldReduceMotion = useReducedMotion();
 
   const [featuredStories, setFeaturedStories] = useState([]);
   const [mapPosts, setMapPosts] = useState([]);
@@ -117,26 +153,28 @@ export const Home = () => {
           <div className="absolute inset-0 km-grid-bg opacity-[0.08]" />
           <div className="absolute left-1/2 top-0 h-px w-2/3 -translate-x-1/2 bg-gradient-to-r from-transparent via-emerald-300/70 to-transparent" />
 
-          <div className="relative z-10 grid lg:grid-cols-[1.03fr_0.97fr] gap-10 lg:gap-12 items-center px-5 sm:px-9 lg:px-14 py-12 sm:py-16 lg:py-20">
-            <div className="flex flex-col items-start text-left">
-              <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/10 border border-white/15 text-emerald-100 text-xs sm:text-sm font-extrabold shadow-2xl shadow-emerald-500/10 backdrop-blur-xl animate-fade-in">
+          <motion.div className="relative z-10 grid lg:grid-cols-[1.03fr_0.97fr] gap-10 lg:gap-12 items-center px-5 sm:px-9 lg:px-14 py-12 sm:py-16 lg:py-20" variants={motionContainer} initial={shouldReduceMotion ? false : "hidden"} animate="show">
+            <motion.div className="flex flex-col items-start text-left" variants={motionContainer}>
+              <motion.div variants={motionRise} className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-white/10 border border-white/15 text-emerald-100 text-xs sm:text-sm font-extrabold shadow-2xl shadow-emerald-500/10 backdrop-blur-xl animate-fade-in">
                 <Sparkles className="w-4 h-4 text-emerald-300 animate-pulse" />
                 <span>Social Good Platform · Việt Nam 2026</span>
-              </div>
+              </motion.div>
 
-              <h1 className="mt-7 text-4xl sm:text-6xl xl:text-7xl font-black tracking-[-0.055em] leading-[0.95] max-w-5xl">
+              <motion.h1 variants={motionRise} className="mt-7 text-4xl sm:text-6xl xl:text-7xl font-black tracking-[-0.055em] leading-[0.95] max-w-5xl">
                 Biến mỗi việc tốt thành
                 <span className="block mt-2 bg-gradient-to-r from-emerald-200 via-teal-200 to-cyan-200 bg-clip-text text-transparent drop-shadow-[0_0_28px_rgba(45,212,191,0.22)]">
                   một điểm sáng trên bản đồ.
                 </span>
-              </h1>
+              </motion.h1>
 
-              <p className="mt-6 text-base sm:text-xl text-slate-300 max-w-2xl leading-relaxed">
+              <motion.p variants={motionRise} className="mt-6 text-base sm:text-xl text-slate-300 max-w-2xl leading-relaxed">
                 KindnessMap kết hợp bản đồ trực tuyến, câu chuyện cộng đồng, điểm công dân số và AI để lan tỏa lòng tốt theo cách hiện đại, trực quan và truyền cảm hứng.
-              </p>
+              </motion.p>
 
-              <div className="mt-9 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
-                <button
+              <motion.div variants={motionRise} className="mt-9 flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
+                <motion.button
+                  whileHover={shouldReduceMotion ? undefined : { y: -4, scale: 1.035 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => {
                     if (!isAuthenticated) setActiveModal('login');
                     else navigate('/submit');
@@ -146,27 +184,29 @@ export const Home = () => {
                   <span className="absolute inset-0 translate-x-[-120%] bg-gradient-to-r from-transparent via-white/50 to-transparent group-hover:translate-x-[120%] transition-transform duration-700" />
                   <PlusCircle className="relative w-5 h-5 group-hover:rotate-90 transition-transform" />
                   <span className="relative">Ghim Việc Tốt Của Bạn</span>
-                </button>
+                </motion.button>
 
-                <button
+                <motion.button
+                  whileHover={shouldReduceMotion ? undefined : { y: -4, scale: 1.035 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => navigate('/explore')}
                   className="px-7 py-4 rounded-2xl bg-white/8 hover:bg-white/12 text-white font-extrabold text-base border border-white/15 backdrop-blur-xl hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
                   <span>Khám Phá Bản Đồ</span>
                   <ArrowRight className="w-5 h-5 text-emerald-300 group-hover:translate-x-1" />
-                </button>
-              </div>
+                </motion.button>
+              </motion.div>
 
-              <div className="mt-9 flex flex-wrap gap-3">
+              <motion.div variants={motionRise} className="mt-9 flex flex-wrap gap-3">
                 {audiences.map((item) => (
                   <div key={item} className="rounded-full border border-white/12 bg-white/[0.06] px-4 py-2 text-xs sm:text-sm font-bold text-slate-200 backdrop-blur-xl">
                     {item}
                   </div>
                 ))}
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
-            <div className="relative min-h-[520px] lg:min-h-[610px]">
+            <motion.div variants={motionScale} className="relative min-h-[520px] lg:min-h-[610px]">
               <div className="absolute inset-4 rounded-[2.5rem] bg-gradient-to-br from-emerald-400/20 via-cyan-400/10 to-purple-500/20 blur-3xl" />
 
               <div className="relative h-full rounded-[2rem] border border-white/12 bg-white/[0.07] p-4 sm:p-5 backdrop-blur-2xl shadow-2xl overflow-hidden km-float-slow">
@@ -224,22 +264,19 @@ export const Home = () => {
                 </div>
               </div>
 
-              <div className="hidden sm:block absolute -right-2 top-10 rounded-3xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-2xl shadow-2xl km-float-fast">
-                <div className="flex items-center gap-2 text-sm font-black text-white"><ShieldCheck className="w-4 h-4 text-emerald-300" /> Verified stories</div>
-              </div>
               <div className="hidden sm:block absolute -left-3 bottom-20 rounded-3xl border border-white/15 bg-slate-950/70 px-4 py-3 backdrop-blur-2xl shadow-2xl km-float-medium">
                 <div className="text-[11px] uppercase tracking-wider text-slate-400 font-black">Điểm tích lũy</div>
                 <div className="text-2xl font-black text-white">{formatStatValue(siteStats.kindnessPoints)}</div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       <section className="px-4 sm:px-6 lg:px-8 max-w-[1500px] mx-auto w-full -mt-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {statDefinitions.map((stat, index) => (
-            <div key={stat.key} className="km-stat-card km-magnetic-card group p-5 sm:p-6 text-center">
+            <motion.div key={stat.key} initial={shouldReduceMotion ? false : { opacity: 0, y: 24, scale: 0.96 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true, margin: "-80px" }} transition={{ duration: 0.55, delay: index * 0.06, ease: easeOutExpo }} whileHover={shouldReduceMotion ? undefined : { y: -8, rotateX: 1.2, rotateY: -1.2 }} className="km-stat-card km-magnetic-card group p-5 sm:p-6 text-center">
               <div className="text-3xl sm:text-5xl font-black tracking-[-0.04em] bg-gradient-to-r from-slate-950 to-emerald-700 bg-clip-text text-transparent dark:from-white dark:to-emerald-200">
                 {formatStatValue(siteStats[stat.key])}
               </div>
@@ -249,7 +286,7 @@ export const Home = () => {
               <div className="mt-4 h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                 <div className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400" style={{ width: `${Math.min(95, 42 + index * 14)}%` }} />
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
@@ -322,10 +359,15 @@ export const Home = () => {
             </div>
           ) : (
             featuredStories.map((story) => (
-              <article
+              <motion.article
                 key={story.id}
                 id={`home-story-${story.id}`}
                 onClick={() => navigate(`/stories?id=${story.id}`)}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 26 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-70px" }}
+                transition={{ duration: 0.55, ease: easeOutExpo }}
+                whileHover={shouldReduceMotion ? undefined : { y: -8, scale: 1.01 }}
                 className="km-panel overflow-hidden group hover:-translate-y-1 transition-all duration-300 cursor-pointer"
                 role="button"
                 tabIndex={0}
@@ -382,7 +424,7 @@ export const Home = () => {
                     </div>
                   </div>
                 </div>
-              </article>
+              </motion.article>
             ))
           )}
         </div>

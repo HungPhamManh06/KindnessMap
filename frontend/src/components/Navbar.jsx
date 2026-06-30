@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -30,6 +31,7 @@ export const Navbar = () => {
   const { addToast } = useNotification();
   const navigate = useNavigate();
   const location = useLocation();
+  const shouldReduceMotion = useReducedMotion();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [demoDropdownOpen, setDemoDropdownOpen] = useState(false);
@@ -97,7 +99,7 @@ export const Navbar = () => {
     }`;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-white/10 bg-white/78 dark:bg-slate-950/72 backdrop-blur-2xl shadow-[0_18px_60px_-38px_rgba(15,23,42,0.65)]">
+    <motion.header initial={shouldReduceMotion ? false : { y: -24, opacity: 0, filter: 'blur(8px)' }} animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }} transition={{ duration: 0.62, ease: [0.16, 1, 0.3, 1] }} className="sticky top-0 z-40 border-b border-white/10 bg-white/78 dark:bg-slate-950/72 backdrop-blur-2xl shadow-[0_18px_60px_-38px_rgba(15,23,42,0.65)]">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center h-20 gap-2 min-[1700px]:gap-4">
           {/* Logo brand */}
@@ -580,6 +582,6 @@ export const Navbar = () => {
           </div>
         </div>
       )}
-    </header>
+    </motion.header>
   );
 };
