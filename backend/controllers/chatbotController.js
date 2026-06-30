@@ -4,6 +4,27 @@ const systemInstruction = `Bạn là trợ lý AI của KindnessMap Việt Nam -
 Nhiệm vụ: trả lời thân thiện, ngắn gọn bằng tiếng Việt; hướng dẫn người dùng đăng bài việc tốt, xem bản đồ, xem câu chuyện, đăng nhập, tích điểm, dùng trang admin nếu họ có quyền.
 Không bịa đặt dữ liệu nội bộ. Nếu không chắc, hãy đề nghị người dùng kiểm tra lại trên trang tương ứng.`;
 
+const readGeminiApiKey = () => {
+  // Correct config: GEMINI_API_KEY=<api-key>
+  let key = process.env.GEMINI_API_KEY || '';
+
+  // Tolerate common Render mistake: VALUE contains "GEMINI_API_KEY=<api-key>".
+  if (!key) {
+    const envValueWithPrefix = Object.values(process.env).find(
+      (value) => typeof value === 'string' && value.trim().startsWith('GEMINI_API_KEY=')
+    );
+    if (envValueWithPrefix) key = envValueWithPrefix;
+  }
+
+  key = String(key).trim();
+  if (key.startsWith('GEMINI_API_KEY=')) {
+    key = key.slice('GEMINI_API_KEY='.length).trim();
+  }
+
+  // Remove accidental quotes/spaces/newlines copied from dashboards.
+  return key.replace(/^['"]|['"]$/g, '').trim();
+};
+
 const chatWithGemini = async (req, res) => {
   try {
     const { message, history = [] } = req.body;
@@ -12,7 +33,7 @@ const chatWithGemini = async (req, res) => {
       return res.status(400).json({ message: 'Vui lòng nhập nội dung cần hỏi chatbot.' });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = readGeminiApiKey();
     if (!apiKey) {
       return res.status(500).json({ message: 'Máy chủ chưa cấu hình GEMINI_API_KEY.' });
     }
