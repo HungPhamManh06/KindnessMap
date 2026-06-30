@@ -4,14 +4,14 @@
 
 /* ── Fade-rise keyframe (hero content entrance) ──────────────────────────── */
 @keyframes fade-rise {
-  from { opacity: 0; transform: translateY(22px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.animate-fade-rise          { animation: fade-rise 0.85s cubic-bezier(0.16,1,0.3,1) both; }
-.animate-fade-rise-delay    { animation: fade-rise 0.85s cubic-bezier(0.16,1,0.3,1) 0.18s both; }
-.animate-fade-rise-delay-2  { animation: fade-rise 0.85s cubic-bezier(0.16,1,0.3,1) 0.36s both; }
-.animate-fade-rise-delay-3  { animation: fade-rise 0.85s cubic-bezier(0.16,1,0.3,1) 0.52s both; }
+.animate-fade-rise          { animation: fade-rise 0.8s ease-out both; }
+.animate-fade-rise-delay    { animation: fade-rise 0.8s ease-out 0.2s both; }
+.animate-fade-rise-delay-2  { animation: fade-rise 0.8s ease-out 0.4s both; }
+.animate-fade-rise-delay-3  { animation: fade-rise 0.8s ease-out 0.6s both; }
 
 /* ── Nature background animations ───────────────────────────────────────── */
 
@@ -53,19 +53,59 @@
 /* ── Hero cinematic typography ───────────────────────────────────────────── */
 .km-cinematic-title {
   font-family: var(--font-display);
-  font-weight: 600;
-  /* Reduced from -2.46px — prevents diacritic collision */
-  letter-spacing: -0.5px;
-  line-height: 1.05;
+  font-weight: 400;
+  letter-spacing: -2.46px;
+  line-height: 0.95;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   font-feature-settings: 'kern' 1, 'liga' 1;
+}
+
+/* Vietnamese headlines — avoid diacritic collision */
+.km-cinematic-title-viet {
+  font-family: var(--font-viet);
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 .km-cinematic-copy {
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
+
+/* ── Cinematic hero wrapper (white/light mode, ignores dark mode) ─────────── */
+.km-cinematic-hero {
+  background: #ffffff;
+  color: #000000;
+  color-scheme: light;
+  isolation: isolate;
+}
+
+/* ── Video background layer ──────────────────────────────────────────────── */
+.km-hero-video-layer {
+  position: absolute;
+  inset: auto 0 0 0;
+  top: 300px;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ── Hero CTA (black pill button) ────────────────────────────────────────── */
+.km-hero-cta {
+  background: #000000;
+  color: #ffffff;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+.km-hero-cta:hover { transform: scale(1.03); box-shadow: 0 8px 32px rgba(0,0,0,0.22); }
 
 /* ── Brand gradient text ─────────────────────────────────────────────────── */
 .km-brand-gradient-text {

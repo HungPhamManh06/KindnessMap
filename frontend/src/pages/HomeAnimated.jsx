@@ -14,7 +14,7 @@ import {
   HeartHandshake,
 } from 'lucide-react';
 import { AnimatedNumber } from '../components/AnimatedNumber';
-import { AnimatedNatureBackground } from '../components/AnimatedNatureBackground';
+import { CinematicVideoBackground } from '../components/CinematicVideoBackground';
 import { useGsapHomeAnimations } from '../hooks/useGsapHomeAnimations';
 
 const LazyMapComponent = lazy(() =>
@@ -143,176 +143,170 @@ export const HomeAnimated = () => {
   };
 
   return (
-    <div ref={scopeRef} className="relative flex flex-col overflow-x-hidden km-modern-home">
+    <div ref={scopeRef} className="relative flex flex-col overflow-x-hidden">
 
       {/* ═══════════════════════════════════════════════════════════════════
-          HERO — full-screen nature background with centered content
+          CINEMATIC HERO — white background + looping video
          ═══════════════════════════════════════════════════════════════════ */}
       <section
-        className="relative min-h-screen w-full overflow-hidden flex flex-col"
-        style={{
-          /* Explicit sky gradient — always light, ignores Tailwind dark mode */
-          background: 'linear-gradient(180deg, #4fc3f7 0%, #81d4fa 18%, #b3e5fc 38%, #e0f7fa 60%, #c8e6c9 80%, #a5d6a7 100%)',
-          colorScheme: 'light',
-          isolation: 'isolate',
-        }}
+        className="km-cinematic-hero relative min-h-screen w-full overflow-hidden flex flex-col"
       >
-        {/* Nature animation layer */}
-        <AnimatedNatureBackground />
+        {/* ── Video background layer ──────────────────────────────────────────── */}
+        <CinematicVideoBackground className="km-hero-video-layer" />
 
-        {/* Top vignette */}
-        <div
-          className="absolute inset-x-0 top-0 z-[2]"
-          style={{ height: 100, background: 'linear-gradient(to bottom, rgba(255,255,255,0.15), transparent)', pointerEvents: 'none' }}
-        />
-
-        {/* ── HERO CONTENT ── */}
+        {/* ── HERO CONTENT ────────────────────────────────────────────────────── */}
         <motion.div
-          className="relative z-10 flex flex-col items-center justify-center text-center flex-1 px-5 sm:px-8"
-          style={{ paddingTop: 'calc(8rem - 70px)', paddingBottom: '6rem' }}
+          className="relative z-10 flex flex-col items-center justify-center text-center flex-1 px-6"
+          style={{ paddingTop: 'calc(8rem - 75px)', paddingBottom: '10rem' }}
           variants={container}
           initial={noMotion ? false : 'hidden'}
           animate="show"
         >
-          {/* Eyebrow badge */}
+          {/* ── Eyebrow badge ──────────────────────────────────────────── */}
           <motion.div
             variants={rise}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs sm:text-sm font-bold km-nature-glass text-emerald-800 border-emerald-300/60 shadow-lg animate-fade-rise"
+            className="animate-fade-rise inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-medium border border-black/10 bg-white/60 backdrop-blur-sm"
+            style={{ color: '#6F6F6F' }}
           >
-            <HeartHandshake className="w-4 h-4 text-emerald-600" />
-            <span>Social Good Platform · Việt Nam 2026</span>
+            <HeartHandshake className="w-3.5 h-3.5" style={{ color: '#000000' }} />
+            <span style={{ fontFamily: 'var(--font-body)' }}>KindnessMap · Nền Tảng Việc Tốt · Việt Nam 2026</span>
           </motion.div>
 
-          {/* ── Main headline ─────────────────────────────────────────── */}
+          {/* ── Main headline ──────────────────────────────────────────── */}
+          {/*
+           * FONT STRATEGY:
+           * - 'Be Vietnam Pro' → black/bold Vietnamese text (full diacritic support)
+           * - 'Instrument Serif' italic → ONLY the short gray emphasis words
+           * - Layout: two block-level <div> lines to prevent orphaned inline elements
+           */}
           <motion.h1
             variants={rise}
-            className="mt-7 max-w-5xl animate-fade-rise"
+            className="mt-7 max-w-5xl animate-fade-rise text-center"
             style={{
-              /*
-               * FONT: Use 'Be Vietnam Pro' (loaded) then system-ui fallback
-               * Be Vietnam Pro has full precomposed Vietnamese glyph support
-               * Note: NO letter-spacing or italic for Vietnamese to prevent diacritic separation
-               */
-              fontFamily: "'Be Vietnam Pro', 'Arial', system-ui, sans-serif",
-              fontWeight: 800,
-              fontSize: 'clamp(2.4rem, 7.5vw, 6rem)',
-              letterSpacing: 0,
-              lineHeight: 1.1,
-              color: '#0a2e15',
+              lineHeight: 1.12,
               textRendering: 'optimizeLegibility',
-              fontStyle: 'normal',
+              WebkitFontSmoothing: 'antialiased',
             }}
           >
-            {/* Line 1 */}
-            <span className="block">
-              Biến mỗi
+            {/* Line 1: "Biến mỗi việc tốt" [bold black] + "nhỏ bé" [italic gray] */}
+            <span className="block" style={{ fontSize: 'clamp(1.9rem, 5.2vw, 4.8rem)', whiteSpace: 'nowrap' }}>
+              <span
+                style={{
+                  color: '#000000',
+                  fontFamily: "'Be Vietnam Pro', system-ui, sans-serif",
+                  fontWeight: 800,
+                  letterSpacing: '-1px',
+                }}
+              >
+                Biến mỗi việc tốt{' '}
+              </span>
+              <span
+                style={{
+                  color: '#6F6F6F',
+                  fontFamily: "'Be Vietnam Pro', system-ui, sans-serif",
+                  fontWeight: 300,
+                  fontStyle: 'italic',
+                  letterSpacing: '-0.5px',
+                }}
+              >
+                nhỏ bé
+              </span>
             </span>
-            {/* Line 2 — emerald color, NOT italic (italics break Vietnamese diacritics in most fonts) */}
-            <span
-              className="block"
-              style={{
-                color: '#065f46',
-                textShadow: '0 2px 24px rgba(16,185,129,0.3)',
-              }}
-            >
-              việc tốt nhỏ bé
-            </span>
-            {/* Line 3 */}
-            <span className="block">
-              thành
-            </span>
-            {/* Line 4 — teal accent */}
-            <span
-              className="block"
-              style={{
-                lineHeight: 1.12,
-                color: '#0f766e',
-                textShadow: '0 2px 20px rgba(20,184,166,0.22)',
-              }}
-            >
-              một điểm sáng trên bản đồ.
+
+            {/* Line 2: "thành một" [bold black] + "điểm sáng trên bản đồ." [italic gray] */}
+            <span className="block" style={{ fontSize: 'clamp(1.6rem, 4.4vw, 4.1rem)', marginTop: '0.1em', whiteSpace: 'nowrap' }}>
+              <span
+                style={{
+                  color: '#000000',
+                  fontFamily: "'Be Vietnam Pro', system-ui, sans-serif",
+                  fontWeight: 800,
+                  letterSpacing: '-1px',
+                }}
+              >
+                thành một{' '}
+              </span>
+              <span
+                style={{
+                  color: '#6F6F6F',
+                  fontFamily: "'Be Vietnam Pro', system-ui, sans-serif",
+                  fontWeight: 300,
+                  fontStyle: 'italic',
+                  letterSpacing: '-0.5px',
+                }}
+              >
+                điểm sáng trên bản đồ.
+              </span>
             </span>
           </motion.h1>
 
-          {/* Description */}
+          {/* ── Description ────────────────────────────────────────────── */}
           <motion.p
             variants={rise}
-            className="mt-7 max-w-xl text-base sm:text-lg leading-relaxed km-cinematic-copy animate-fade-rise-delay"
-            style={{ color: '#1f3d2a' }}
+            className="mt-8 max-w-2xl text-base sm:text-lg leading-relaxed km-cinematic-copy animate-fade-rise-delay"
+            style={{ color: '#6F6F6F' }}
           >
-            KindnessMap kết hợp bản đồ trực tuyến, câu chuyện cộng đồng, điểm công dân số và AI
-            để lan tỏa lòng tốt theo cách hiện đại, trực quan và truyền cảm hứng.
+            Xây dựng nền tảng cho những tâm hồn nhân ái và những người đáng can đảm.
+            Qua mọi ồn ào, chúng tôi tạo nên những không gian số để lan tỏa lòng tốt
+            theo cách hiện đại, trực quan và truyền cảm hứng.
           </motion.p>
 
-          {/* CTA Buttons */}
+          {/* ── CTA Buttons ─────────────────────────────────────────────── */}
           <motion.div
             variants={rise}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-rise-delay-2"
+            className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-rise-delay-2"
           >
-            {/* Primary */}
+            {/* Primary CTA — black pill */}
             <motion.button
-              whileHover={noMotion ? undefined : { y: -4, scale: 1.035 }}
+              whileHover={noMotion ? undefined : { scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => { if (!isAuthenticated) setActiveModal('login'); else navigate('/submit'); }}
-              className="group relative overflow-hidden rounded-full px-12 py-4 text-base font-bold text-white shadow-[0_12px_40px_-10px_rgba(5,150,105,0.7)] transition-all flex items-center gap-3"
-              style={{
-                background: 'linear-gradient(135deg, #059669, #0d9488, #0284c7)',
-              }}
+              className="km-hero-cta px-14 py-5 text-base"
+              style={{ fontFamily: 'var(--font-body)' }}
             >
-              <span className="absolute inset-0 translate-x-[-120%] bg-gradient-to-r from-transparent via-white/30 to-transparent group-hover:translate-x-[120%] transition-transform duration-700" />
-              <PlusCircle className="relative w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-              <span className="relative">Ghim Việc Tốt Của Bạn</span>
+              Ghìm Việc Tốt Của Bạn
             </motion.button>
 
-            {/* Secondary */}
+            {/* Secondary CTA — outlined */}
             <motion.button
-              whileHover={noMotion ? undefined : { y: -4, scale: 1.035 }}
+              whileHover={noMotion ? undefined : { scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => navigate('/explore')}
-              className="rounded-full px-10 py-4 text-base font-bold km-nature-glass text-emerald-900 transition-all flex items-center gap-2 hover:shadow-lg"
+              className="rounded-full px-10 py-5 text-base flex items-center gap-2 border transition-all"
+              style={{
+                fontFamily: 'var(--font-body)',
+                color: '#000000',
+                borderColor: 'rgba(0,0,0,0.2)',
+                background: 'rgba(255,255,255,0.7)',
+                backdropFilter: 'blur(8px)',
+              }}
             >
               <span>Khám Phá Bản Đồ</span>
-              <ArrowRight className="w-5 h-5 text-emerald-700" />
+              <ArrowRight className="w-4 h-4" />
             </motion.button>
           </motion.div>
 
-          {/* Audience pills */}
+          {/* ── Live stats strip ────────────────────────────────────────────── */}
           <motion.div
             variants={rise}
-            className="mt-8 flex flex-wrap items-center justify-center gap-2.5 animate-fade-rise-delay-2"
-          >
-            {[
-              '👨‍🎓 Sinh viên tích cực',
-              '💚 Tình nguyện viên',
-              '🏡 Cư dân địa phương',
-              '🏢 CLB & Câu lạc bộ',
-            ].map((item) => (
-              <span
-                key={item}
-                className="rounded-full px-4 py-1.5 text-xs sm:text-sm font-semibold km-nature-glass text-emerald-900 hover:shadow-md transition-all km-gsap-pill cursor-default"
-              >
-                {item}
-              </span>
-            ))}
-          </motion.div>
-
-          {/* Live stats strip */}
-          <motion.div
-            variants={rise}
-            className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-2xl animate-fade-rise-delay-3"
+            className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-2xl animate-fade-rise-delay-3"
           >
             {statDefinitions.map((s) => (
               <div
                 key={s.key}
-                className="rounded-2xl px-4 py-3 km-nature-glass text-center"
+                className="rounded-2xl px-4 py-4 text-center"
+                style={{
+                  background: 'rgba(255,255,255,0.72)',
+                  border: '1px solid rgba(0,0,0,0.08)',
+                  backdropFilter: 'blur(12px)',
+                }}
               >
                 <div
                   className="text-2xl sm:text-3xl font-black tracking-tight"
-                  style={{ color: '#065f46', fontFamily: 'var(--font-body)' }}
+                  style={{ color: '#000000', fontFamily: 'var(--font-body)' }}
                 >
                   <AnimatedNumber value={stats[s.key]} disabled={noMotion} />
                 </div>
-                <div className="text-[10px] sm:text-[11px] font-semibold mt-1 leading-tight" style={{ color: '#14532d' }}>
+                <div className="text-[10px] sm:text-[11px] font-semibold mt-1 leading-tight" style={{ color: '#6F6F6F' }}>
                   {s.label}
                 </div>
               </div>
