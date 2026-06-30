@@ -83,7 +83,7 @@ export const Navbar = () => {
   }, []);
 
   const navLinkClass = ({ isActive }) =>
-    `flex items-center gap-2 px-2 py-2 rounded-2xl font-bold text-[13px] whitespace-nowrap transition-all duration-300 ${
+    `flex items-center gap-1.5 min-[1700px]:gap-2 px-1.5 min-[1700px]:px-2 py-2 rounded-2xl font-bold text-[12px] min-[1700px]:text-[13px] whitespace-nowrap transition-all duration-300 ${
       isActive
         ? 'bg-brand-green/10 text-brand-deepGreen dark:text-brand-green'
         : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80'
@@ -99,7 +99,7 @@ export const Navbar = () => {
   return (
     <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-950/90 backdrop-blur-md border-b border-slate-100 dark:border-slate-800 shadow-sm">
       <div className="mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-[auto_1fr_auto] items-center h-20 gap-4">
+        <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center h-20 gap-2 min-[1700px]:gap-4">
           {/* Logo brand */}
           <NavLink to="/" className="flex items-center gap-3 min-w-0 group">
             <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-brand-green via-brand-teal to-emerald-400 flex items-center justify-center text-white shadow-lg shadow-brand-green/20 group-hover:scale-105 transition-transform duration-300">
@@ -116,7 +116,7 @@ export const Navbar = () => {
           </NavLink>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center justify-center gap-0 flex-nowrap min-w-0 px-2">
+          <nav className="hidden lg:flex items-center justify-center gap-0 flex-nowrap min-w-0 px-1 min-[1700px]:px-2 overflow-hidden">
             <NavLink to="/explore" className={navLinkClass}>
               <Map className="w-4 h-4" /> Bản Đồ
             </NavLink>
@@ -137,14 +137,16 @@ export const Navbar = () => {
           {/* Right side: Action Tools + Mobile Toggle */}
           <div className="flex items-center justify-end gap-2 min-w-0">
             {/* Action Tools Center */}
-            <div className="hidden md:flex items-center gap-1.5 flex-nowrap">
+            <div className="hidden md:flex items-center gap-1 flex-nowrap min-w-0 min-[1700px]:gap-1.5">
               {/* Admin Badge/Link if Admin */}
               {isAuthenticated && user?.role === 'admin' && (
                 <NavLink
                   to="/admin"
-                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-2xl bg-brand-green text-white font-bold text-[13px] whitespace-nowrap shadow-lg shadow-brand-green/25 hover:opacity-90 transition-all"
+                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-2xl bg-brand-green text-white font-bold text-[12px] min-[1700px]:text-[13px] whitespace-nowrap shadow-lg shadow-brand-green/25 hover:opacity-90 transition-all"
                 >
-                  <Shield className="w-4 h-4" /> Quản Trị Admin
+                  <Shield className="w-4 h-4 shrink-0" />
+                  <span className="hidden min-[1700px]:inline">Quản Trị Admin</span>
+                  <span className="min-[1700px]:hidden">Admin</span>
                 </NavLink>
               )}
 
@@ -152,12 +154,12 @@ export const Navbar = () => {
               <div className="relative" ref={demoRef}>
                 <button
                   onClick={() => setDemoDropdownOpen(!demoDropdownOpen)}
-                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-2xl bg-amber-500 text-white font-bold text-[13px] whitespace-nowrap shadow-lg shadow-amber-500/20 hover:bg-amber-600 transition-all"
+                  className="flex items-center gap-1.5 px-2 py-1.5 rounded-2xl bg-amber-500 text-white font-bold text-[12px] min-[1700px]:text-[13px] whitespace-nowrap shadow-lg shadow-amber-500/20 hover:bg-amber-600 transition-all"
                   title="Chuyển nhanh các tài khoản người dùng mẫu"
                 >
                   <Sparkles className="w-4 h-4 animate-spin-slow" />
-                  <span className="hidden xl:inline">Tài Khoản Demo</span>
-                  <span className="xl:hidden">Demo</span>
+                  <span className="hidden min-[1700px]:inline">Tài Khoản Demo</span>
+                  <span className="min-[1700px]:hidden">Demo</span>
                   <ChevronDown className="w-3.5 h-3.5 opacity-80" />
                 </button>
 
@@ -232,10 +234,10 @@ export const Navbar = () => {
                   if (!isAuthenticated) setActiveModal('login');
                   else navigate('/submit');
                 }}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-gradient-to-r from-brand-deepGreen to-brand-green text-white font-bold text-[13px] whitespace-nowrap shadow-lg shadow-brand-green/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                className="flex items-center gap-1.5 px-2 min-[1700px]:px-3 py-1.5 rounded-2xl bg-gradient-to-r from-brand-deepGreen to-brand-green text-white font-bold text-[12px] min-[1700px]:text-[13px] whitespace-nowrap shadow-lg shadow-brand-green/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 <PlusCircle className="w-5 h-5" />
-                <span>Gửi Việc Tốt</span>
+                <span className="hidden min-[1500px]:inline">Gửi Việc Tốt</span>
               </button>
 
               {/* Auth section */}
@@ -324,7 +326,7 @@ export const Navbar = () => {
                         />
                         <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-brand-green border-2 border-white dark:border-slate-950 rounded-full"></div>
                       </div>
-                      <div className="hidden xl:flex flex-col text-left pr-1 max-w-[100px]">
+                      <div className="hidden min-[1700px]:flex flex-col text-left pr-1 max-w-[100px]">
                         <span className="font-bold text-[13px] text-slate-800 dark:text-slate-100 leading-tight whitespace-nowrap truncate">
                           {user.fullName}
                         </span>
@@ -332,7 +334,7 @@ export const Navbar = () => {
                           {user.level}
                         </span>
                       </div>
-                      <ChevronDown className="w-4 h-4 text-slate-400 mr-1" />
+                      <ChevronDown className="w-4 h-4 text-slate-400 mr-0.5 min-[1700px]:mr-1" />
                     </button>
 
                     {profileDropdownOpen && (
