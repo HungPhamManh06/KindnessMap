@@ -1,15 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { animate, useInView, useReducedMotion } from 'framer-motion';
 
-export const AnimatedNumber = ({ value = 0, className = '', format = true, duration = 1.15 }) => {
+export const AnimatedNumber = ({ value = 0, className = '', format = true, duration = 1.15, disabled = false }) => {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const shouldReduceMotion = useReducedMotion();
-  const [displayValue, setDisplayValue] = useState(shouldReduceMotion ? Number(value || 0) : 0);
+  const shouldSkipAnimation = disabled || shouldReduceMotion;
+  const [displayValue, setDisplayValue] = useState(shouldSkipAnimation ? Number(value || 0) : 0);
 
   useEffect(() => {
     const nextValue = Number(value || 0);
-    if (shouldReduceMotion) {
+    if (shouldSkipAnimation) {
       setDisplayValue(nextValue);
       return undefined;
     }
@@ -22,7 +23,7 @@ export const AnimatedNumber = ({ value = 0, className = '', format = true, durat
     });
 
     return () => controls.stop();
-  }, [value, inView, shouldReduceMotion, duration]);
+  }, [value, inView, shouldSkipAnimation, duration]);
 
   const text = format ? Number(displayValue || 0).toLocaleString('en-US') : String(displayValue);
 

@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { X, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-react';
 
@@ -15,7 +14,6 @@ export const AuthModals = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [googleReady, setGoogleReady] = useState(typeof window !== 'undefined' && Boolean(window.google?.accounts?.id));
   const googleButtonRef = useRef(null);
-  const shouldReduceMotion = useReducedMotion();
 
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
@@ -92,21 +90,8 @@ export const AuthModals = () => {
   };
 
   return (
-    <AnimatePresence>
-      <motion.div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/72 backdrop-blur-xl p-4"
-        initial={shouldReduceMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.22 }}
-      >
-      <motion.div
-        initial={shouldReduceMotion ? false : { opacity: 0, y: 30, scale: 0.94, filter: 'blur(10px)' }}
-        animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-        exit={shouldReduceMotion ? undefined : { opacity: 0, y: 20, scale: 0.96, filter: 'blur(8px)' }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-        className="relative w-full max-w-md km-auth-card overflow-hidden"
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/72 backdrop-blur-xl p-4 animate-fade-in">
+      <div className="relative w-full max-w-md km-auth-card overflow-hidden animate-slide-up">
         {/* Banner header */}
         <div className="km-auth-banner p-7 text-white text-center relative">
           <button
@@ -285,8 +270,7 @@ export const AuthModals = () => {
             )}
           </div>
         </form>
-      </motion.div>
-      </motion.div>
-    </AnimatePresence>
+      </div>
+    </div>
   );
 };
