@@ -30,15 +30,45 @@ const getGeminiModelCandidates = () => {
     .trim()
     .replace(/^models\//, '');
 
+  // Ưu tiên model nhẹ để giảm quota/cost. Nếu Render cấu hình GEMINI_MODEL thì vẫn thử trước.
   return [
     configuredModel,
-    'gemini-2.0-flash',
-    'gemini-2.5-flash',
     'gemini-2.0-flash-lite',
+    'gemini-2.0-flash',
+    'gemini-2.5-flash-lite',
+    'gemini-2.5-flash',
     'gemini-1.5-flash-latest',
   ]
     .filter(Boolean)
     .filter((modelName, index, arr) => arr.indexOf(modelName) === index);
+};
+
+const isQuotaError = (errorData = {}) => {
+  const message = String(errorData?.error?.message || '').toLowerCase();
+  const status = String(errorData?.error?.status || '').toLowerCase();
+  return status.includes('resource_exhausted') || message.includes('quota') || message.includes('rate limit');
+};
+
+const localFallbackReply = (message = '') => {
+  const text = String(message).toLowerCase();
+
+  if (text.includes('đăng') || text.includes('ghim') || text.includes('bài')) {
+    return 'Hiện quota Gemini của máy chủ đang hết, nên mình trả lời bằng chế độ dự phòng: Bạn bấm “Ghim Việc Tốt Của Bạn”, đăng nhập nếu được yêu cầu, điền tiêu đề, mô tả, địa điểm, ảnh minh hoạ rồi gửi. Bài sẽ hiển thị sau khi được duyệt.';
+  }
+
+  if (text.includes('bản đồ') || text.includes('map')) {
+    return 'Hiện quota Gemini của máy chủ đang hết, nên mình trả lời bằng chế độ dự phòng: Bạn vào mục “Bản Đồ”, phóng to/thu nhỏ để xem các việc tốt quanh khu vực. Bấm vào ghim trên bản đồ để xem chi tiết câu chuyện.';
+  }
+
+  if (text.includes('demo') || text.includes('tài khoản')) {
+    return 'Hiện quota Gemini của máy chủ đang hết, nên mình trả lời bằng chế độ dự phòng: Bạn bấm “Tài Khoản Demo” hoặc “Demo” trên thanh điều hướng để thử nhanh các vai trò đã chuẩn bị sẵn.';
+  }
+
+  if (text.includes('admin') || text.includes('duyệt') || text.includes('quản trị')) {
+    return 'Hiện quota Gemini của máy chủ đang hết, nên mình trả lời bằng chế độ dự phòng: Tài khoản có quyền quản trị có thể vào “Quản Trị Admin” để xem, duyệt, từ chối hoặc quản lý bài viết cộng đồng.';
+  }
+
+  return 'Hiện quota Gemini của máy chủ đang hết nên chatbot đang chạy chế độ dự phòng. Bạn vẫn có thể hỏi về: cách đăng việc tốt, xem bản đồ, xem câu chuyện, dùng tài khoản demo hoặc quản trị bài viết.';
 };
 
 const chatWithGemini = async (req, res) => {
@@ -98,12 +128,23 @@ const chatWithGemini = async (req, res) => {
       }
 
       lastError = { status: response.status, data, model };
+
       // Nếu model cũ không còn hỗ trợ generateContent, thử model kế tiếp.
-      if (![400, 404].includes(response.status)) break;
+      // Nếu quota/rate-limit bị hết ở một model, thử model nhẹ/khác trước khi chuyển sang fallback nội bộ.
+      if (![400, 404, 429].includes(response.status) && !isQuotaError(data)) break;
     }
 
     if (lastError) {
       console.error('Gemini API error:', lastError);
+
+      if (lastError.status === 429 || isQuotaError(lastError.data)) {
+        return res.status(200).json({
+          reply: localFallbackReply(message),
+          model: 'local-fallback',
+          warning: 'GEMINI_QUOTA_EXCEEDED'
+        });
+      }
+
       return res.status(lastError.status || 500).json({
         message: lastError.data?.error?.message || 'Không thể kết nối Gemini API.'
       });

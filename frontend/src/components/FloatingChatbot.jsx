@@ -32,7 +32,10 @@ export const FloatingChatbot = () => {
         message: text,
         history: apiHistory,
       });
-      setMessages((prev) => [...prev, { role: 'model', text: res.data.reply }]);
+      const replyText = res.data.warning === 'GEMINI_QUOTA_EXCEEDED'
+        ? `${res.data.reply}\n\nLưu ý: Gemini API đang hết quota/free tier, đây là câu trả lời dự phòng của hệ thống.`
+        : res.data.reply;
+      setMessages((prev) => [...prev, { role: 'model', text: replyText }]);
     } catch (error) {
       setMessages((prev) => [
         ...prev,
