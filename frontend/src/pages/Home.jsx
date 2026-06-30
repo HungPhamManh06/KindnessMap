@@ -141,7 +141,7 @@ export const Home = () => {
                     if (!isAuthenticated) setActiveModal('login');
                     else navigate('/submit');
                   }}
-                  className="group relative overflow-hidden px-7 py-4 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 font-black text-base shadow-[0_18px_55px_-18px_rgba(45,212,191,0.95)] hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-3"
+                  className="group relative overflow-hidden km-shimmer px-7 py-4 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 font-black text-base shadow-[0_18px_55px_-18px_rgba(45,212,191,0.95)] hover:scale-[1.03] active:scale-95 transition-all flex items-center justify-center gap-3"
                 >
                   <span className="absolute inset-0 translate-x-[-120%] bg-gradient-to-r from-transparent via-white/50 to-transparent group-hover:translate-x-[120%] transition-transform duration-700" />
                   <PlusCircle className="relative w-5 h-5 group-hover:rotate-90 transition-transform" />
@@ -239,7 +239,7 @@ export const Home = () => {
       <section className="px-4 sm:px-6 lg:px-8 max-w-[1500px] mx-auto w-full -mt-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {statDefinitions.map((stat, index) => (
-            <div key={stat.key} className="km-stat-card group p-5 sm:p-6 text-center">
+            <div key={stat.key} className="km-stat-card km-magnetic-card group p-5 sm:p-6 text-center">
               <div className="text-3xl sm:text-5xl font-black tracking-[-0.04em] bg-gradient-to-r from-slate-950 to-emerald-700 bg-clip-text text-transparent dark:from-white dark:to-emerald-200">
                 {formatStatValue(siteStats[stat.key])}
               </div>

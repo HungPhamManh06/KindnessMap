@@ -38,6 +38,8 @@ export const SubmitKindness = () => {
   const [locationName, setLocationName] = useState('Hà Nội, Việt Nam');
   const [pickedLatLng, setPickedLatLng] = useState([21.0285, 105.8402]);
   const [imageUrl, setImageUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [successPost, setSuccessPost] = useState(null);
   const [enablePicker, setEnablePicker] = useState(false);
@@ -102,6 +104,35 @@ export const SubmitKindness = () => {
       () => addToast('Không lấy được vị trí', 'Bạn có thể chọn thủ công bằng cách bấm trên bản đồ.', 'warning'),
       { enableHighAccuracy: true, timeout: 10000 }
     );
+  };
+
+  const handleImageUpload = async (file) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      addToast('File không hợp lệ', 'Vui lòng chọn file ảnh JPG, PNG, WEBP hoặc GIF.', 'warning');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      addToast('Ảnh quá lớn', 'Vui lòng chọn ảnh dưới 5MB.', 'warning');
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      setImagePreview(URL.createObjectURL(file));
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await api.post('/posts/upload-image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 30000,
+      });
+      setImageUrl(res.data.imageUrl);
+      addToast('Tải ảnh thành công', 'Ảnh đã được lưu vào máy chủ KindnessMap.', 'success');
+    } catch (error) {
+      addToast('Tải ảnh thất bại', error.response?.data?.message || 'Vui lòng thử lại hoặc dùng URL ảnh.', 'warning');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -204,6 +235,7 @@ export const SubmitKindness = () => {
                 setDescription('');
                 setLocationName('Hà Nội, Việt Nam');
                 setImageUrl('');
+                setImagePreview('');
                 setSuccessPost(null);
               }}
               className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 font-extrabold text-xs rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all"
@@ -278,10 +310,31 @@ export const SubmitKindness = () => {
               <h3 className="font-black text-slate-900 dark:text-slate-100">Hình ảnh minh họa</h3>
             </div>
 
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-4 items-stretch">
+              <label className="group relative flex min-h-[150px] cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-emerald-400/50 bg-emerald-50/70 dark:bg-emerald-500/10 p-5 text-center hover:bg-emerald-100/70 dark:hover:bg-emerald-500/15 transition-all overflow-hidden">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={(e) => handleImageUpload(e.target.files?.[0])}
+                  className="sr-only"
+                />
+                <ImageIcon className="w-8 h-8 text-brand-green mb-3" />
+                <span className="text-sm font-black text-slate-900 dark:text-slate-100">Tải ảnh thật từ máy</span>
+                <span className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">JPG, PNG, WEBP, GIF · tối đa 5MB</span>
+                {uploadingImage && <span className="mt-3 text-xs font-black text-brand-green">Đang tải ảnh lên...</span>}
+              </label>
+
+              {(imagePreview || imageUrl) && (
+                <div className="rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 min-h-[150px]">
+                  <img src={imagePreview || imageUrl} alt="Preview ảnh bài viết" className="w-full h-full object-cover" />
+                </div>
+              )}
+            </div>
+
             <input
               value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="Dán URL hình ảnh hoặc chọn ảnh mẫu bên dưới"
+              onChange={(e) => { setImageUrl(e.target.value); setImagePreview(''); }}
+              placeholder="Hoặc dán URL hình ảnh"
               className="px-4 py-3.5 rounded-2xl km-auth-input text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-emerald-400/10 focus:border-emerald-400"
             />
 

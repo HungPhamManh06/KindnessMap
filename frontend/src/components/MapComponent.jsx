@@ -9,7 +9,7 @@ import Polygon from 'ol/geom/Polygon';
 import Point from 'ol/geom/Point';
 import TileLayer from 'ol/layer/Tile';
 import { Vector as VectorLayer } from 'ol/layer';
-import { Vector as VectorSource, XYZ } from 'ol/source';
+import { Vector as VectorSource, XYZ, Cluster } from 'ol/source';
 import { Style, Text, Fill, Stroke, Circle as CircleStyle } from 'ol/style';
 import GeoJSON from 'ol/format/GeoJSON';
 import { fromLonLat } from 'ol/proj';
@@ -116,6 +116,7 @@ const MapComponentBase = ({
   const heatmapLayerRef = useRef(null);
   const tileLayerRef = useRef(null);
   const territoryLayerRef = useRef(null);
+  const clusterLayerRef = useRef(null);
   const overlaysRef = useRef([]);
   const userLocationOverlayRef = useRef(null);
   const [emergencyTeams,setEmergencyTeams] = useState([]);
@@ -417,6 +418,11 @@ useEffect(() => {
     overlaysRef.current.forEach((overlay) => map.removeOverlay(overlay));
     overlaysRef.current = [];
 
+    if (clusterLayerRef.current) {
+      map.removeLayer(clusterLayerRef.current);
+      clusterLayerRef.current = null;
+    }
+
     if (heatmapLayerRef.current) {
       map.removeLayer(heatmapLayerRef.current);
       heatmapLayerRef.current = null;
@@ -479,53 +485,130 @@ useEffect(() => {
       };
     }
 
+    const pointFeatures = [];
+
     posts.forEach((post) => {
       const lat = Number(post.latitude);
       const lng = Number(post.longitude);
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
-      const el = createPinElement(getCategoryColor(post.category));
+      const feature = new Feature({ geometry: new Point(fromLonLat([lng, lat])) });
+      feature.setProperties({ post });
+      pointFeatures.push(feature);
+    });
+
+    const vectorSource = new VectorSource({ features: pointFeatures });
+    const clusterSource = new Cluster({ distance: 42, minDistance: 14, source: vectorSource });
+    const styleCache = {};
+
+    clusterLayerRef.current = new VectorLayer({
+      source: clusterSource,
+      zIndex: 8000,
+      updateWhileAnimating: false,
+      updateWhileInteracting: false,
+      style: (feature) => {
+        const features = feature.get('features') || [];
+        const size = features.length;
+        const post = features[0]?.get('post') || {};
+        const color = size > 1 ? '#10b981' : getCategoryColor(post.category);
+        const key = `${size}-${color}`;
+        if (!styleCache[key]) {
+          styleCache[key] = new Style({
+            image: new CircleStyle({
+              radius: size > 1 ? Math.min(28, 15 + Math.log(size) * 5) : 12,
+              fill: new Fill({ color }),
+              stroke: new Stroke({ color: '#ffffff', width: 4 }),
+            }),
+            text: new Text({
+              text: size > 1 ? String(size) : '•',
+              font: '900 12px Inter, Arial, sans-serif',
+              fill: new Fill({ color: '#ffffff' }),
+              stroke: new Stroke({ color: 'rgba(15,23,42,0.35)', width: 2 }),
+            }),
+          });
+        }
+        return styleCache[key];
+      },
+    });
+
+    map.addLayer(clusterLayerRef.current);
+
+    const buildPostPopup = (post) => {
       const image = post.imageUrl
-        ? `<img src="${escapeHtml(post.imageUrl)}" alt="${escapeHtml(post.title)}" style="width:100%;height:110px;object-fit:cover;border-radius:10px;margin:8px 0;"/>`
+        ? `<img src="${escapeHtml(post.imageUrl)}" alt="${escapeHtml(post.title)}" style="width:100%;height:128px;object-fit:cover;border-radius:18px;margin:10px 0;"/>`
         : '';
 
-      const popupHtml = `
-        <div style="width:250px;font-family:Inter,Arial,sans-serif;background:${popupPalette.surface};padding:12px;border-radius:16px;box-shadow:0 20px 25px -5px rgb(0 0 0 / 0.18), 0 8px 10px -6px rgb(0 0 0 / 0.18);border:1px solid ${popupPalette.cardBorder};">
-          <span style="display:inline-block;padding:3px 10px;border-radius:999px;background:${popupPalette.categoryBg};color:${popupPalette.categoryText};font-size:10px;font-weight:900;text-transform:uppercase;">
-            ${escapeHtml(post.category)}
-          </span>
+      return `
+        <div class="km-map-popup-html" style="width:292px;font-family:Inter,Arial,sans-serif;background:${popupPalette.surface};padding:14px;border-radius:24px;box-shadow:0 28px 60px -24px rgb(0 0 0 / 0.45);border:1px solid ${popupPalette.cardBorder};backdrop-filter:blur(18px);">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+            <span style="display:inline-block;padding:5px 11px;border-radius:999px;background:${popupPalette.categoryBg};color:${popupPalette.categoryText};font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;">
+              ${escapeHtml(post.category)}
+            </span>
+            <span style="font-size:10px;color:${popupPalette.subtle};font-weight:800;">📍 ${escapeHtml(post.locationName || 'Việt Nam')}</span>
+          </div>
           ${image}
-          <h4 style="font-size:13px;line-height:1.35;margin:8px 0 4px;color:${popupPalette.title};font-weight:900;">
+          <h4 style="font-size:15px;line-height:1.35;margin:8px 0 6px;color:${popupPalette.title};font-weight:950;">
             ${escapeHtml(post.title)}
           </h4>
-          <p style="font-size:11px;line-height:1.45;margin:0 0 8px;color:${popupPalette.text};">
-            ${escapeHtml((post.description || '').slice(0, 140))}
+          <p style="font-size:12px;line-height:1.55;margin:0 0 10px;color:${popupPalette.text};">
+            ${escapeHtml((post.description || '').slice(0, 150))}${(post.description || '').length > 150 ? '...' : ''}
           </p>
-          <div style="display:flex;justify-content:space-between;border-top:1px solid ${popupPalette.cardBorder};padding-top:8px;font-size:10px;color:${popupPalette.subtle};font-weight:700;">
+          <div style="display:flex;justify-content:space-between;border-top:1px solid ${popupPalette.cardBorder};padding-top:10px;font-size:11px;color:${popupPalette.subtle};font-weight:800;">
             <span>👤 ${escapeHtml(post.authorName || 'Người dùng')}</span>
-            <span>📍 ${escapeHtml(post.locationName || 'Việt Nam')}</span>
+            <span>💚 Việc tốt</span>
           </div>
-          <a href="/stories?id=${encodeURIComponent(post.id)}" style="display:block;text-align:center;text-decoration:none;width:100%;margin-top:10px;padding:9px 0;border-radius:12px;background:${popupPalette.buttonBg};color:${popupPalette.buttonText};font-size:12px;font-weight:900;">
-            Xem Chi Tiết
+          <a href="/stories?id=${encodeURIComponent(post.id)}" style="display:block;text-align:center;text-decoration:none;width:100%;margin-top:12px;padding:11px 0;border-radius:16px;background:linear-gradient(90deg,#34d399,#22d3ee);color:#020617;font-size:12px;font-weight:950;">
+            Xem câu chuyện →
           </a>
         </div>`;
+    };
 
-      const coords = fromLonLat([lng, lat]);
-      const overlay = new Overlay({ element: el, position: coords, positioning: 'bottom-center', stopEvent: false });
-      map.addOverlay(overlay);
-      overlaysRef.current.push(overlay);
-
-      el.addEventListener('click', (event) => {
-        event.stopPropagation();
-        popupElementRef.current.innerHTML = popupHtml;
-        popupOverlayRef.current?.setPosition(coords);
+    const clusterClickHandler = (event) => {
+      const cluster = map.forEachFeatureAtPixel(event.pixel, (item, layer) => {
+        if (layer === clusterLayerRef.current) return item;
+        return null;
       });
-    });
+
+      if (!cluster) return;
+      const features = cluster.get('features') || [];
+      const coordinate = cluster.getGeometry().getCoordinates();
+
+      if (features.length > 1) {
+        const extent = clusterSource.getSource().getExtent();
+        const featureExtent = features.reduce((acc, f) => {
+          const c = f.getGeometry().getCoordinates();
+          return [Math.min(acc[0], c[0]), Math.min(acc[1], c[1]), Math.max(acc[2], c[0]), Math.max(acc[3], c[1])];
+        }, [Infinity, Infinity, -Infinity, -Infinity]);
+        map.getView().fit(featureExtent, { duration: 650, padding: [80, 80, 80, 80], maxZoom: 13 });
+        popupElementRef.current.innerHTML = `
+          <div style="font-family:Inter,Arial,sans-serif;background:${popupPalette.surface};color:${popupPalette.title};border:1px solid ${popupPalette.cardBorder};border-radius:20px;padding:14px 16px;box-shadow:0 24px 55px -26px rgba(0,0,0,.5);font-size:12px;font-weight:900;">
+            ✨ ${features.length} việc tốt trong khu vực<br/>
+            <span style="font-weight:700;color:${popupPalette.subtle};">Đang phóng to để xem chi tiết</span>
+          </div>`;
+        popupOverlayRef.current?.setPosition(coordinate);
+        return;
+      }
+
+      const post = features[0]?.get('post');
+      if (!post) return;
+      popupElementRef.current.innerHTML = buildPostPopup(post);
+      popupOverlayRef.current?.setPosition(coordinate);
+    };
+
+    const pointerHandler = (event) => {
+      const hit = map.hasFeatureAtPixel(event.pixel, { layerFilter: (layer) => layer === clusterLayerRef.current });
+      map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+    };
+
+    map.on('singleclick', clusterClickHandler);
+    map.on('pointermove', pointerHandler);
 
     const closePopup = () => popupOverlayRef.current?.setPosition(undefined);
     map.on('singleclick', closePopup);
 
     return () => {
+      map.un('singleclick', clusterClickHandler);
+      map.un('pointermove', pointerHandler);
       map.un('singleclick', closePopup);
     };
   }, [posts, heatmapMode, mapReady, popupPalette]);
@@ -600,16 +683,18 @@ if (mapError) {
   return (
   <div className={`relative ${className}`}>
 
-    <div className="absolute top-4 right-4 z-[5] flex items-center gap-2">
+    <div className="absolute top-4 right-4 z-[5] flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-950/55 p-1.5 shadow-2xl backdrop-blur-xl">
 
       <button
         onClick={() => setHeatmapMode((prev) => !prev)}
+        className={`px-3 py-2 rounded-xl text-xs font-black transition-all ${heatmapMode ? 'bg-emerald-400 text-slate-950' : 'bg-white/10 text-white hover:bg-white/15'}`}
       >
         Heatmap
       </button>
 
       <button
         onClick={() => setEmergencyMode(prev => !prev)}
+        className={`px-3 py-2 rounded-xl text-xs font-black transition-all ${emergencyMode ? 'bg-rose-500 text-white' : 'bg-white/10 text-white hover:bg-white/15'}`}
       >
         🚨 Khẩn cấp
       </button>

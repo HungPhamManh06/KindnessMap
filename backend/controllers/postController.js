@@ -1,6 +1,52 @@
 const { queryGet, queryRun, queryAll } = require('../config/db');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 
 const FALLBACK_IMAGE_URL = 'data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%201200%20700%27%3E%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20x2%3D%271%27%20y1%3D%270%27%20y2%3D%271%27%3E%3Cstop%20stop-color%3D%27%2310b981%27%2F%3E%3Cstop%20offset%3D%270.55%27%20stop-color%3D%27%230f766e%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%230f172a%27%2F%3E%3C%2FlinearGradient%3E%3CradialGradient%20id%3D%27r%27%20cx%3D%2750%25%27%20cy%3D%2735%25%27%20r%3D%2760%25%27%3E%3Cstop%20stop-color%3D%27%23ffffff%27%20stop-opacity%3D%270.22%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%23ffffff%27%20stop-opacity%3D%270%27%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%271200%27%20height%3D%27700%27%20fill%3D%27url(%23g)%27%2F%3E%3Crect%20width%3D%271200%27%20height%3D%27700%27%20fill%3D%27url(%23r)%27%2F%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%23ffffff%27%20stroke-width%3D%2718%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%20opacity%3D%270.92%27%20transform%3D%27translate(510%20225)%20scale(3.3)%27%3E%3Cpath%20d%3D%27M20.8%204.6a5.5%205.5%200%200%200-7.8%200L12%205.7l-1-1.1a5.5%205.5%200%200%200-7.8%207.8l1%201L12%2021l7.8-7.6%201-1a5.5%205.5%200%200%200%200-7.8z%27%2F%3E%3Cpath%20d%3D%27M12%205.7l-2.6%202.6a2%202%200%200%200%200%202.8l.2.2a2%202%200%200%200%202.8%200L14%209.8%27%2F%3E%3C%2Fg%3E%3Ctext%20x%3D%27600%27%20y%3D%27525%27%20text-anchor%3D%27middle%27%20font-family%3D%27Inter%2CArial%2Csans-serif%27%20font-size%3D%2756%27%20font-weight%3D%27800%27%20fill%3D%27%23ffffff%27%3EKindnessMap%3C%2Ftext%3E%3Ctext%20x%3D%27600%27%20y%3D%27590%27%20text-anchor%3D%27middle%27%20font-family%3D%27Inter%2CArial%2Csans-serif%27%20font-size%3D%2728%27%20font-weight%3D%27600%27%20fill%3D%27%23d1fae5%27%3EB%E1%BA%A3n%20%C4%90%E1%BB%93%20Vi%E1%BB%87c%20T%E1%BB%91t%3C%2Ftext%3E%3C%2Fsvg%3E';
+
+const UPLOAD_ROOT = path.join(__dirname, '..', 'uploads');
+const POST_UPLOAD_DIR = path.join(UPLOAD_ROOT, 'posts');
+const IMAGE_CACHE_DIR = path.join(UPLOAD_ROOT, 'cache');
+
+const ensureDir = (dir) => {
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+};
+
+const extensionFromMime = (mime = '') => {
+  const value = String(mime).toLowerCase().split(';')[0].trim();
+  if (value === 'image/jpeg' || value === 'image/jpg') return 'jpg';
+  if (value === 'image/png') return 'png';
+  if (value === 'image/webp') return 'webp';
+  if (value === 'image/gif') return 'gif';
+  if (value === 'image/svg+xml') return 'svg';
+  return 'jpg';
+};
+
+const mimeFromExtension = (ext = '') => {
+  switch (ext.toLowerCase()) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'webp':
+      return 'image/webp';
+    case 'gif':
+      return 'image/gif';
+    case 'svg':
+      return 'image/svg+xml; charset=utf-8';
+    default:
+      return 'application/octet-stream';
+  }
+};
+
+const findCachedImage = (hash) => {
+  ensureDir(IMAGE_CACHE_DIR);
+  const match = fs.readdirSync(IMAGE_CACHE_DIR).find((file) => file.startsWith(`${hash}.`));
+  return match ? path.join(IMAGE_CACHE_DIR, match) : null;
+};
+
 
 
 const proxifyImageUrl = (raw) => `/api/posts/image-proxy?url=${encodeURIComponent(raw)}`;
@@ -33,6 +79,34 @@ function performAIModeration(text) {
   }
   return { isClean: true };
 }
+
+
+const uploadPostImage = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'Vui lòng chọn một file ảnh để tải lên.' });
+    }
+
+    const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowed.includes(req.file.mimetype)) {
+      return res.status(400).json({ message: 'Chỉ hỗ trợ ảnh JPG, PNG, WEBP hoặc GIF.' });
+    }
+
+    ensureDir(POST_UPLOAD_DIR);
+    const ext = extensionFromMime(req.file.mimetype);
+    const filename = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}.${ext}`;
+    const filePath = path.join(POST_UPLOAD_DIR, filename);
+    fs.writeFileSync(filePath, req.file.buffer);
+
+    res.status(201).json({
+      message: 'Tải ảnh lên thành công.',
+      imageUrl: `/uploads/posts/${filename}`,
+    });
+  } catch (error) {
+    console.error('Upload post image error:', error);
+    res.status(500).json({ message: 'Có lỗi khi tải ảnh lên máy chủ.' });
+  }
+};
 
 const createPost = async (req, res) => {
   try {
@@ -306,6 +380,16 @@ const proxyImage = async (req, res) => {
       return res.send(decodeURIComponent(FALLBACK_IMAGE_URL.split(',')[1]));
     }
 
+    const hash = crypto.createHash('sha256').update(rawUrl).digest('hex').slice(0, 32);
+    const cachedPath = findCachedImage(hash);
+    if (cachedPath && fs.existsSync(cachedPath)) {
+      const ext = path.extname(cachedPath).slice(1);
+      res.setHeader('Content-Type', mimeFromExtension(ext));
+      res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
+      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      return res.send(fs.readFileSync(cachedPath));
+    }
+
     const response = await fetch(rawUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; KindnessMapBot/1.0; +https://kindnessmap-vn.vercel.app)',
@@ -324,6 +408,10 @@ const proxyImage = async (req, res) => {
 
     const arrayBuffer = await response.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    const ext = extensionFromMime(contentType);
+    const cachePath = path.join(IMAGE_CACHE_DIR, `${hash}.${ext}`);
+    ensureDir(IMAGE_CACHE_DIR);
+    fs.writeFile(cachePath, buffer, () => {});
 
     res.setHeader('Content-Type', contentType);
     res.setHeader('Cache-Control', 'public, max-age=604800, immutable');
@@ -337,7 +425,9 @@ const proxyImage = async (req, res) => {
   }
 };
 
+
 module.exports = {
+  uploadPostImage,
   createPost,
   getPublicPosts,
   getMapPosts,

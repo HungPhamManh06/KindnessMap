@@ -276,7 +276,7 @@ export const KindnessStories = () => {
                     setSearchParams({ id: story.id });
                     openStoryDetail(story);
                   }}
-                  className="km-story-card-modern group hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
+                  className="km-story-card-modern km-magnetic-card group hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col"
                 >
                   {/* Image full width */}
                   <div className="relative h-72 sm:h-96 w-full bg-slate-100 dark:bg-slate-800 overflow-hidden rounded-b-[2rem]">
