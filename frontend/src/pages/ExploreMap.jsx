@@ -78,10 +78,10 @@ export const ExploreMap = () => {
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-lightGreen border border-brand-green/20 text-brand-deepGreen text-xs font-black w-fit uppercase tracking-wide">
                 <Sparkles className="w-4 h-4" /> Khám phá cộng đồng tử tế
               </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-slate-50 leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight">
                 Khám Phá Bản Đồ Việc Tốt Trên Toàn Quốc
               </h1>
-              <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed">
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
                 Tìm nhanh theo khu vực, danh mục hoặc nội dung để xem các câu chuyện tử tế đang diễn ra quanh bạn và định vị tức thì trên bản đồ tương tác.
               </p>
             </div>

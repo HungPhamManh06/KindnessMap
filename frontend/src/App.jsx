@@ -9,6 +9,7 @@ import { Footer } from './components/Footer';
 import { AuthModals } from './components/AuthModals';
 import { NotificationToast } from './components/NotificationToast';
 import { FloatingChatbot } from './components/FloatingChatbot';
+import { ScrollToTop } from './components/ScrollToTop';
 
 const Home = lazy(() => import('./pages/Home').then((module) => ({ default: module.Home })));
 const ExploreMap = lazy(() => import('./pages/ExploreMap').then((module) => ({ default: module.ExploreMap })));
@@ -64,6 +65,7 @@ export const App = () => {
         <NotificationProvider>
           <AuthProvider>
             <Router>
+              <ScrollToTop />
               <div className="min-h-screen flex flex-col justify-between bg-[var(--app-bg)] text-[var(--app-text)] transition-colors duration-300">
                 <Navbar />
                 <main className="flex-1">

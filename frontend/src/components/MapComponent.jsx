@@ -8,7 +8,7 @@ import Feature from 'ol/Feature';
 import Polygon from 'ol/geom/Polygon';
 import Point from 'ol/geom/Point';
 import TileLayer from 'ol/layer/Tile';
-import { Vector as VectorLayer } from 'ol/layer';
+import { Vector as VectorLayer, Heatmap as HeatmapLayer } from 'ol/layer';
 import { Vector as VectorSource, XYZ, Cluster } from 'ol/source';
 import { Style, Text, Fill, Stroke, Circle as CircleStyle } from 'ol/style';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -430,59 +430,39 @@ useEffect(() => {
 
     popupOverlayRef.current?.setPosition(undefined);
 
+    // Heatmap mode now overlays a real density layer built from the actual
+    // posts being shown, instead of replacing the markers with static demo
+    // hotspots. The green location pins/clusters stay visible underneath so
+    // toggling Heatmap "adds" information rather than hiding the data.
     if (heatmapMode) {
-      const features = HEATMAP_HOTSPOTS.map((spot) => {
-        const polygon = buildCirclePolygon(spot.lat, spot.lng, spot.radius);
-        const feature = new Feature({ geometry: polygon });
-        feature.setProperties({ name: spot.name, count: spot.count, strong: spot.count > 40 });
-        return feature;
+      const heatFeatures = [];
+
+      posts.forEach((post) => {
+        const lat = Number(post.latitude);
+        const lng = Number(post.longitude);
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+        heatFeatures.push(new Feature({ geometry: new Point(fromLonLat([lng, lat])) }));
       });
 
-      heatmapLayerRef.current = new VectorLayer({
-        source: new VectorSource({ features }),
-        style: (feature) => {
-          const strong = feature.get('strong');
-          return new Style({
-            fill: new Fill({ color: strong ? 'rgba(244,63,94,0.35)' : 'rgba(16,185,129,0.32)' }),
-            stroke: new Stroke({ color: strong ? 'rgba(225,29,72,0.85)' : 'rgba(5,150,105,0.85)', width: 2 }),
-          });
-        },
+      // Fall back to the illustrative hotspots only if there is no real
+      // location data to visualize, so the heatmap is never blank.
+      if (heatFeatures.length === 0) {
+        HEATMAP_HOTSPOTS.forEach((spot) => {
+          heatFeatures.push(
+            new Feature({ geometry: new Point(fromLonLat([spot.lng, spot.lat])) })
+          );
+        });
+      }
+
+      heatmapLayerRef.current = new HeatmapLayer({
+        source: new VectorSource({ features: heatFeatures }),
+        blur: 24,
+        radius: 18,
+        opacity: 0.75,
+        zIndex: 5000,
+        gradient: ['#22c55e', '#facc15', '#f97316', '#ef4444'],
       });
       map.addLayer(heatmapLayerRef.current);
-
-      const clickHandler = (event) => {
-        const feature = map.forEachFeatureAtPixel(event.pixel, (item, layer) => {
-          if (layer === heatmapLayerRef.current) return item;
-          return null;
-        });
-
-        if (feature) {
-          const { name, count } = feature.getProperties();
-          popupElementRef.current.innerHTML = `
-            <div style="font-family:Inter,Arial,sans-serif;font-size:12px;font-weight:800;color:${popupPalette.title};background:${popupPalette.surface};padding:12px;border-radius:12px;box-shadow:0 10px 15px -3px rgb(0 0 0 / 0.18);border:1px solid ${popupPalette.cardBorder};">
-               🔥 ${escapeHtml(name)}<br/>
-               <span style="font-weight:600;color:${popupPalette.subtle};">Hơn ${count} hành động việc tốt</span>
-            </div>`;
-          popupOverlayRef.current?.setPosition(event.coordinate);
-        } else {
-          popupOverlayRef.current?.setPosition(undefined);
-        }
-      };
-
-      const pointerHandler = (event) => {
-        const hit = map.hasFeatureAtPixel(event.pixel, {
-          layerFilter: (layer) => layer === heatmapLayerRef.current,
-        });
-        map.getTargetElement().style.cursor = hit ? 'pointer' : '';
-      };
-
-      map.on('singleclick', clickHandler);
-      map.on('pointermove', pointerHandler);
-
-      return () => {
-        map.un('singleclick', clickHandler);
-        map.un('pointermove', pointerHandler);
-      };
     }
 
     const pointFeatures = [];
