@@ -3,6 +3,7 @@ import { Flame, MapPin } from 'lucide-react';
 import 'ol/ol.css';
 import Map from 'ol/Map';
 import View from 'ol/View';
+import { defaults as defaultInteractions } from 'ol/interaction/defaults';
 import Overlay from 'ol/Overlay';
 import Feature from 'ol/Feature';
 import Polygon from 'ol/geom/Polygon';
@@ -107,6 +108,7 @@ const MapComponentBase = ({
   posts = [],
   selectedCenter = null,
   className = 'h-[550px] w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200',
+  enableWheelZoom = false,
 }) => {
   const [responseTeams, setResponseTeams] = useState([]);
   const containerRef = useRef(null);
@@ -184,6 +186,9 @@ const MapComponentBase = ({
         const map = new Map({
           target: containerRef.current,
           layers: [tileLayer],
+          // Tắt zoom bằng con lăn mặc định để khu vực bản đồ không "nuốt" thao tác cuộn trang.
+          // Trang Explore có thể bật lại bằng prop enableWheelZoom nếu cần tương tác bản đồ đầy đủ.
+          interactions: defaultInteractions({ mouseWheelZoom: enableWheelZoom }),
           view: new View({
             center: fromLonLat([108, 16]),
             zoom: 5,
@@ -593,15 +598,18 @@ useEffect(() => {
     };
   }, [posts, heatmapMode, mapReady, popupPalette]);
   useEffect(() => {
+  // Không theo dõi GPS ngay khi bản đồ vừa render vì watchPosition có thể tạo
+  // nhiều callback và làm giật cuộn trên trang chủ. Chỉ bật khi người dùng thật sự
+  // dùng chế độ khẩn cấp cần vị trí hiện tại.
+  if (!emergencyMode) return undefined;
+
   if (!navigator.geolocation) {
     console.log("GPS không được hỗ trợ");
-    return;
+    return undefined;
   }
 
   const watchId = navigator.geolocation.watchPosition(
     (position) => {
-      console.log("GPS:", position.coords.latitude, position.coords.longitude);
-
       setUserLocation({
         lat: position.coords.latitude,
         lng: position.coords.longitude,
@@ -612,11 +620,13 @@ useEffect(() => {
     },
     {
       enableHighAccuracy: true,
+      maximumAge: 30000,
+      timeout: 10000,
     }
   );
 
   return () => navigator.geolocation.clearWatch(watchId);
-}, []);
+}, [emergencyMode]);
 
   useEffect(() => {
   if (!emergencyMode) return;
