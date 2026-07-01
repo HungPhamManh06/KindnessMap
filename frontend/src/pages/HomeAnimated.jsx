@@ -253,18 +253,18 @@ export const HomeAnimated = () => {
             style={{ lineHeight: 1.12, textRendering: 'optimizeLegibility', WebkitFontSmoothing: 'antialiased' }}
           >
             <span className="block" style={{ fontSize: 'clamp(1.9rem, 5.2vw, 4.8rem)', whiteSpace: 'nowrap' }}>
-              <span style={{ color: '#000000', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 800, letterSpacing: '-1px' }}>
+              <span style={{ color: '#000000', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 800, fontStyle: 'normal', letterSpacing: '-1px' }}>
                 Biến mỗi việc tốt{' '}
               </span>
-              <span style={{ color: '#6F6F6F', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 300, fontStyle: 'italic', letterSpacing: '-0.5px' }}>
+              <span style={{ color: '#6F6F6F', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 800, fontStyle: 'normal', letterSpacing: '-1px' }}>
                 nhỏ bé
               </span>
             </span>
             <span className="block" style={{ fontSize: 'clamp(1.9rem, 5.2vw, 4.8rem)', marginTop: '0.1em', whiteSpace: 'nowrap' }}>
-              <span style={{ color: '#000000', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 800, letterSpacing: '-1px' }}>
+              <span style={{ color: '#000000', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 800, fontStyle: 'normal', letterSpacing: '-1px' }}>
                 thành một{' '}
               </span>
-              <span style={{ color: '#6F6F6F', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 300, fontStyle: 'italic', letterSpacing: '-0.5px' }}>
+              <span style={{ color: '#6F6F6F', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 800, fontStyle: 'normal', letterSpacing: '-1px' }}>
                 điểm sáng trên bản đồ.
               </span>
             </span>
