@@ -260,7 +260,7 @@ export const HomeAnimated = () => {
                 nhỏ bé
               </span>
             </span>
-            <span className="block" style={{ fontSize: 'clamp(1.6rem, 4.4vw, 4.1rem)', marginTop: '0.1em', whiteSpace: 'nowrap' }}>
+            <span className="block" style={{ fontSize: 'clamp(1.9rem, 5.2vw, 4.8rem)', marginTop: '0.1em', whiteSpace: 'nowrap' }}>
               <span style={{ color: '#000000', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 800, letterSpacing: '-1px' }}>
                 thành một{' '}
               </span>

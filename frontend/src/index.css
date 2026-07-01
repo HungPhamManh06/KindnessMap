@@ -607,9 +607,19 @@ html.dark .km-modern-sidebar-card {
   pointer-events: none;
 }
 
-.km-dark-hero > * {
+/* Only re-stack children that aren't already explicitly positioned.
+   Previously this forced `position: relative` onto every direct child,
+   which broke Tailwind's `absolute` utility on decorative glow elements
+   (e.g. the w-[500px] h-[500px] blur circles on the Leaderboard hero).
+   Those fixed-size elements then took up real space in the layout and
+   pushed the actual heading far down, creating a large empty gap. */
+.km-dark-hero > *:not(.absolute):not(.fixed) {
   position: relative;
   z-index: 1;
+}
+
+.km-dark-hero > .absolute {
+  z-index: 0;
 }
 
 .km-submit-card {
