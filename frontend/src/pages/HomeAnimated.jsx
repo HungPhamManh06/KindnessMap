@@ -166,8 +166,9 @@ const container = {
 };
 
 const rise = {
-  hidden: { opacity: 0, y: 26, filter: 'blur(6px)' },
-  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.82, ease } },
+  // Tránh animate CSS filter/blur vì filter khá nặng và có thể làm cuộn bị khựng.
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.72, ease } },
 };
 
 const sectionReveal = {

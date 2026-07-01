@@ -108,7 +108,7 @@ const MapComponentBase = ({
   posts = [],
   selectedCenter = null,
   className = 'h-[550px] w-full rounded-3xl overflow-hidden shadow-2xl border border-slate-200',
-  enableWheelZoom = false,
+  enableWheelZoom = true,
 }) => {
   const [responseTeams, setResponseTeams] = useState([]);
   const containerRef = useRef(null);
@@ -186,8 +186,8 @@ const MapComponentBase = ({
         const map = new Map({
           target: containerRef.current,
           layers: [tileLayer],
-          // Tắt zoom bằng con lăn mặc định để khu vực bản đồ không "nuốt" thao tác cuộn trang.
-          // Trang Explore có thể bật lại bằng prop enableWheelZoom nếu cần tương tác bản đồ đầy đủ.
+          // Không chặn cuộn trang ở các bản đồ nhúng nhỏ. Khi enableWheelZoom=false,
+          // người dùng vẫn có thể kéo bản đồ và dùng nút +/- nhưng wheel sẽ cuộn trang ngay.
           interactions: defaultInteractions({ mouseWheelZoom: enableWheelZoom }),
           view: new View({
             center: fromLonLat([108, 16]),
@@ -598,9 +598,8 @@ useEffect(() => {
     };
   }, [posts, heatmapMode, mapReady, popupPalette]);
   useEffect(() => {
-  // Không theo dõi GPS ngay khi bản đồ vừa render vì watchPosition có thể tạo
-  // nhiều callback và làm giật cuộn trên trang chủ. Chỉ bật khi người dùng thật sự
-  // dùng chế độ khẩn cấp cần vị trí hiện tại.
+  // Chỉ bật GPS khi cần chế độ khẩn cấp. Việc watchPosition chạy liên tục ngay khi
+  // tải trang chủ có thể làm tốn tài nguyên và gây khựng trên một số trình duyệt.
   if (!emergencyMode) return undefined;
 
   if (!navigator.geolocation) {
