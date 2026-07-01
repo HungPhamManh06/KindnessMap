@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kindnessmap-vn.vercel.app/sitemap.xml

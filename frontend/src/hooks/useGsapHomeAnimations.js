@@ -71,14 +71,13 @@ export const useGsapHomeAnimations = ({ scopeRef, disabled = false } = {}) => {
         gsap.utils.toArray('.km-gsap-reveal').forEach((element) => {
           gsap.fromTo(
             element,
-            { autoAlpha: 0, y: 46, scale: 0.985, filter: 'blur(10px)' },
+            { autoAlpha: 0, y: 40, scale: 0.99 },
             {
               autoAlpha: 1,
               y: 0,
               scale: 1,
-              filter: 'blur(0px)',
-              duration: 0.85,
-              ease: 'power4.out',
+              duration: 0.68,
+              ease: 'power3.out',
               scrollTrigger: {
                 trigger: element,
                 start: 'top 82%',
@@ -94,8 +93,9 @@ export const useGsapHomeAnimations = ({ scopeRef, disabled = false } = {}) => {
           onEnter: (batch) =>
             gsap.fromTo(
               batch,
-              { autoAlpha: 0, y: 34, scale: 0.96, filter: 'blur(10px)' },
-              { autoAlpha: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.75, ease: 'power4.out', stagger: 0.08 },
+              // Chỉ animate transform/opacity để compositor xử lý mượt, không dùng filter blur.
+              { autoAlpha: 0, y: 30, scale: 0.98 },
+              { autoAlpha: 1, y: 0, scale: 1, duration: 0.58, ease: 'power3.out', stagger: 0.06 },
             ),
         });
 

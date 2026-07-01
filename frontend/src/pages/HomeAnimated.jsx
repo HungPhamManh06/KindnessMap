@@ -166,8 +166,9 @@ const container = {
 };
 
 const rise = {
-  hidden: { opacity: 0, y: 26, filter: 'blur(6px)' },
-  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { duration: 0.82, ease } },
+  // Tránh animate CSS filter/blur vì filter khá nặng và có thể làm cuộn bị khựng.
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.72, ease } },
 };
 
 const sectionReveal = {
@@ -256,7 +257,7 @@ export const HomeAnimated = () => {
               <span style={{ color: '#000000', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 800, fontStyle: 'normal', letterSpacing: '-1px' }}>
                 Biến mỗi việc tốt{' '}
               </span>
-              <span style={{ color: '#6F6F6F', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 800, fontStyle: 'normal', letterSpacing: '-1px' }}>
+              <span style={{ color: '#000000', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 800, fontStyle: 'normal', letterSpacing: '-1px' }}>
                 nhỏ bé
               </span>
             </span>
@@ -264,7 +265,7 @@ export const HomeAnimated = () => {
               <span style={{ color: '#000000', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 800, fontStyle: 'normal', letterSpacing: '-1px' }}>
                 thành một{' '}
               </span>
-              <span style={{ color: '#6F6F6F', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 800, fontStyle: 'normal', letterSpacing: '-1px' }}>
+              <span style={{ color: '#000000', fontFamily: "'Be Vietnam Pro', system-ui, sans-serif", fontWeight: 800, fontStyle: 'normal', letterSpacing: '-1px' }}>
                 điểm sáng trên bản đồ.
               </span>
             </span>
@@ -276,8 +277,8 @@ export const HomeAnimated = () => {
             className="mt-8 max-w-2xl text-base sm:text-lg leading-relaxed km-cinematic-copy animate-fade-rise-delay"
             style={{ color: '#6F6F6F' }}
           >
-            Xây dựng nền tảng cho những tâm hồn nhân ái và những người đáng can đảm.
-            Qua mọi ồn ào, chúng tôi tạo nên những không gian số để lan tỏa lòng tốt
+            Xây dựng nền tảng cho những tâm hồn nhân ái và những người muốn trao đi những hành động đẹp.
+            Qua nhiều cuộc thảo luận, chúng tôi tạo nên những không gian số để lan tỏa lòng tốt
             theo cách hiện đại, trực quan và truyền cảm hứng.
           </motion.p>
 
@@ -293,7 +294,7 @@ export const HomeAnimated = () => {
               className="km-hero-cta km-btn-shine px-14 py-5 text-base"
               style={{ fontFamily: 'var(--font-body)' }}
             >
-              Ghìm Việc Tốt Của Bạn
+              Ghim Việc Tốt Của Bạn
             </motion.button>
 
             <motion.button
@@ -476,6 +477,7 @@ export const HomeAnimated = () => {
               <LazyMapComponent
                 posts={mapPosts}
                 className="h-[520px] w-full rounded-[28px] overflow-hidden border border-slate-200 dark:border-slate-800"
+                enableWheelZoom={false}
               />
             </Suspense>
           )}

@@ -1,18 +1,117 @@
 <!doctype html>
 <html lang="vi">
-<head>
-<meta charset="UTF-8" />
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMTBCOTgxIiBzdHJva2Utd2lkdGg9IjIuNSIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNMTkgMTRjMS40OS0xLjQ2IDMtMy4yMSAzLTUuNUE1LjUgNS41IDAgMCAwIDE2LjUgM2MtMS43NiAwLTMgLjUtNC41IDItMS41LTEuNS0yLjc0LTItNC41LTJBNS41IDUuNSAwIDAgMCAyIDguNWMwIDIuMyAxLjUgNC4wNSAzIDUuNWw3IDdaIi8+PHBhdGggZD0iTTEyIDUgOS4wNCA3Ljk2YTIuMTcgMi4xNyAwIDAgMCAwIDMuMDh2MGMuODIuODIgMi4xMy44NSAzIC4wN2wyLjA3LTEuOWEyLjgyIDIuODIgMCAwIDEgMy43OSAwbDIuOTYgMi42NiIvPjxwYXRoIGQ9Im0xOCAxNS0yLTIiLz48cGF0aCBkPSJtMTUgMTgtMi0yIi8+PC9zdmc+" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="theme-color" content="#0f172a" />
-<title>KindnessMap – Bản Đồ Việc Tốt</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary SEO -->
+    <title>KindnessMap – Bản Đồ Việc Tốt Việt Nam</title>
+    <meta
+      name="description"
+      content="KindnessMap là nền tảng cộng đồng giúp ghim, kể và lan tỏa những hành động tử tế trên bản đồ số Việt Nam. Mỗi việc tốt nhỏ bé đều có thể trở thành một điểm sáng."
+    />
+    <meta
+      name="keywords"
+      content="KindnessMap, bản đồ việc tốt, việc tốt Việt Nam, lòng tốt, tình nguyện, cộng đồng tử tế, bản đồ nhân ái, thiện nguyện Việt Nam"
+    />
+    <meta name="author" content="KindnessMap" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow" />
+    <meta name="language" content="Vietnamese" />
+    <meta name="application-name" content="KindnessMap" />
+    <meta name="theme-color" content="#10b981" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="canonical" href="https://kindnessmap-vn.vercel.app/" />
+
+    <!-- Icons / PWA -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Open Graph: Facebook, Zalo, Messenger, LinkedIn -->
+    <meta property="og:site_name" content="KindnessMap" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:url" content="https://kindnessmap-vn.vercel.app/" />
+    <meta property="og:title" content="KindnessMap – Bản Đồ Việc Tốt Việt Nam" />
+    <meta
+      property="og:description"
+      content="Ghim, kể và lan tỏa những hành động tử tế trên bản đồ số. Biến mỗi việc tốt nhỏ bé thành một điểm sáng trên bản đồ Việt Nam."
+    />
+    <meta property="og:image" content="https://kindnessmap-vn.vercel.app/og-kindnessmap.png" />
+    <meta property="og:image:secure_url" content="https://kindnessmap-vn.vercel.app/og-kindnessmap.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="KindnessMap – Bản Đồ Việc Tốt Việt Nam" />
+
+    <!-- Twitter / X card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="KindnessMap – Bản Đồ Việc Tốt Việt Nam" />
+    <meta
+      name="twitter:description"
+      content="Nền tảng cộng đồng để ghim, kể và lan tỏa những hành động tử tế trên bản đồ số Việt Nam."
+    />
+    <meta name="twitter:image" content="https://kindnessmap-vn.vercel.app/og-kindnessmap.png" />
+    <meta name="twitter:image:alt" content="KindnessMap – Bản Đồ Việc Tốt Việt Nam" />
+
+    <!-- Performance hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://accounts.google.com" />
+    <link rel="preconnect" href="https://api.maptiler.com" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="dns-prefetch" href="https://accounts.google.com" />
+    <link rel="dns-prefetch" href="https://api.maptiler.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Structured data for Google -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://kindnessmap-vn.vercel.app/#organization",
+            "name": "KindnessMap",
+            "url": "https://kindnessmap-vn.vercel.app/",
+            "logo": "https://kindnessmap-vn.vercel.app/icon-512.png",
+            "image": "https://kindnessmap-vn.vercel.app/og-kindnessmap.png",
+            "sameAs": [
+              "https://www.facebook.com/profile.php?id=61591351918773",
+              "https://github.com/HungPhamManh06/KindnessMap"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://kindnessmap-vn.vercel.app/#website",
+            "url": "https://kindnessmap-vn.vercel.app/",
+            "name": "KindnessMap – Bản Đồ Việc Tốt Việt Nam",
+            "description": "Nền tảng cộng đồng giúp ghim, kể và lan tỏa những hành động tử tế trên bản đồ số Việt Nam.",
+            "inLanguage": "vi-VN",
+            "publisher": {
+              "@id": "https://kindnessmap-vn.vercel.app/#organization"
+            }
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://kindnessmap-vn.vercel.app/#webapp",
+            "name": "KindnessMap",
+            "url": "https://kindnessmap-vn.vercel.app/",
+            "applicationCategory": "SocialNetworkingApplication",
+            "operatingSystem": "Web",
+            "description": "Ứng dụng web giúp cộng đồng chia sẻ, ghim và khám phá những việc tốt trên bản đồ Việt Nam.",
+            "inLanguage": "vi-VN"
+          }
+        ]
+      }
+    </script>
+
     <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
-<body>
-<div id="root"></div>
-<script type="module" src="/src/main.jsx"></script>
-</body>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>

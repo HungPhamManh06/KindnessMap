@@ -1,0 +1,15 @@
+{
+  "name": "KindnessMap – Bản Đồ Việc Tốt",
+  "short_name": "KindnessMap",
+  "description": "Nền tảng cộng đồng để ghim, kể và lan tỏa những hành động tử tế trên bản đồ số.",
+  "lang": "vi-VN",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
