@@ -48,20 +48,20 @@ export const Footer = () => {
             {/* Social links */}
             <div className="flex items-center gap-3 pt-1">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/profile.php?id=61591351918773&mibextid=wwXIfr&rdid=8AaPGVbwdGnunsgT&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1Ks8mGpgGj%2F%3Fmibextid%3DwwXIfr#"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-blue-600 flex items-center justify-center transition-colors text-slate-400 hover:text-white"
-                aria-label="Facebook"
+                aria-label="Facebook KindnessMap"
               >
                 <Facebook className="w-4 h-4" />
               </a>
               <a
-                href="https://github.com"
+                href="https://github.com/HungPhamManh06/KindnessMap"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-600 flex items-center justify-center transition-colors text-slate-400 hover:text-white"
-                aria-label="GitHub"
+                aria-label="GitHub KindnessMap"
               >
                 <Github className="w-4 h-4" />
               </a>
