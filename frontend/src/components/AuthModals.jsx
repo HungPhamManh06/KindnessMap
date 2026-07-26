@@ -31,6 +31,19 @@ export const AuthModals = () => {
     return () => window.clearInterval(timer);
   }, [googleReady]);
 
+  // Đóng modal bằng phím Escape
+  useEffect(() => {
+    if (!activeModal) return;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setActiveModal(null);
+        setErrorMsg('');
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [activeModal, setActiveModal]);
+
   useEffect(() => {
     if (!activeModal || !googleClientId || !googleReady || !googleButtonRef.current) return;
 
@@ -62,6 +75,8 @@ export const AuthModals = () => {
   const handleClose = () => {
     setActiveModal(null);
     setErrorMsg('');
+    setPassword('');
+    setNewPassword('');
   };
 
   const handleSubmit = async (e) => {
@@ -89,8 +104,14 @@ export const AuthModals = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xl p-4 animate-fade-in">
-      <div className="relative w-full max-w-md km-auth-card overflow-hidden animate-slide-up">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xl p-4 animate-fade-in"
+      onClick={handleClose}
+    >
+      <div
+        className="relative w-full max-w-md km-auth-card overflow-hidden animate-slide-up"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Banner header */}
         <div className="km-auth-banner p-6 text-white text-center relative">
           <button
@@ -162,12 +183,16 @@ export const AuthModals = () => {
                 <input
                   type="password"
                   required
+                  minLength={activeModal === 'register' ? 6 : undefined}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-11 pr-4 py-3 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                 />
               </div>
+              {activeModal === 'register' && (
+                <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">Tối thiểu 6 ký tự.</p>
+              )}
               {activeModal === 'login' && (
                 <div className="text-right mt-1.5">
                   <button
@@ -190,6 +215,7 @@ export const AuthModals = () => {
                 <input
                   type="password"
                   required
+                  minLength={6}
                   placeholder="••••••••"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}

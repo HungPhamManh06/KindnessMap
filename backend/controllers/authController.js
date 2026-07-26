@@ -18,6 +18,11 @@ const createAuthToken = (user) => jwt.sign(
   { expiresIn: '7d' }
 );
 
+// Chuẩn hoá email: bỏ khoảng trắng + viết thường để "Abc@x.com" và "abc@x.com" là một tài khoản
+const normalizeEmail = (email) => String(email || '').trim().toLowerCase();
+const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const MIN_PASSWORD_LENGTH = 6;
+
 const toPublicUser = (user) => ({
   id: user.id,
   fullName: user.fullName,
@@ -50,12 +55,21 @@ async function checkAndUpdateLevel(userId) {
 
 const register = async (req, res) => {
   try {
-    const { fullName, email, password } = req.body;
-    if (!fullName || !email || !password) {
+    const { fullName, password } = req.body;
+    const email = normalizeEmail(req.body.email);
+    const trimmedName = String(fullName || '').trim();
+
+    if (!trimmedName || !email || !password) {
       return res.status(400).json({ message: 'Vui lòng điền đầy đủ họ tên, email và mật khẩu.' });
     }
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ message: 'Địa chỉ email không hợp lệ. Vui lòng kiểm tra lại.' });
+    }
+    if (String(password).length < MIN_PASSWORD_LENGTH) {
+      return res.status(400).json({ message: `Mật khẩu phải có ít nhất ${MIN_PASSWORD_LENGTH} ký tự.` });
+    }
 
-    const existing = await queryGet(`SELECT id FROM Users WHERE email = ?`, [email]);
+    const existing = await queryGet(`SELECT id FROM Users WHERE LOWER(email) = ?`, [email]);
     if (existing) {
       return res.status(400).json({ message: 'Email này đã được đăng ký. Vui lòng sử dụng email khác hoặc đăng nhập.' });
     }
@@ -64,11 +78,11 @@ const register = async (req, res) => {
     // Public registration always creates a normal user account.
     // Admin rights must be granted later by an existing admin from the Admin Panel.
     const userRole = 'user';
-    const avatar = `https://api.dicebear.com/8.x/thumbs/svg?seed=${encodeURIComponent(fullName)}`;
+    const avatar = `https://api.dicebear.com/8.x/thumbs/svg?seed=${encodeURIComponent(trimmedName)}`;
 
     const result = await queryRun(
       `INSERT INTO Users (fullName, email, password, avatar, points, level, role) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [fullName, email, hashedPw, avatar, 10, 'Active Citizen', userRole]
+      [trimmedName, email, hashedPw, avatar, 10, 'Active Citizen', userRole]
     );
 
     // Welcome notification
@@ -79,7 +93,7 @@ const register = async (req, res) => {
 
     const user = {
       id: result.lastID,
-      fullName,
+      fullName: trimmedName,
       email,
       role: userRole,
       avatar,
@@ -102,12 +116,13 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = normalizeEmail(req.body.email);
     if (!email || !password) {
       return res.status(400).json({ message: 'Vui lòng điền email và mật khẩu.' });
     }
 
-    const user = await queryGet(`SELECT * FROM Users WHERE email = ?`, [email]);
+    const user = await queryGet(`SELECT * FROM Users WHERE LOWER(email) = ?`, [email]);
     if (!user) {
       return res.status(401).json({ message: 'Email hoặc mật khẩu không chính xác.' });
     }
@@ -148,7 +163,7 @@ const googleLogin = async (req, res) => {
     });
 
     const payload = ticket.getPayload();
-    const email = payload?.email;
+    const email = normalizeEmail(payload?.email);
     const emailVerified = payload?.email_verified;
 
     if (!email || !emailVerified) {
@@ -158,7 +173,7 @@ const googleLogin = async (req, res) => {
     const fullName = payload.name || email.split('@')[0];
     const avatar = payload.picture || `https://api.dicebear.com/8.x/thumbs/svg?seed=${encodeURIComponent(fullName)}`;
 
-    let user = await queryGet(`SELECT * FROM Users WHERE email = ?`, [email]);
+    let user = await queryGet(`SELECT * FROM Users WHERE LOWER(email) = ?`, [email]);
 
     if (!user) {
       // Mật khẩu ngẫu nhiên để thỏa schema hiện tại; người dùng đăng nhập bằng Google không cần biết mật khẩu này.
@@ -261,8 +276,17 @@ const updateProfile = async (req, res) => {
 
 const passwordReset = async (req, res) => {
   try {
-    const { email, newPassword } = req.body;
-    const user = await queryGet(`SELECT id FROM Users WHERE email = ?`, [email]);
+    const { newPassword } = req.body;
+    const email = normalizeEmail(req.body.email);
+
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: 'Vui lòng điền email và mật khẩu mới.' });
+    }
+    if (String(newPassword).length < MIN_PASSWORD_LENGTH) {
+      return res.status(400).json({ message: `Mật khẩu mới phải có ít nhất ${MIN_PASSWORD_LENGTH} ký tự.` });
+    }
+
+    const user = await queryGet(`SELECT id FROM Users WHERE LOWER(email) = ?`, [email]);
     if (!user) {
       return res.status(404).json({ message: 'Không tìm thấy tài khoản với email này.' });
     }
