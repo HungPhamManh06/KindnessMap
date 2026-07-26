@@ -140,9 +140,24 @@ export const AuthProvider = ({ children }) => {
     addToast('Đã đăng xuất', 'Hẹn gặp lại bạn lần sau!', 'info');
   };
 
-  const resetPassword = async (email, newPassword) => {
+  const requestPasswordReset = async (email) => {
     try {
-      const res = await api.post('/auth/reset-password', { email, newPassword });
+      const res = await api.post('/auth/forgot-password', { email });
+      const devNote = res.data.devMode
+        ? ' (Server chưa cấu hình SMTP: mã được in ra console backend.)'
+        : '';
+      addToast('Đã gửi mã xác nhận', `${res.data.message}${devNote}`, 'success');
+      return { success: true, devMode: Boolean(res.data.devMode) };
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Không thể gửi mã xác nhận. Vui lòng thử lại.';
+      addToast('Thất bại', msg, 'warning');
+      return { success: false, message: msg };
+    }
+  };
+
+  const resetPassword = async (email, code, newPassword) => {
+    try {
+      const res = await api.post('/auth/reset-password', { email, code, newPassword });
       addToast('Thành công!', res.data.message, 'success');
       setActiveModal('login');
       return { success: true };
@@ -201,6 +216,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        requestPasswordReset,
         resetPassword,
         loginWithGoogle,
         fetchUserData,

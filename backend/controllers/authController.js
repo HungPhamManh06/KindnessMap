@@ -1,8 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
 const { queryGet, queryRun, queryAll } = require('../config/db');
 const { JWT_SECRET } = require('../middleware/authMiddleware');
+const { isMailerConfigured, sendPasswordResetEmail } = require('../utils/mailer');
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -274,29 +276,139 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// ==========================================================================
+// ĐẶT LẠI MẬT KHẨU AN TOÀN (2 BƯỚC VỚI MÃ OTP GỬI QUA EMAIL)
+// Bước 1: POST /auth/forgot-password  { email }              -> gửi mã 6 số
+// Bước 2: POST /auth/reset-password   { email, code, newPassword } -> đổi mật khẩu
+// ==========================================================================
+
+const OTP_EXPIRES_MINUTES = 10;
+const OTP_MAX_ATTEMPTS = 5;          // số lần nhập sai tối đa cho 1 mã
+const OTP_RESEND_COOLDOWN_MS = 60 * 1000; // chờ 60s giữa 2 lần gửi mã
+
+// Lưu OTP trong bộ nhớ: Map<email, { codeHash, expiresAt, attempts, lastSentAt }>
+// (Đủ dùng cho 1 tiến trình server; nếu sau này chạy nhiều instance thì chuyển sang bảng DB/Redis.)
+const resetOtpStore = new Map();
+
+const hashOtp = (code) => crypto.createHash('sha256').update(String(code)).digest('hex');
+
+// Dọn các mã hết hạn để Map không phình to
+const cleanupExpiredOtps = () => {
+  const now = Date.now();
+  for (const [key, entry] of resetOtpStore) {
+    if (entry.expiresAt < now) resetOtpStore.delete(key);
+  }
+};
+
+const forgotPassword = async (req, res) => {
+  try {
+    cleanupExpiredOtps();
+
+    const email = normalizeEmail(req.body.email);
+    if (!email || !isValidEmail(email)) {
+      return res.status(400).json({ message: 'Vui lòng nhập địa chỉ email hợp lệ.' });
+    }
+
+    // Chống spam gửi mã liên tục
+    const existing = resetOtpStore.get(email);
+    if (existing && Date.now() - existing.lastSentAt < OTP_RESEND_COOLDOWN_MS) {
+      const waitSec = Math.ceil((OTP_RESEND_COOLDOWN_MS - (Date.now() - existing.lastSentAt)) / 1000);
+      return res.status(429).json({ message: `Bạn vừa yêu cầu mã. Vui lòng chờ ${waitSec} giây rồi thử lại.` });
+    }
+
+    const user = await queryGet(`SELECT id, fullName FROM Users WHERE LOWER(email) = ?`, [email]);
+
+    // Luôn trả về thông điệp giống nhau dù email có tồn tại hay không,
+    // để tránh kẻ xấu dò xem email nào đã đăng ký (user enumeration).
+    const genericMessage = `Nếu email này đã đăng ký, mã xác nhận gồm 6 chữ số đã được gửi tới hộp thư của bạn (hiệu lực ${OTP_EXPIRES_MINUTES} phút).`;
+    // Cờ devMode phải đồng nhất kể cả khi email không tồn tại,
+    // để response không tiết lộ email nào đã đăng ký (chống user enumeration).
+    const devMode = !isMailerConfigured();
+    const genericResponse = devMode ? { message: genericMessage, devMode: true } : { message: genericMessage };
+
+    if (!user) {
+      return res.status(200).json(genericResponse);
+    }
+
+    // Sinh mã 6 số bảo mật (crypto), lưu dạng hash
+    const code = crypto.randomInt(100000, 1000000).toString();
+    resetOtpStore.set(email, {
+      codeHash: hashOtp(code),
+      expiresAt: Date.now() + OTP_EXPIRES_MINUTES * 60 * 1000,
+      attempts: 0,
+      lastSentAt: Date.now()
+    });
+
+    if (isMailerConfigured()) {
+      await sendPasswordResetEmail(email, user.fullName, code, OTP_EXPIRES_MINUTES);
+      return res.status(200).json(genericResponse);
+    }
+
+    // ===== CHẾ ĐỘ DEV (chưa cấu hình SMTP) =====
+    // In mã ra console server để lập trình viên test được luồng đầy đủ.
+    console.log('==============================================');
+    console.log(`🔐 [DEV] Mã đặt lại mật khẩu cho ${email}: ${code}`);
+    console.log('   (Cấu hình SMTP_HOST/SMTP_USER/SMTP_PASS để gửi email thật)');
+    console.log('==============================================');
+
+    return res.status(200).json(genericResponse);
+  } catch (error) {
+    console.error('Forgot password error:', error);
+    res.status(500).json({ message: 'Có lỗi khi gửi mã xác nhận. Vui lòng thử lại.' });
+  }
+};
+
 const passwordReset = async (req, res) => {
   try {
+    cleanupExpiredOtps();
+
     const { newPassword } = req.body;
     const email = normalizeEmail(req.body.email);
+    const code = String(req.body.code || '').trim();
 
-    if (!email || !newPassword) {
-      return res.status(400).json({ message: 'Vui lòng điền email và mật khẩu mới.' });
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ message: 'Vui lòng điền email, mã xác nhận và mật khẩu mới.' });
     }
     if (String(newPassword).length < MIN_PASSWORD_LENGTH) {
       return res.status(400).json({ message: `Mật khẩu mới phải có ít nhất ${MIN_PASSWORD_LENGTH} ký tự.` });
     }
 
+    const entry = resetOtpStore.get(email);
+    if (!entry || entry.expiresAt < Date.now()) {
+      resetOtpStore.delete(email);
+      return res.status(400).json({ message: 'Mã xác nhận không tồn tại hoặc đã hết hạn. Vui lòng yêu cầu mã mới.' });
+    }
+
+    if (entry.attempts >= OTP_MAX_ATTEMPTS) {
+      resetOtpStore.delete(email);
+      return res.status(429).json({ message: 'Bạn đã nhập sai mã quá nhiều lần. Vui lòng yêu cầu mã mới.' });
+    }
+
+    if (hashOtp(code) !== entry.codeHash) {
+      entry.attempts += 1;
+      const remaining = OTP_MAX_ATTEMPTS - entry.attempts;
+      if (remaining <= 0) {
+        resetOtpStore.delete(email);
+        return res.status(429).json({ message: 'Bạn đã nhập sai mã quá nhiều lần. Vui lòng yêu cầu mã mới.' });
+      }
+      return res.status(400).json({ message: `Mã xác nhận không đúng. Bạn còn ${remaining} lần thử.` });
+    }
+
     const user = await queryGet(`SELECT id FROM Users WHERE LOWER(email) = ?`, [email]);
     if (!user) {
+      resetOtpStore.delete(email);
       return res.status(404).json({ message: 'Không tìm thấy tài khoản với email này.' });
     }
 
     const hashedPw = await bcrypt.hash(newPassword, 10);
     await queryRun(`UPDATE Users SET password = ? WHERE id = ?`, [hashedPw, user.id]);
 
+    // Mã dùng một lần: xoá ngay sau khi đổi mật khẩu thành công
+    resetOtpStore.delete(email);
+
     await queryRun(
       `INSERT INTO Notifications (userId, title, message, type) VALUES (?, ?, ?, ?)`,
-      [user.id, 'Đổi mật khẩu thành công', 'Mật khẩu của bạn đã được thiết lập lại thành công.', 'info']
+      [user.id, 'Đổi mật khẩu thành công', 'Mật khẩu của bạn đã được thiết lập lại thành công qua mã xác nhận email.', 'info']
     );
 
     res.status(200).json({ message: 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.' });
@@ -312,6 +424,7 @@ module.exports = {
   googleLogin,
   getMe,
   updateProfile,
+  forgotPassword,
   passwordReset,
   checkAndUpdateLevel
 };
