@@ -1,14 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { X, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-react';
+import { X, Mail, Lock, User, ArrowRight, Sparkles, KeyRound } from 'lucide-react';
 
 export const AuthModals = () => {
-  const { activeModal, setActiveModal, login, register, resetPassword, loginWithGoogle } = useAuth();
+  const { activeModal, setActiveModal, login, register, requestPasswordReset, resetPassword, loginWithGoogle } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [resetCode, setResetCode] = useState('');
+  // Bước của luồng quên mật khẩu: 'request' (nhập email) -> 'confirm' (nhập mã + mật khẩu mới)
+  const [resetStep, setResetStep] = useState('request');
+  const [resendCountdown, setResendCountdown] = useState(0);
   const [errorMsg, setErrorMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -30,6 +34,19 @@ export const AuthModals = () => {
 
     return () => window.clearInterval(timer);
   }, [googleReady]);
+
+  // Đóng modal bằng phím Escape
+  useEffect(() => {
+    if (!activeModal) return;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setActiveModal(null);
+        setErrorMsg('');
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [activeModal, setActiveModal]);
 
   useEffect(() => {
     if (!activeModal || !googleClientId || !googleReady || !googleButtonRef.current) return;
@@ -62,6 +79,42 @@ export const AuthModals = () => {
   const handleClose = () => {
     setActiveModal(null);
     setErrorMsg('');
+    setPassword('');
+    setNewPassword('');
+    setResetCode('');
+    setResetStep('request');
+    setResendCountdown(0);
+  };
+
+  // Đếm ngược cho nút "Gửi lại mã"
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+    const timer = window.setTimeout(() => setResendCountdown((s) => s - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [resendCountdown]);
+
+  const handleRequestCode = async () => {
+    const res = await requestPasswordReset(email);
+    if (res.success) {
+      setResetStep('confirm');
+      setResendCountdown(60);
+    } else {
+      setErrorMsg(res.message);
+    }
+    return res;
+  };
+
+  const handleResendCode = async () => {
+    if (resendCountdown > 0 || submitting) return;
+    setErrorMsg('');
+    setSubmitting(true);
+    const res = await requestPasswordReset(email);
+    if (res.success) {
+      setResendCountdown(60);
+    } else {
+      setErrorMsg(res.message);
+    }
+    setSubmitting(false);
   };
 
   const handleSubmit = async (e) => {
@@ -76,8 +129,20 @@ export const AuthModals = () => {
       const res = await register(fullName, email, password);
       if (!res.success) setErrorMsg(res.message);
     } else if (activeModal === 'reset') {
-      const res = await resetPassword(email, newPassword);
-      if (!res.success) setErrorMsg(res.message);
+      if (resetStep === 'request') {
+        // Bước 1: gửi mã xác nhận về email
+        await handleRequestCode();
+      } else {
+        // Bước 2: xác nhận mã + đặt mật khẩu mới
+        const res = await resetPassword(email, resetCode, newPassword);
+        if (!res.success) {
+          setErrorMsg(res.message);
+        } else {
+          setResetCode('');
+          setNewPassword('');
+          setResetStep('request');
+        }
+      }
     }
 
     setSubmitting(false);
@@ -85,12 +150,20 @@ export const AuthModals = () => {
 
   const switchModal = (target) => {
     setErrorMsg('');
+    setResetStep('request');
+    setResetCode('');
     setActiveModal(target);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xl p-4 animate-fade-in">
-      <div className="relative w-full max-w-md km-auth-card overflow-hidden animate-slide-up">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xl p-4 animate-fade-in"
+      onClick={handleClose}
+    >
+      <div
+        className="relative w-full max-w-md km-auth-card overflow-hidden animate-slide-up"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Banner header */}
         <div className="km-auth-banner p-6 text-white text-center relative">
           <button
@@ -110,7 +183,9 @@ export const AuthModals = () => {
           <p className="text-xs text-emerald-100 mt-1 font-medium">
             {activeModal === 'login' && 'Chia sẻ việc tốt và tích lũy điểm công dân số'}
             {activeModal === 'register' && 'Đăng ký ngay để nhận +10 điểm công dân số'}
-            {activeModal === 'reset' && 'Nhập email để nhận liên kết khôi phục'}
+            {activeModal === 'reset' && (resetStep === 'request'
+              ? 'Nhập email để nhận mã xác nhận gồm 6 chữ số'
+              : `Nhập mã đã gửi tới ${email} và mật khẩu mới`)}
           </p>
         </div>
 
@@ -146,12 +221,24 @@ export const AuthModals = () => {
               <input
                 type="email"
                 required
+                disabled={activeModal === 'reset' && resetStep === 'confirm'}
                 placeholder="name@example.vn"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                className="w-full pl-11 pr-4 py-3 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all disabled:opacity-60"
               />
             </div>
+            {activeModal === 'reset' && resetStep === 'confirm' && (
+              <div className="text-right mt-1.5">
+                <button
+                  type="button"
+                  onClick={() => { setResetStep('request'); setResetCode(''); setErrorMsg(''); }}
+                  className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
+                >
+                  Dùng email khác?
+                </button>
+              </div>
+            )}
           </div>
 
           {activeModal !== 'reset' && (
@@ -162,12 +249,16 @@ export const AuthModals = () => {
                 <input
                   type="password"
                   required
+                  minLength={activeModal === 'register' ? 6 : undefined}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-11 pr-4 py-3 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                 />
               </div>
+              {activeModal === 'register' && (
+                <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">Tối thiểu 6 ký tự.</p>
+              )}
               {activeModal === 'login' && (
                 <div className="text-right mt-1.5">
                   <button
@@ -182,21 +273,55 @@ export const AuthModals = () => {
             </div>
           )}
 
-          {activeModal === 'reset' && (
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mật khẩu mới</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-                />
+          {activeModal === 'reset' && resetStep === 'confirm' && (
+            <>
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mã xác nhận (6 chữ số)</label>
+                <div className="relative">
+                  <KeyRound className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    required
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    placeholder="Ví dụ: 123456"
+                    value={resetCode}
+                    onChange={(e) => setResetCode(e.target.value.replace(/\D/g, ''))}
+                    className="w-full pl-11 pr-4 py-3 km-auth-input rounded-2xl text-sm tracking-[0.3em] font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                  />
+                </div>
+                <div className="flex items-center justify-between mt-1.5">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Mã có hiệu lực trong 10 phút.</p>
+                  <button
+                    type="button"
+                    onClick={handleResendCode}
+                    disabled={resendCountdown > 0 || submitting}
+                    className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline disabled:opacity-50 disabled:no-underline"
+                  >
+                    {resendCountdown > 0 ? `Gửi lại mã (${resendCountdown}s)` : 'Gửi lại mã'}
+                  </button>
+                </div>
               </div>
-            </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mật khẩu mới</label>
+                <div className="relative">
+                  <Lock className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    placeholder="••••••••"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full pl-11 pr-4 py-3 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                  />
+                </div>
+                <p className="mt-1.5 text-[11px] text-slate-500 dark:text-slate-400">Tối thiểu 6 ký tự.</p>
+              </div>
+            </>
           )}
 
           {activeModal !== 'reset' && (
@@ -236,7 +361,7 @@ export const AuthModals = () => {
               <>
                 {activeModal === 'login' && 'Đăng Nhập'}
                 {activeModal === 'register' && 'Đăng Ký Tài Khoản'}
-                {activeModal === 'reset' && 'Khôi Phục Mật Khẩu'}
+                {activeModal === 'reset' && (resetStep === 'request' ? 'Gửi Mã Xác Nhận' : 'Đặt Lại Mật Khẩu')}
                 <ArrowRight className="w-4 h-4" />
               </>
             )}

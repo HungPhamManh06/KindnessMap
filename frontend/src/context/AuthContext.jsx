@@ -52,8 +52,17 @@ export const AuthProvider = ({ children }) => {
       setUserPosts(res.data.posts || []);
       setIsAuthenticated(true);
     } catch (error) {
-      // Nếu mất mạng, vẫn giữ trạng thái cũ không logout
       console.error('fetchUserData error:', error);
+      const status = error.response?.status;
+      if (status === 401 || status === 403) {
+        // Token hết hạn/không hợp lệ: đăng xuất để tránh trạng thái "đăng nhập ảo"
+        localStorage.removeItem('kindness_token');
+        setUser(null);
+        setUserBadges([]);
+        setUserPosts([]);
+        setIsAuthenticated(false);
+      }
+      // Nếu chỉ mất mạng (không có response), giữ trạng thái cũ không logout
     } finally {
       setLoading(false);
     }
@@ -62,6 +71,22 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     fetchUserData();
   }, [fetchUserData]);
+
+  // Lắng nghe sự kiện phiên hết hạn từ interceptor của axios (api.js)
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      setUser(null);
+      setUserBadges([]);
+      setUserPosts([]);
+      setIsAuthenticated(false);
+      addToast('Phiên đăng nhập đã hết hạn', 'Vui lòng đăng nhập lại để tiếp tục.', 'warning');
+      setActiveModal('login');
+    };
+
+    window.addEventListener('kindnessmap:session-expired', handleSessionExpired);
+    return () => window.removeEventListener('kindnessmap:session-expired', handleSessionExpired);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const login = async (email, password) => {
     try {
@@ -115,9 +140,24 @@ export const AuthProvider = ({ children }) => {
     addToast('Đã đăng xuất', 'Hẹn gặp lại bạn lần sau!', 'info');
   };
 
-  const resetPassword = async (email, newPassword) => {
+  const requestPasswordReset = async (email) => {
     try {
-      const res = await api.post('/auth/reset-password', { email, newPassword });
+      const res = await api.post('/auth/forgot-password', { email });
+      const devNote = res.data.devMode
+        ? ' (Server chưa cấu hình SMTP: mã được in ra console backend.)'
+        : '';
+      addToast('Đã gửi mã xác nhận', `${res.data.message}${devNote}`, 'success');
+      return { success: true, devMode: Boolean(res.data.devMode) };
+    } catch (error) {
+      const msg = error.response?.data?.message || 'Không thể gửi mã xác nhận. Vui lòng thử lại.';
+      addToast('Thất bại', msg, 'warning');
+      return { success: false, message: msg };
+    }
+  };
+
+  const resetPassword = async (email, code, newPassword) => {
+    try {
+      const res = await api.post('/auth/reset-password', { email, code, newPassword });
       addToast('Thành công!', res.data.message, 'success');
       setActiveModal('login');
       return { success: true };
@@ -176,6 +216,7 @@ export const AuthProvider = ({ children }) => {
         login,
         register,
         logout,
+        requestPasswordReset,
         resetPassword,
         loginWithGoogle,
         fetchUserData,
