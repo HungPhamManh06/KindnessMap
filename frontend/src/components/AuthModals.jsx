@@ -74,6 +74,15 @@ export const AuthModals = () => {
     });
   }, [activeModal, googleClientId, googleReady, loginWithGoogle]);
 
+  // Đếm ngược cho nút "Gửi lại mã"
+  // Lưu ý: hook này PHẢI nằm trước early return `if (!activeModal) return null;`
+  // để không vi phạm Rules of Hooks (tránh lỗi màn hình đen khi mở modal).
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+    const timer = window.setTimeout(() => setResendCountdown((s) => s - 1), 1000);
+    return () => window.clearTimeout(timer);
+  }, [resendCountdown]);
+
   if (!activeModal) return null;
 
   const handleClose = () => {
@@ -85,13 +94,6 @@ export const AuthModals = () => {
     setResetStep('request');
     setResendCountdown(0);
   };
-
-  // Đếm ngược cho nút "Gửi lại mã"
-  useEffect(() => {
-    if (resendCountdown <= 0) return;
-    const timer = window.setTimeout(() => setResendCountdown((s) => s - 1), 1000);
-    return () => window.clearTimeout(timer);
-  }, [resendCountdown]);
 
   const handleRequestCode = async () => {
     const res = await requestPasswordReset(email);
