@@ -277,9 +277,8 @@ export const HomeAnimated = () => {
             className="mt-8 max-w-2xl text-base sm:text-lg leading-relaxed km-cinematic-copy animate-fade-rise-delay"
             style={{ color: '#6F6F6F' }}
           >
-            Xây dựng nền tảng cho những tâm hồn nhân ái và những người muốn trao đi những hành động đẹp.
-            Qua nhiều cuộc thảo luận, chúng tôi tạo nên những không gian số để lan tỏa lòng tốt
-            theo cách hiện đại, trực quan và truyền cảm hứng.
+            KindnessMap ghi nhận và kết nối các việc làm tử tế quanh bạn.
+            Đăng câu chuyện, ghim vị trí thực tế trên bản đồ và nhận điểm công dân số cùng cộng đồng.
           </motion.p>
 
           {/* CTA Buttons */}
@@ -453,7 +452,7 @@ export const HomeAnimated = () => {
               Khám Phá Lòng Tốt Quanh Bạn
             </h2>
             <p className="text-sm text-slate-600 dark:text-slate-300 max-w-2xl leading-relaxed">
-              Theo dõi những điểm sáng tử tế, cụm hoạt động cộng đồng và các câu chuyện đang truyền cảm hứng khắp Việt Nam.
+              Theo dõi các điểm việc tốt, cụm hoạt động cộng đồng và các bài viết thực tế trên toàn quốc.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
