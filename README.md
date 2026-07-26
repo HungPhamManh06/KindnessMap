@@ -3,7 +3,7 @@
 ![Tech Stack](https://img.shields.io/badge/Tech%20Stack-React%20%7C%20Tailwind%20CSS%20%7C%20Node.js%20%7C%20Express%20%7C%20MySQL%20%2F%20SQLite-10B981?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Complete%20Production%20Ready-success?style=for-the-badge)
 
-**KindnessMap** là một nền tảng mạng xã hội và cộng đồng khuyến khích mọi người cùng chia sẻ, ghim và khám phá những việc làm tử tế, từ thiện, bảo vệ môi trường diễn ra xung quanh họ. Mục tiêu cao cả của nền tảng là giúp giảm thiểu sự vô cảm trong xã hội, kết nối trái tim và xây dựng những cộng đồng nhân ái, bền vững.
+**KindnessMap** là nền tảng web cho phép người dùng chia sẻ, định vị và theo dõi các hoạt động từ thiện, môi trường, hỗ trợ người cao tuổi và các phong trào tình nguyện trên bản đồ tương tác toàn quốc. Giao diện trực quan giúp kết nối tình nguyện viên, người dân địa phương và các tổ chức cộng đồng.
 
 ---
 

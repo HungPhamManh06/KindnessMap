@@ -19,7 +19,6 @@ export const AuthModals = () => {
 
   useEffect(() => {
     if (googleReady) return;
-
     if (typeof window === 'undefined') return;
 
     const timer = window.setInterval(() => {
@@ -90,83 +89,83 @@ export const AuthModals = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/72 backdrop-blur-xl p-4 animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-xl p-4 animate-fade-in">
       <div className="relative w-full max-w-md km-auth-card overflow-hidden animate-slide-up">
         {/* Banner header */}
-        <div className="km-auth-banner p-7 text-white text-center relative">
+        <div className="km-auth-banner p-6 text-white text-center relative">
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 dark:bg-slate-800/50 hover:bg-white/20 dark:bg-slate-800/60 transition-colors"
+            className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
-          <div className="inline-flex p-3 rounded-2xl bg-white/15 dark:bg-slate-800/50 backdrop-blur-md mb-2">
-            <Sparkles className="w-7 h-7 animate-spin" style={{ animationDuration: '6s' }} />
+          <div className="inline-flex p-2.5 rounded-2xl bg-white/15 backdrop-blur-md mb-2">
+            <Sparkles className="w-6 h-6" />
           </div>
           <h3 className="text-xl font-bold">
-            {activeModal === 'login' && 'Chào Mừng Trở Lại!'}
-            {activeModal === 'register' && 'Tham Gia Cộng Đồng Việc Tốt'}
+            {activeModal === 'login' && 'Chào Mừng Trở Lại'}
+            {activeModal === 'register' && 'Tạo Tài Khoản Mới'}
             {activeModal === 'reset' && 'Đặt Lại Mật Khẩu'}
           </h3>
-          <p className="text-xs text-emerald-100 mt-1">
-            {activeModal === 'login' && 'Cùng lan tỏa những điều tử tế mỗi ngày'}
-            {activeModal === 'register' && 'Tạo tài khoản để nhận ngay +10 điểm công dân số'}
-            {activeModal === 'reset' && 'Khôi phục quyền truy cập Bản Đồ Việc Tốt'}
+          <p className="text-xs text-emerald-100 mt-1 font-medium">
+            {activeModal === 'login' && 'Chia sẻ việc tốt và tích lũy điểm công dân số'}
+            {activeModal === 'register' && 'Đăng ký ngay để nhận +10 điểm công dân số'}
+            {activeModal === 'reset' && 'Nhập email để nhận liên kết khôi phục'}
           </p>
         </div>
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 flex flex-col gap-4">
           {errorMsg && (
-            <div className="p-3 bg-rose-50 text-rose-700 rounded-2xl text-xs font-medium border border-rose-200">
+            <div className="p-3 bg-rose-50 text-rose-700 dark:bg-rose-950/40 dark:text-rose-300 rounded-2xl text-xs font-medium border border-rose-200 dark:border-rose-800">
               {errorMsg}
             </div>
           )}
 
           {activeModal === 'register' && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 dark:text-slate-400 mb-1">Họ và tên</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Họ và tên</label>
               <div className="relative">
-                <User className="absolute left-4 top-3.5 w-4 h-4 text-slate-400 dark:text-slate-500" />
+                <User className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
                 <input
                   type="text"
                   required
                   placeholder="Ví dụ: Trần Minh Tuấn"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
+                  className="w-full pl-11 pr-4 py-3 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                 />
               </div>
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 dark:text-slate-400 mb-1">Địa chỉ Email</label>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Địa chỉ Email</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-3.5 w-4 h-4 text-slate-400 dark:text-slate-500" />
+              <Mail className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
               <input
                 type="email"
                 required
                 placeholder="name@example.vn"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-11 pr-4 py-3.5 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
+                className="w-full pl-11 pr-4 py-3 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
               />
             </div>
           </div>
 
           {activeModal !== 'reset' && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 dark:text-slate-400 mb-1">Mật khẩu</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mật khẩu</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-3.5 w-4 h-4 text-slate-400 dark:text-slate-500" />
+                <Lock className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
                 <input
                   type="password"
                   required
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
+                  className="w-full pl-11 pr-4 py-3 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                 />
               </div>
               {activeModal === 'login' && (
@@ -174,7 +173,7 @@ export const AuthModals = () => {
                   <button
                     type="button"
                     onClick={() => switchModal('reset')}
-                    className="text-xs font-medium text-brand-green hover:underline"
+                    className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
                   >
                     Quên mật khẩu?
                   </button>
@@ -185,27 +184,26 @@ export const AuthModals = () => {
 
           {activeModal === 'reset' && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 dark:text-slate-300 dark:text-slate-400 mb-1">Mật khẩu mới</label>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mật khẩu mới</label>
               <div className="relative">
-                <Lock className="absolute left-4 top-3.5 w-4 h-4 text-slate-400 dark:text-slate-500" />
+                <Lock className="absolute left-4 top-3.5 w-4 h-4 text-slate-400" />
                 <input
                   type="password"
                   required
                   placeholder="••••••••"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3.5 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all"
+                  className="w-full pl-11 pr-4 py-3 km-auth-input rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                 />
               </div>
             </div>
           )}
 
-
           {activeModal !== 'reset' && (
             <div className="flex flex-col gap-3">
               <div className="relative flex items-center justify-center">
-                <div className="absolute inset-x-0 top-1/2 border-t border-slate-100 dark:border-slate-800" />
-                <span className="relative px-3 bg-white dark:bg-slate-900 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                <div className="absolute inset-x-0 top-1/2 border-t border-slate-200 dark:border-slate-800" />
+                <span className="relative px-3 bg-white dark:bg-slate-900 text-[10px] font-bold uppercase tracking-widest text-slate-400">
                   hoặc
                 </span>
               </div>
@@ -215,13 +213,13 @@ export const AuthModals = () => {
                   <div ref={googleButtonRef} className="w-full flex justify-center" />
                   {googleLoading && (
                     <div className="absolute inset-0 rounded-2xl bg-white/70 dark:bg-slate-900/70 flex items-center justify-center">
-                      <span className="inline-block w-5 h-5 border-2 border-brand-green border-t-transparent rounded-full animate-spin" />
+                      <span className="inline-block w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-300 text-[11px] font-semibold border border-amber-200 dark:border-amber-500/20">
-                  {googleClientId ? 'Đang tải nút đăng nhập Google...' : 'Chưa cấu hình VITE_GOOGLE_CLIENT_ID nên nút đăng nhập Google đang bị ẩn.'}
+                <div className="p-3 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[11px] font-medium border border-slate-200 dark:border-slate-700 text-center">
+                  {googleClientId ? 'Đang tải đăng nhập Google...' : 'Nút đăng nhập Google bị ẩn (chưa thiết lập Client ID).'}
                 </div>
               )}
             </div>
@@ -230,7 +228,7 @@ export const AuthModals = () => {
           <button
             type="submit"
             disabled={submitting || googleLoading}
-            className="w-full mt-2 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 hover:opacity-95 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+            className="w-full mt-2 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg shadow-emerald-600/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
           >
             {submitting ? (
               <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -244,25 +242,25 @@ export const AuthModals = () => {
             )}
           </button>
 
-          <div className="border-t border-slate-100 dark:border-slate-800 pt-4 mt-2 text-center">
+          <div className="border-t border-slate-100 dark:border-slate-800 pt-4 mt-1 text-center">
             {activeModal === 'login' ? (
-              <p className="text-xs text-slate-600 dark:text-slate-300 dark:text-slate-400">
+              <p className="text-xs text-slate-600 dark:text-slate-400">
                 Chưa có tài khoản?{' '}
                 <button
                   type="button"
                   onClick={() => switchModal('register')}
-                  className="font-bold text-brand-green hover:underline"
+                  className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
                 >
                   Đăng ký ngay
                 </button>
               </p>
             ) : (
-              <p className="text-xs text-slate-600 dark:text-slate-300 dark:text-slate-400">
+              <p className="text-xs text-slate-600 dark:text-slate-400">
                 Đã có tài khoản?{' '}
                 <button
                   type="button"
                   onClick={() => switchModal('login')}
-                  className="font-bold text-brand-green hover:underline"
+                  className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
                 >
                   Đăng nhập
                 </button>

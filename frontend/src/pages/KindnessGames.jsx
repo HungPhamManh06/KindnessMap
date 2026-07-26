@@ -30,7 +30,7 @@ const PAGE_COPY = {
     badge: 'Khu vui chơi tử tế',
     title: 'Mini Game KindnessMap',
     subtitle:
-      'Một góc nhỏ để người dùng vừa giải trí, vừa luyện phản xạ tử tế: ghi nhớ việc tốt, xử lý tình huống cộng đồng và thu thập “hạt mầm lòng tốt”.',
+      'Không gian giải trí và thử thách phản xạ: ghi nhớ hoạt động cộng đồng, xử lý tình huống thực tế và thu thập điểm hạt mầm.',
     playNow: 'Chơi ngay',
     exploreMap: 'Khám phá bản đồ',
     totalSeeds: 'Hạt mầm tích lũy',
@@ -40,16 +40,16 @@ const PAGE_COPY = {
     flashSuffix: ' hạt mầm!',
     gamesTitle: 'Chọn thử thách của bạn',
     gamesSubtitle:
-      'Mỗi trò chơi được thiết kế theo chủ đề Bản Đồ Việc Tốt: lan tỏa, ghi nhớ, chọn hành động đúng và tránh những tín hiệu tiêu cực.',
+      'Mỗi trò chơi được thiết kế theo các chủ đề chính của Bản Đồ Việc Tốt: ghi nhớ, chọn hành động đúng và phân loại phản hồi tích cực.',
     memoryCardTitle: 'Ghép Cặp Việc Tốt',
-    memoryCardDesc: 'Lật thẻ để tìm những cặp hành động tử tế giống nhau.',
+    memoryCardDesc: 'Lật thẻ để tìm những cặp hành động giống nhau.',
     quizCardTitle: 'Sứ Giả Tình Huống',
-    quizCardDesc: 'Chọn cách ứng xử ấm áp nhất trong các tình huống đời thường.',
+    quizCardDesc: 'Chọn cách ứng xử phù hợp nhất trong các tình huống cộng đồng.',
     catcherCardTitle: 'Bắt Hạt Mầm',
-    catcherCardDesc: 'Thu thập trái tim, lá xanh và dọn rác; né các đám mây tiêu cực.',
-    footerTitle: 'Bạn vừa luyện kỹ năng tử tế?',
+    catcherCardDesc: 'Thu thập trái tim, lá xanh và dọn rác; tránh các chướng ngại vật.',
+    footerTitle: 'Biến thử thách game thành hành động thực tế',
     footerDesc:
-      'Hãy biến điểm số trong mini game thành một hành động thật ngoài đời: giúp một người, nhặt một mẩu rác, hoặc đăng câu chuyện việc tốt của bạn lên KindnessMap.',
+      'Thực hiện một việc tốt ngoài đời thực: giúp đỡ người xung quanh, dọn dẹp môi trường hoặc ghim bài viết của bạn lên KindnessMap.',
     submitStory: 'Gửi câu chuyện thật',
     backToStories: 'Xem câu chuyện cộng đồng',
     ranks: [
