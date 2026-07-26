@@ -22,6 +22,7 @@ import {
   Check,
   Sparkles,
   Target,
+  Gamepad2,
 } from 'lucide-react';
 
 export const Navbar = () => {
@@ -122,6 +123,9 @@ export const Navbar = () => {
             </NavLink>
             <NavLink to="/stories" className={navLinkClass}>
               <BookOpen className="w-4 h-4" /> Câu Chuyện
+            </NavLink>
+            <NavLink to="/games" className={navLinkClass}>
+              <Gamepad2 className="w-4 h-4" /> <span className="hidden xl:inline">Mini Game</span><span className="xl:hidden">Game</span>
             </NavLink>
             <NavLink to="/leaderboard" className={navLinkClass}>
               <Trophy className="w-4 h-4" /> Bảng Xếp Hạng
@@ -488,6 +492,13 @@ export const Navbar = () => {
               className={mobileNavLinkClass}
             >
               <BookOpen className="w-5 h-5" /> Kindness Stories
+            </NavLink>
+            <NavLink
+              to="/games"
+              onClick={() => setMobileMenuOpen(false)}
+              className={mobileNavLinkClass}
+            >
+              <Gamepad2 className="w-5 h-5" /> Mini Game
             </NavLink>
             <NavLink
               to="/leaderboard"
