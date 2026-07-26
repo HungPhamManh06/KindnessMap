@@ -99,6 +99,7 @@ export const Footer = () => {
               {[
                 { to: '/explore',     label: 'Bản Đồ Tương Tác' },
                 { to: '/stories',     label: 'Câu Chuyện Việc Tốt' },
+                { to: '/games',       label: 'Mini Game Tử Tế' },
                 { to: '/leaderboard', label: 'Bảng Xếp Hạng' },
                 { to: '/awards',      label: 'Giải Thưởng Tháng' },
                 { to: '/matching',    label: 'AI Ghép Nối' },
