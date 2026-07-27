@@ -6,7 +6,8 @@ const { queryGet, queryRun, queryAll } = require('../config/db');
 const { JWT_SECRET } = require('../middleware/authMiddleware');
 const { isMailerConfigured, sendPasswordResetEmail } = require('../utils/mailer');
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '739741002165-6t4c64ucbr1re1n4a0gslc86gh52gdoc.apps.googleusercontent.com';
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const createAuthToken = (user) => jwt.sign(
   {
@@ -155,13 +156,9 @@ const googleLogin = async (req, res) => {
       return res.status(400).json({ message: 'Thiếu mã xác thực Google.' });
     }
 
-    if (!process.env.GOOGLE_CLIENT_ID) {
-      return res.status(500).json({ message: 'Máy chủ chưa cấu hình GOOGLE_CLIENT_ID.' });
-    }
-
     const ticket = await googleClient.verifyIdToken({
       idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID
+      audience: GOOGLE_CLIENT_ID
     });
 
     const payload = ticket.getPayload();

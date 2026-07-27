@@ -2,8 +2,13 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
+const googleClientId = process.env.VITE_GOOGLE_CLIENT_ID || '739741002165-6t4c64ucbr1re1n4a0gslc86gh52gdoc.apps.googleusercontent.com';
+
 export default defineConfig({
   plugins: [react()],
+  define: {
+    'import.meta.env.VITE_GOOGLE_CLIENT_ID': JSON.stringify(googleClientId),
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
