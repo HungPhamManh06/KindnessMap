@@ -431,45 +431,133 @@ const passwordReset = async (req, res) => {
   }
 };
 
-const facebookLogin = async (req, res) => {
+// ==========================================================================
+// ĐĂNG NHẬP FACEBOOK — Server-side OAuth Redirect Flow
+// Bước 1: GET /auth/facebook         -> chuyển hướng sang Facebook
+// Bước 2: GET /auth/facebook/callback <- Facebook gọi lại, xử lý, redirect về frontend
+// ==========================================================================
+
+// Lưu CSRF state cho OAuth Facebook (in-memory, tương tự resetOtpStore)
+const facebookOAuthState = new Map();
+
+const cleanupExpiredFacebookState = () => {
+  const now = Date.now();
+  for (const [key, entry] of facebookOAuthState) {
+    if (entry.expiresAt < now) facebookOAuthState.delete(key);
+  }
+};
+
+// Bước 1: Chuyển hướng người dùng đến Facebook OAuth dialog
+const facebookRedirect = async (req, res) => {
   try {
-    const { accessToken } = req.body;
+    cleanupExpiredFacebookState();
 
-    if (!accessToken) {
-      return res.status(400).json({ message: 'Thiếu mã xác thực Facebook.' });
-    }
-
-    const appId = FACEBOOK_APP_ID;
     const appSecret = process.env.FACEBOOK_APP_SECRET;
-
     if (!appSecret) {
       return res.status(500).json({ message: 'Máy chủ chưa cấu hình FACEBOOK_APP_SECRET. Vui lòng thêm vào biến môi trường.' });
     }
 
-    // Bước 1: Xác thực token qua Facebook Graph API debug_token
-    const appAccessToken = `${appId}|${appSecret}`;
-    const debugUrl = `https://graph.facebook.com/debug_token?input_token=${accessToken}&access_token=${appAccessToken}`;
+    // Sinh CSRF state để防止 tấn công CSRF
+    const state = crypto.randomBytes(16).toString('hex');
+    const frontendUrl = req.query.redirect || 'http://localhost:3000';
 
-    const debugRes = await fetch(debugUrl);
-    const debugData = await debugRes.json();
+    facebookOAuthState.set(state, {
+      frontendUrl,
+      expiresAt: Date.now() + 10 * 60 * 1000 // 10 phút
+    });
 
-    if (debugData.error || !debugData.data?.is_valid) {
-      return res.status(401).json({ message: 'Mã xác thực Facebook không hợp lệ hoặc đã hết hạn.' });
+    // Xác định callback URL (chính là request này)
+    const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/facebook/callback`;
+
+    // Tạo URL Facebook OAuth
+    const facebookAuthUrl = [
+      'https://www.facebook.com/v22.0/dialog/oauth',
+      `?client_id=${encodeURIComponent(FACEBOOK_APP_ID)}`,
+      `&redirect_uri=${encodeURIComponent(redirectUri)}`,
+      `&state=${encodeURIComponent(state)}`,
+      '&scope=email,public_profile',
+      '&response_type=code'
+    ].join('');
+
+    console.log(`🔄 [Facebook OAuth] Redirecting user to Facebook...`);
+    res.redirect(facebookAuthUrl);
+  } catch (error) {
+    console.error('Facebook redirect error:', error);
+    res.redirect(`${req.query.redirect || 'http://localhost:3000'}?error=facebook_redirect_error`);
+  }
+};
+
+// Bước 2: Xử lý callback từ Facebook
+const facebookCallback = async (req, res) => {
+  try {
+    cleanupExpiredFacebookState();
+
+    const { code, state, error: fbError } = req.query;
+
+    // Mặc định chuyển hướng về frontend (lấy từ state đã lưu hoặc mặc định)
+    const storedState = state ? facebookOAuthState.get(state) : null;
+    const frontendUrl = storedState?.frontendUrl || 'http://localhost:3000';
+
+    // Xoá state ngay sau khi dùng (dùng 1 lần)
+    if (state) facebookOAuthState.delete(state);
+
+    // Kiểm tra lỗi từ Facebook
+    if (fbError) {
+      console.log(`⚠️ [Facebook OAuth] User denied or error: ${fbError}`);
+      return res.redirect(`${frontendUrl}?error=${fbError}`);
     }
 
-    if (debugData.data.app_id !== appId) {
-      return res.status(403).json({ message: 'Mã xác thực không khớp với ứng dụng này.' });
+    // Kiểm tra state (CSRF)
+    if (!state || !storedState) {
+      console.log('⚠️ [Facebook OAuth] Invalid or expired state');
+      return res.redirect(`${frontendUrl}?error=invalid_state`);
     }
 
-    // Bước 2: Lấy thông tin người dùng từ Graph API
+    if (storedState.expiresAt < Date.now()) {
+      console.log('⚠️ [Facebook OAuth] State expired');
+      return res.redirect(`${frontendUrl}?error=expired_state`);
+    }
+
+    if (!code) {
+      console.log('⚠️ [Facebook OAuth] Missing authorization code');
+      return res.redirect(`${frontendUrl}?error=missing_code`);
+    }
+
+    const appSecret = process.env.FACEBOOK_APP_SECRET;
+    if (!appSecret) {
+      return res.redirect(`${frontendUrl}?error=server_not_configured`);
+    }
+
+    // Bước A: Đổi code lấy access token
+    const redirectUri = `${req.protocol}://${req.get('host')}/api/auth/facebook/callback`;
+    const tokenUrl = [
+      'https://graph.facebook.com/v22.0/oauth/access_token',
+      `?client_id=${encodeURIComponent(FACEBOOK_APP_ID)}`,
+      `&redirect_uri=${encodeURIComponent(redirectUri)}`,
+      `&client_secret=${encodeURIComponent(appSecret)}`,
+      `&code=${encodeURIComponent(code)}`
+    ].join('');
+
+    const tokenRes = await fetch(tokenUrl);
+    const tokenData = await tokenRes.json();
+
+    if (tokenData.error) {
+      console.error('❌ [Facebook OAuth] Token exchange error:', tokenData.error);
+      return res.redirect(`${frontendUrl}?error=token_exchange_failed`);
+    }
+
+    const accessToken = tokenData.access_token;
+
+    // Bước B: Lấy thông tin người dùng
     const fields = 'id,name,email,picture';
-    const userUrl = `https://graph.facebook.com/v22.0/me?fields=${fields}&access_token=${accessToken}`;
+    const userUrl = `https://graph.facebook.com/v22.0/me?fields=${encodeURIComponent(fields)}&access_token=${encodeURIComponent(accessToken)}`;
 
     const userRes = await fetch(userUrl);
     const fbUser = await userRes.json();
 
     if (fbUser.error) {
-      return res.status(400).json({ message: 'Không thể lấy thông tin từ Facebook.' });
+      console.error('❌ [Facebook OAuth] Get user info error:', fbUser.error);
+      return res.redirect(`${frontendUrl}?error=user_info_failed`);
     }
 
     const facebookId = fbUser.id;
@@ -477,7 +565,7 @@ const facebookLogin = async (req, res) => {
     const email = fbUser.email ? normalizeEmail(fbUser.email) : `fb_${facebookId}@facebook.kindnessmap.vn`;
     const avatar = fbUser.picture?.data?.url || `https://api.dicebear.com/8.x/thumbs/svg?seed=${encodeURIComponent(fullName)}`;
 
-    // Bước 3: Tìm hoặc tạo user trong DB
+    // Bước C: Tìm hoặc tạo user trong DB
     let user = await queryGet(`SELECT * FROM Users WHERE LOWER(email) = ?`, [email]);
 
     if (!user) {
@@ -523,15 +611,18 @@ const facebookLogin = async (req, res) => {
     }
 
     const token = createAuthToken(user);
+    const userData = toPublicUser(user);
 
-    res.status(200).json({
-      message: 'Đăng nhập bằng Facebook thành công!',
-      token,
-      user: toPublicUser(user)
-    });
+    // Bước D: Chuyển hướng về frontend kèm token và thông tin user
+    const redirectUrl = `${frontendUrl}?token=${encodeURIComponent(token)}&user=${encodeURIComponent(JSON.stringify(userData))}`;
+    console.log(`✅ [Facebook OAuth] User ${email} logged in successfully. Redirecting to frontend...`);
+    res.redirect(redirectUrl);
   } catch (error) {
-    console.error('Facebook login error:', error);
-    res.status(401).json({ message: 'Không thể xác thực tài khoản Facebook. Vui lòng thử lại.' });
+    console.error('❌ [Facebook OAuth] Callback error:', error);
+    // Cố gắng lấy frontendUrl từ state (nếu còn) hoặc query param redirect, fallback về localhost
+    const fallbackState = req.query?.state ? facebookOAuthState.get(req.query.state) : null;
+    const fbFrontendUrl = fallbackState?.frontendUrl || req.query?.redirect || 'http://localhost:3000';
+    res.redirect(`${fbFrontendUrl}?error=server_error`);
   }
 };
 
@@ -539,7 +630,8 @@ module.exports = {
   register,
   login,
   googleLogin,
-  facebookLogin,
+  facebookRedirect,
+  facebookCallback,
   getMe,
   updateProfile,
   forgotPassword,

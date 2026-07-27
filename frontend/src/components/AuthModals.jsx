@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { X, Mail, Lock, User, ArrowRight, Sparkles, KeyRound, Facebook } from 'lucide-react';
 
 export const AuthModals = () => {
-  const { activeModal, setActiveModal, login, register, requestPasswordReset, resetPassword, loginWithGoogle, loginWithFacebook } = useAuth();
+  const { activeModal, setActiveModal, login, register, requestPasswordReset, resetPassword, loginWithGoogle } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,7 +18,6 @@ export const AuthModals = () => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [facebookLoading, setFacebookLoading] = useState(false);
   const [googleReady, setGoogleReady] = useState(typeof window !== 'undefined' && Boolean(window.google?.accounts?.id));
-  const [facebookReady, setFacebookReady] = useState(typeof window !== 'undefined' && Boolean(window.FB));
   const googleButtonRef = useRef(null);
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const facebookAppId = import.meta.env.VITE_FACEBOOK_APP_ID;
@@ -27,40 +26,7 @@ export const AuthModals = () => {
   const loginWithGoogleRef = useRef(loginWithGoogle);
   loginWithGoogleRef.current = loginWithGoogle;
 
-  // Khởi tạo Facebook SDK
-  useEffect(() => {
-    if (typeof window === 'undefined' || !facebookAppId || facebookAppId.startsWith('your_facebook')) return;
-
-    // Định nghĩa callback fbAsyncInit trước khi script load
-    window.fbAsyncInit = function() {
-      window.FB.init({
-        appId: facebookAppId,
-        cookie: true,
-        xfbml: true,
-        version: 'v22.0'
-      });
-      setFacebookReady(true);
-    };
-
-    // Chỉ load script nếu chưa tồn tại
-    if (!document.getElementById('facebook-jssdk')) {
-      const js = document.createElement('script');
-      js.id = 'facebook-jssdk';
-      js.src = 'https://connect.facebook.net/en_US/sdk.js';
-      js.async = true;
-      js.defer = true;
-      document.body.appendChild(js);
-    } else if (window.FB) {
-      // FB đã được init từ trước, check status
-      window.FB.getLoginStatus((response) => {
-        setFacebookReady(true);
-      });
-    }
-
-    return () => {
-      delete window.fbAsyncInit;
-    };
-  }, [facebookAppId]);
+  // Không cần Facebook SDK nữa — dùng server-side OAuth redirect
 
   useEffect(() => {
     if (googleReady || typeof window === 'undefined') return;
@@ -114,21 +80,13 @@ export const AuthModals = () => {
     });
   }, [activeModal, googleClientId, googleReady]);
 
-  // Xử lý đăng nhập Facebook
-  const handleFacebookLogin = async () => {
-    if (!window.FB) return;
-
-    window.FB.login(async (response) => {
-      if (response.status === 'connected') {
-        setErrorMsg('');
-        setFacebookLoading(true);
-        const res = await loginWithFacebook(response.authResponse.accessToken);
-        if (!res.success) setErrorMsg(res.message);
-        setFacebookLoading(false);
-      } else {
-        setErrorMsg('Bạn đã huỷ đăng nhập Facebook hoặc không cấp quyền.');
-      }
-    }, { scope: 'public_profile,email' });
+  // Xử lý đăng nhập Facebook — chuyển hướng sang server OAuth
+  const handleFacebookLogin = () => {
+    setFacebookLoading(true);
+    setErrorMsg('');
+    // Chuyển hướng đến backend để bắt đầu luồng OAuth Facebook
+    const currentOrigin = window.location.origin;
+    window.location.href = `/api/auth/facebook?redirect=${encodeURIComponent(currentOrigin)}`;
   };
 
   // Đếm ngược cho nút "Gửi lại mã"
@@ -397,7 +355,7 @@ export const AuthModals = () => {
               <button
                 type="button"
                 onClick={handleFacebookLogin}
-                disabled={!facebookAppId || facebookAppId.startsWith('your_facebook') || !facebookReady || facebookLoading}
+                disabled={!facebookAppId || facebookAppId.startsWith('your_facebook') || facebookLoading}
                 className="relative w-full py-3 rounded-2xl bg-[#1877f2] hover:bg-[#166fe5] text-white font-bold text-sm shadow-lg shadow-[#1877f2]/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-80"
               >
                 {facebookLoading ? (

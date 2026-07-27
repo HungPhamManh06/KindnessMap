@@ -72,6 +72,54 @@ export const AuthProvider = ({ children }) => {
     fetchUserData();
   }, [fetchUserData]);
 
+  // Xử lý URL params từ Facebook OAuth redirect (hoặc các redirect khác)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    const userStr = params.get('user');
+    const error = params.get('error');
+
+    if (error) {
+      let errorMsg = 'Đăng nhập bằng Facebook thất bại.';
+      if (error === 'access_denied' || error === 'user_denied') {
+        errorMsg = 'Bạn đã huỷ đăng nhập Facebook.';
+      } else if (error === 'invalid_state' || error === 'expired_state') {
+        errorMsg = 'Phiên đăng nhập Facebook không hợp lệ. Vui lòng thử lại.';
+      } else if (error === 'server_not_configured') {
+        errorMsg = 'Máy chủ chưa cấu hình Facebook App Secret.';
+      } else if (error === 'token_exchange_failed' || error === 'user_info_failed') {
+        errorMsg = 'Không thể xác thực với Facebook. Vui lòng thử lại sau.';
+      }
+      addToast('Đăng nhập Facebook thất bại', errorMsg, 'warning');
+      // Xoá error param khỏi URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    if (token) {
+      localStorage.setItem('kindness_token', token);
+
+      if (userStr) {
+        try {
+          const userData = JSON.parse(decodeURIComponent(userStr));
+          setUser(userData);
+          setUserBadges([]);
+          setUserPosts([]);
+          setIsAuthenticated(true);
+          addToast('Đăng nhập Facebook thành công!', `Chào mừng ${userData.fullName} đến với KindnessMap.`, 'success');
+        } catch (e) {
+          console.error('Failed to parse user data from URL:', e);
+        }
+      }
+
+      // Fetch dữ liệu đầy đủ từ backend
+      fetchUserData();
+
+      // Xoá params khỏi URL để không lộ token trên thanh địa chỉ
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Lắng nghe sự kiện phiên hết hạn từ interceptor của axios (api.js)
   useEffect(() => {
     const handleSessionExpired = () => {
