@@ -1,0 +1,150 @@
+/* ──────────────────────────────────────────────────────────────────────────
+   KindnessMap · Cinematic + Nature Theme
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── Fade-rise keyframe (hero content entrance) ──────────────────────────── */
+@keyframes fade-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-rise          { animation: fade-rise 0.8s ease-out both; }
+.animate-fade-rise-delay    { animation: fade-rise 0.8s ease-out 0.2s both; }
+.animate-fade-rise-delay-2  { animation: fade-rise 0.8s ease-out 0.4s both; }
+.animate-fade-rise-delay-3  { animation: fade-rise 0.8s ease-out 0.6s both; }
+
+/* ── Nature background animations ───────────────────────────────────────── */
+
+/* Clouds drift left → right, looping infinitely */
+@keyframes km-cloud-1 { from { transform: translateX(-260px) scale(1.3); } to { transform: translateX(105vw) scale(1.3); } }
+@keyframes km-cloud-2 { from { transform: translateX(-200px) scale(0.85); } to { transform: translateX(105vw) scale(0.85); } }
+@keyframes km-cloud-3 { from { transform: translateX(-160px) scale(0.6);  } to { transform: translateX(105vw) scale(0.6);  } }
+
+/* Sun gentle pulse */
+@keyframes km-sun-pulse {
+  0%, 100% { transform: scale(1);    opacity: 0.88; }
+  50%       { transform: scale(1.10); opacity: 1; }
+}
+.km-sun-pulse { animation: km-sun-pulse 5s ease-in-out infinite; }
+
+/* River shimmer */
+@keyframes km-river-shimmer {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.8; }
+}
+.km-river-shimmer { animation: km-river-shimmer 3s ease-in-out infinite; }
+
+/* Flowers bob */
+@keyframes km-flower-bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}
+
+/* Birds float */
+@keyframes km-bird-1 {
+  0%   { transform: translate(0, 0)      scaleX(1); }
+  25%  { transform: translate(12px,-6px) scaleX(1); }
+  50%  { transform: translate(24px,0)    scaleX(1); }
+  75%  { transform: translate(12px, 5px) scaleX(1); }
+  100% { transform: translate(0, 0)      scaleX(1); }
+}
+.km-bird-1 { animation: km-bird-1 8s ease-in-out infinite; }
+
+/* ── Hero cinematic typography ───────────────────────────────────────────── */
+.km-cinematic-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -2.46px;
+  line-height: 0.95;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+
+/* Vietnamese headlines — avoid diacritic collision */
+.km-cinematic-title-viet {
+  font-family: var(--font-viet);
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.km-cinematic-copy {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Cinematic hero wrapper (white/light mode, ignores dark mode) ─────────── */
+.km-cinematic-hero {
+  background: #ffffff;
+  color: #000000;
+  color-scheme: light;
+  isolation: isolate;
+}
+
+/* ── Video background layer ──────────────────────────────────────────────── */
+.km-hero-video-layer {
+  position: absolute;
+  inset: auto 0 0 0;
+  top: 300px;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* ── Hero CTA (black pill button) ────────────────────────────────────────── */
+.km-hero-cta {
+  background: #000000;
+  color: #ffffff;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  font-family: var(--font-body);
+  font-weight: 500;
+}
+.km-hero-cta:hover { transform: scale(1.03); box-shadow: 0 8px 32px rgba(0,0,0,0.22); }
+
+/* ── Brand gradient text ─────────────────────────────────────────────────── */
+.km-brand-gradient-text {
+  background: linear-gradient(90deg, #059669 0%, #0d9488 50%, #0e7490 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ── Glass cards for nature hero ─────────────────────────────────────────── */
+.km-nature-glass {
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(16px) saturate(1.6);
+  -webkit-backdrop-filter: blur(16px) saturate(1.6);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+.km-nature-glass-dark {
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* ── Stat pill ───────────────────────────────────────────────────────────── */
+.km-stat-pill {
+  border-radius: 1.25rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-rise,
+  .animate-fade-rise-delay,
+  .animate-fade-rise-delay-2,
+  .animate-fade-rise-delay-3,
+  .km-sun-pulse,
+  .km-river-shimmer,
+  .km-bird-1 { animation: none !important; }
+}

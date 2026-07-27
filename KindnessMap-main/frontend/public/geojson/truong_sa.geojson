@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "QUẦN ĐẢO TRƯỜNG SA (VIỆT NAM)",
+        "type": "territory"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          114,
+          10.5
+        ]
+      }
+    }
+  ]
+}
