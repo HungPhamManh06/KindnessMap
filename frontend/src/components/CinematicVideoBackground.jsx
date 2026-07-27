@@ -5,8 +5,8 @@ export const CINEMATIC_HERO_VIDEO_URL =
 
 /**
  * CinematicVideoBackground
- * — Loops a video with smooth fade-in / fade-out via requestAnimationFrame.
- * — Gradient overlays fade to white (for the light/cinematic KindnessMap hero).
+ * – Loops a video with smooth fade-in/fade-out transitions via requestAnimationFrame.
+ * – Gradient overlays are tuned to the KindnessMap emerald/teal brand palette.
  */
 export const CinematicVideoBackground = ({
   src = CINEMATIC_HERO_VIDEO_URL,
@@ -40,10 +40,10 @@ export const CinematicVideoBackground = ({
       if (!Number.isFinite(duration) || duration <= 0) {
         nextOpacity = 0;
       } else if (currentTime < fadeDuration) {
-        // fade in: 0 → 1
+        // fade in
         nextOpacity = Math.max(0, Math.min(1, currentTime / fadeDuration));
       } else if (duration - currentTime < fadeDuration) {
-        // fade out: 1 → 0
+        // fade out
         nextOpacity = Math.max(0, Math.min(1, (duration - currentTime) / fadeDuration));
       }
 
@@ -87,27 +87,17 @@ export const CinematicVideoBackground = ({
         muted
         playsInline
         preload="metadata"
-        style={{ opacity, transition: 'opacity 0.05s linear' }}
+        style={{ opacity }}
       />
-      {/* Top gradient — fades from white into transparent (blends with hero bg) */}
-      <div
-        className="absolute inset-x-0 top-0"
-        style={{ height: '220px', background: 'linear-gradient(to bottom, #ffffff, transparent)' }}
-      />
-      {/* Bottom gradient — fades to white for seamless page flow */}
-      <div
-        className="absolute inset-x-0 bottom-0"
-        style={{ height: '200px', background: 'linear-gradient(to top, #ffffff, transparent)' }}
-      />
-      {/* Left + Right side vignettes — subtle white edges */}
-      <div
-        className="absolute inset-y-0 left-0"
-        style={{ width: '120px', background: 'linear-gradient(to right, rgba(255,255,255,0.6), transparent)' }}
-      />
-      <div
-        className="absolute inset-y-0 right-0"
-        style={{ width: '120px', background: 'linear-gradient(to left, rgba(255,255,255,0.6), transparent)' }}
-      />
+
+      {/* Top fade-in from card background */}
+      <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-slate-950 to-transparent" />
+
+      {/* Bottom fade-out into card background */}
+      <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-slate-950 to-transparent" />
+
+      {/* Brand-tinted ambient overlay — emerald glow at centre, dark sides */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_60%_40%,rgba(16,185,129,0.22),transparent_55%),radial-gradient(ellipse_at_85%_70%,rgba(20,184,166,0.14),transparent_40%),linear-gradient(100deg,rgba(2,6,23,0.88)_0%,rgba(2,6,23,0.42)_50%,rgba(2,6,23,0.72)_100%)]" />
     </div>
   );
 };

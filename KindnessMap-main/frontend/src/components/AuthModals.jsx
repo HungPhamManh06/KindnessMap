@@ -398,7 +398,7 @@ export const AuthModals = () => {
                 type="button"
                 onClick={handleFacebookLogin}
                 disabled={!facebookAppId || facebookAppId.startsWith('your_facebook') || !facebookReady || facebookLoading}
-                className="relative w-full py-3 rounded-2xl bg-[#1877f2] hover:bg-[#166fe5] text-white font-bold text-sm shadow-lg shadow-[#1877f2]/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="relative w-full py-3 rounded-2xl bg-[#1877f2] hover:bg-[#166fe5] text-white font-bold text-sm shadow-lg shadow-[#1877f2]/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-80"
               >
                 {facebookLoading ? (
                   <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -407,7 +407,7 @@ export const AuthModals = () => {
                     <Facebook className="w-5 h-5 shrink-0" />
                     <span>{activeModal === 'register' ? 'Đăng ký bằng Facebook' : 'Đăng nhập bằng Facebook'}</span>
                     {(!facebookAppId || facebookAppId.startsWith('your_facebook')) && (
-                      <span className="text-[9px] opacity-70 ml-auto">Cấu hình...</span>
+                      <span className="text-[9px] font-normal bg-white/20 px-2 py-0.5 rounded-full ml-auto">Chưa cấu hình</span>
                     )}
                   </>
                 )}
