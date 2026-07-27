@@ -29,7 +29,8 @@ const main = async () => {
   ) || await queryGet(`SELECT id FROM Users ORDER BY id LIMIT 1`);
 
   if (!owner) {
-    throw new Error('No user found. Please start the backend once so default users are created first.');
+    console.log('⚠️ Chưa có người dùng. Server sẽ tạo dữ liệu mẫu khi khởi động. Bỏ qua import community posts.');
+    return;
   }
 
   let inserted = 0;
