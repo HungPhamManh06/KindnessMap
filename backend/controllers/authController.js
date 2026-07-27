@@ -9,6 +9,8 @@ const { isMailerConfigured, sendPasswordResetEmail } = require('../utils/mailer'
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '739741002165-6t4c64ucbr1re1n4a0gslc86gh52gdoc.apps.googleusercontent.com';
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
+const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID || '1568316161683442';
+
 const createAuthToken = (user) => jwt.sign(
   {
     id: user.id,
@@ -437,11 +439,11 @@ const facebookLogin = async (req, res) => {
       return res.status(400).json({ message: 'Thiếu mã xác thực Facebook.' });
     }
 
-    const appId = process.env.FACEBOOK_APP_ID;
+    const appId = FACEBOOK_APP_ID;
     const appSecret = process.env.FACEBOOK_APP_SECRET;
 
-    if (!appId || !appSecret) {
-      return res.status(500).json({ message: 'Máy chủ chưa cấu hình FACEBOOK_APP_ID / FACEBOOK_APP_SECRET.' });
+    if (!appSecret) {
+      return res.status(500).json({ message: 'Máy chủ chưa cấu hình FACEBOOK_APP_SECRET. Vui lòng thêm vào biến môi trường.' });
     }
 
     // Bước 1: Xác thực token qua Facebook Graph API debug_token
