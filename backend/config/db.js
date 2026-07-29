@@ -49,201 +49,127 @@ async function initMySqlDb() {
   try {
     console.log('🔄 Đang kiểm tra và khởi tạo Cơ sở dữ liệu MySQL trên Cloud Aiven...');
     
-    // 1. Tạo các bảng
-    const schemaSql = `
-      CREATE TABLE IF NOT EXISTS Users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-
-    fullName VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-
-    avatar LONGTEXT,
-
-    points INT DEFAULT 0,
-    level VARCHAR(100) DEFAULT 'Active Citizen',
-
-    role ENUM('guest','user','admin') DEFAULT 'user',
-
-    -- AI Matching
-    skills TEXT,
-    interests TEXT,
-    availableTime VARCHAR(100),
-    latitude DOUBLE,
-    longitude DOUBLE,
-    reputationScore DOUBLE DEFAULT 50,
-
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-      CREATE TABLE IF NOT EXISTS HelpRequests (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-
-    category VARCHAR(100),
-
-    latitude DOUBLE,
-    longitude DOUBLE,
-
-    urgency INT DEFAULT 1,
-
-    requesterId INT,
-
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (requesterId)
-    REFERENCES Users(id)
-    ON DELETE CASCADE
-    );
-    ALTER TABLE Users
-    ADD COLUMN skills JSON,
-    ADD COLUMN interests JSON,
-    ADD COLUMN availableTimeSlots JSON,
-    ADD COLUMN locationName VARCHAR(255);
-  
-
-      CREATE TABLE IF NOT EXISTS Badges (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          name VARCHAR(255) NOT NULL,
-          description TEXT NOT NULL,
-          icon VARCHAR(255) NOT NULL
-      ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-       CREATE TABLE UserSkillWeights(
- id INT AUTO_INCREMENT PRIMARY KEY,
- userId INT,
- skillName VARCHAR(255),
- weight DOUBLE DEFAULT 1
-);
-
-      CREATE TABLE IF NOT EXISTS UserBadges (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          userId INT NOT NULL,
-          badgeId INT NOT NULL,
-          awardedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE,
-          FOREIGN KEY (badgeId) REFERENCES Badges(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-       CREATE TABLE IF NOT EXISTS UserCapabilityProfiles (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-
-  userId INT UNIQUE,
-
-  skills JSON,
-
-  interests JSON,
-
-  availabilityStatus VARCHAR(30)
-    DEFAULT 'available',
-
-  baseLatitude DOUBLE,
-  baseLongitude DOUBLE,
-
-  createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-  FOREIGN KEY(userId)
-    REFERENCES Users(id)
-    ON DELETE CASCADE
-);
-
-      CREATE TABLE IF NOT EXISTS Posts (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          title VARCHAR(300) NOT NULL,
-          description TEXT NOT NULL,
-          imageUrl VARCHAR(1000) NOT NULL,
-          category VARCHAR(100) NOT NULL,
-          latitude DECIMAL(10, 8) NOT NULL,
-          longitude DECIMAL(11, 8) NOT NULL,
-          locationName VARCHAR(300) DEFAULT 'Hà Nội, Việt Nam',
-          status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
-          isFeatured BOOLEAN DEFAULT FALSE,
-          pointsAwarded BOOLEAN DEFAULT FALSE,
-          userId INT NOT NULL,
-          createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-      CREATE TABLE IF NOT EXISTS Comments (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          content TEXT NOT NULL,
-          userId INT NOT NULL,
-          postId INT NOT NULL,
-          createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE,
-          FOREIGN KEY (postId) REFERENCES Posts(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-      CREATE TABLE IF NOT EXISTS Likes (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          userId INT NOT NULL,
-          postId INT NOT NULL,
-          createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE,
-          FOREIGN KEY (postId) REFERENCES Posts(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-      CREATE TABLE IF NOT EXISTS Notifications (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          userId INT NOT NULL,
-          title VARCHAR(255) NOT NULL,
-          message TEXT NOT NULL,
-          type VARCHAR(50) DEFAULT 'info',
-          isRead BOOLEAN DEFAULT FALSE,
-          createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-      CREATE TABLE IF NOT EXISTS CommunityAwards (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          title VARCHAR(255) NOT NULL,
-          month VARCHAR(50) NOT NULL,
-          description TEXT NOT NULL,
-          recipientUserId INT NOT NULL,
-          awardPoints INT DEFAULT 100,
-          createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          FOREIGN KEY (recipientUserId) REFERENCES Users(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-      CREATE TABLE IF NOT EXISTS UserCapabilityProfiles (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          userId INT NOT NULL UNIQUE,
-          skills TEXT,
-          communityExperience VARCHAR(50) DEFAULT 'Beginner',
-          yearsExperience INT DEFAULT 0,
-          serviceAreas TEXT,
-          availableTimeSlots TEXT,
-          interests TEXT,
-          availabilityStatus VARCHAR(50) DEFAULT 'available',
-          baseLatitude DECIMAL(10, 8) NULL,
-          baseLongitude DECIMAL(11, 8) NULL,
-          locationName VARCHAR(255) DEFAULT 'Việt Nam',
-          createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-      CREATE TABLE IF NOT EXISTS SupportRequests (
-          id INT AUTO_INCREMENT PRIMARY KEY,
-          requesterUserId INT NOT NULL,
-          title VARCHAR(255) NOT NULL,
-          description TEXT NOT NULL,
-          requiredSkills TEXT,
-          category VARCHAR(100) NOT NULL,
-          latitude DECIMAL(10, 8) NULL,
-          longitude DECIMAL(11, 8) NULL,
-          locationName VARCHAR(255) NOT NULL,
-          preferredTimeSlot VARCHAR(100) DEFAULT 'flexible',
-          urgencyLevel VARCHAR(50) DEFAULT 'medium',
-          status VARCHAR(50) DEFAULT 'open',
-          matchedVolunteerId INT NULL,
-          topMatchScore DECIMAL(6,2) NULL,
-          createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          FOREIGN KEY (requesterUserId) REFERENCES Users(id) ON DELETE CASCADE,
-          FOREIGN KEY (matchedVolunteerId) REFERENCES Users(id) ON DELETE SET NULL
-      ) ENGINE=InnoDB CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-    `;
-    await pool.query(schemaSql);
+    // 1. Tạo các bảng (từng câu lệnh riêng để không cần multipleStatements)
+    const schemaStatements = [
+      `CREATE TABLE IF NOT EXISTS Users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        fullName VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        avatar LONGTEXT,
+        points INT DEFAULT 0,
+        level VARCHAR(100) DEFAULT 'Active Citizen',
+        role ENUM('guest','user','admin') DEFAULT 'user',
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`,
+      `CREATE TABLE IF NOT EXISTS Badges (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        icon VARCHAR(255) NOT NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+      `CREATE TABLE IF NOT EXISTS UserBadges (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        userId INT NOT NULL,
+        badgeId INT NOT NULL,
+        awardedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE,
+        FOREIGN KEY (badgeId) REFERENCES Badges(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+      `CREATE TABLE IF NOT EXISTS UserCapabilityProfiles (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        userId INT NOT NULL UNIQUE,
+        skills TEXT,
+        communityExperience VARCHAR(50) DEFAULT 'Beginner',
+        yearsExperience INT DEFAULT 0,
+        serviceAreas TEXT,
+        availableTimeSlots TEXT,
+        interests TEXT,
+        availabilityStatus VARCHAR(50) DEFAULT 'available',
+        baseLatitude DECIMAL(10, 8) NULL,
+        baseLongitude DECIMAL(11, 8) NULL,
+        locationName VARCHAR(255) DEFAULT 'Việt Nam',
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+      `CREATE TABLE IF NOT EXISTS Posts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(300) NOT NULL,
+        description TEXT NOT NULL,
+        imageUrl VARCHAR(1000) NOT NULL,
+        category VARCHAR(100) NOT NULL,
+        latitude DECIMAL(10, 8) NOT NULL,
+        longitude DECIMAL(11, 8) NOT NULL,
+        locationName VARCHAR(300) DEFAULT 'Hà Nội, Việt Nam',
+        status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
+        isFeatured BOOLEAN DEFAULT FALSE,
+        pointsAwarded BOOLEAN DEFAULT FALSE,
+        userId INT NOT NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+      `CREATE TABLE IF NOT EXISTS Comments (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        content TEXT NOT NULL,
+        userId INT NOT NULL,
+        postId INT NOT NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE,
+        FOREIGN KEY (postId) REFERENCES Posts(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+      `CREATE TABLE IF NOT EXISTS Likes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        userId INT NOT NULL,
+        postId INT NOT NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE,
+        FOREIGN KEY (postId) REFERENCES Posts(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+      `CREATE TABLE IF NOT EXISTS Notifications (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        userId INT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        message TEXT NOT NULL,
+        type VARCHAR(50) DEFAULT 'info',
+        isRead BOOLEAN DEFAULT FALSE,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (userId) REFERENCES Users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+      `CREATE TABLE IF NOT EXISTS CommunityAwards (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        month VARCHAR(50) NOT NULL,
+        description TEXT NOT NULL,
+        recipientUserId INT NOT NULL,
+        awardPoints INT DEFAULT 100,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (recipientUserId) REFERENCES Users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+      `CREATE TABLE IF NOT EXISTS SupportRequests (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        requesterUserId INT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        requiredSkills TEXT,
+        category VARCHAR(100) NOT NULL,
+        latitude DECIMAL(10, 8) NULL,
+        longitude DECIMAL(11, 8) NULL,
+        locationName VARCHAR(255) NOT NULL,
+        preferredTimeSlot VARCHAR(100) DEFAULT 'flexible',
+        urgencyLevel VARCHAR(50) DEFAULT 'medium',
+        status VARCHAR(50) DEFAULT 'open',
+        matchedVolunteerId INT NULL,
+        topMatchScore DECIMAL(6,2) NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (requesterUserId) REFERENCES Users(id) ON DELETE CASCADE,
+        FOREIGN KEY (matchedVolunteerId) REFERENCES Users(id) ON DELETE SET NULL
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`
+    ];
+    for (const stmt of schemaStatements) {
+      await pool.query(stmt);
+    }
 
     // Bọc thép db: Upgrade avatar column to LONGTEXT safely if table already existed
     try {
@@ -553,9 +479,8 @@ async function initDb() {
       waitForConnections: true,
       connectionLimit: 3,
       queueLimit: 0,
-      multipleStatements: true,
       ssl: { rejectUnauthorized: false },
-      connectTimeout: 5000 // Chờ kết nối tối đa 5 giây
+      connectTimeout: 5000
     });
     // Test thử một query để xác minh kết nối có thực sự tồn tại
     const conn = await pool.getConnection();

@@ -206,22 +206,13 @@ const googleLogin = async (req, res) => {
         role: 'user'
       };
     } else {
-      // Đồng bộ avatar và tên từ Google mới nhất (giữ nguyên quyền/điểm)
-      const updates = [];
-      const params = [];
       if (avatar && avatar !== user.avatar) {
-        updates.push('avatar = ?');
-        params.push(avatar);
+        await queryRun(`UPDATE Users SET avatar = ? WHERE id = ?`, [avatar, user.id]);
         user.avatar = avatar;
       }
       if (fullName && fullName !== user.fullName) {
-        updates.push('fullName = ?');
-        params.push(fullName);
+        await queryRun(`UPDATE Users SET fullName = ? WHERE id = ?`, [fullName, user.id]);
         user.fullName = fullName;
-      }
-      if (updates.length > 0) {
-        params.push(user.id);
-        await queryRun(`UPDATE Users SET ${updates.join(', ')} WHERE id = ?`, params);
       }
     }
 
@@ -621,22 +612,13 @@ const facebookCallback = async (req, res) => {
         role: 'user'
       };
     } else {
-      // Đồng bộ avatar và tên từ Facebook mới nhất
-      const updates = [];
-      const params = [];
       if (avatar && avatar !== user.avatar) {
-        updates.push('avatar = ?');
-        params.push(avatar);
+        await queryRun(`UPDATE Users SET avatar = ? WHERE id = ?`, [avatar, user.id]);
         user.avatar = avatar;
       }
       if (fullName && fullName !== user.fullName) {
-        updates.push('fullName = ?');
-        params.push(fullName);
+        await queryRun(`UPDATE Users SET fullName = ? WHERE id = ?`, [fullName, user.id]);
         user.fullName = fullName;
-      }
-      if (updates.length > 0) {
-        params.push(user.id);
-        await queryRun(`UPDATE Users SET ${updates.join(', ')} WHERE id = ?`, params);
       }
     }
 
