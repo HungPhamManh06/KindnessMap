@@ -15,17 +15,24 @@ const cleanEnvValue = (value = '', keyName = '') => {
 };
 
 const readEnvKey = (keyName) => {
-  let key = process.env[keyName] || '';
+  const raw = process.env[keyName];
+  if (raw) return cleanEnvValue(raw, keyName);
 
-  // Tolerate common Render mistake: VALUE contains "KEY_NAME=<api-key>".
-  if (!key) {
-    const envValueWithPrefix = Object.values(process.env).find(
-      (value) => typeof value === 'string' && value.trim().startsWith(`${keyName}=`)
-    );
-    if (envValueWithPrefix) key = envValueWithPrefix;
+  // Tolerate common Render mistake: the env name is set but its VALUE
+  // contains "KEY_NAME=<actual-key>".  Scan only env vars whose name
+  // ends with the exact keyName (case-insensitive) to limit false matches.
+  const lowerKey = keyName.toLowerCase();
+  for (const [envName, envValue] of Object.entries(process.env)) {
+    if (
+      typeof envValue === 'string' &&
+      envName.toLowerCase() === lowerKey && // exact name match only
+      envValue.trim().startsWith(`${keyName}=`)
+    ) {
+      return cleanEnvValue(envValue, keyName);
+    }
   }
 
-  return cleanEnvValue(key, keyName);
+  return '';
 };
 
 const getGeminiModelCandidates = () => {

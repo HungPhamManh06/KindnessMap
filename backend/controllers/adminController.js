@@ -138,12 +138,20 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+const VALID_ROLES = ['user', 'admin', 'guest'];
+
 const updateUserRole = async (req, res) => {
   try {
     const { id } = req.params;
     const { role } = req.body;
-    await queryRun(`UPDATE Users SET role = ? WHERE id = ?`, [role, id]);
-    res.status(200).json({ message: `Cập nhật quyền người dùng thành ${role}.` });
+
+    const cleanRole = String(role || '').trim().toLowerCase();
+    if (!VALID_ROLES.includes(cleanRole)) {
+      return res.status(400).json({ message: `Vai trò không hợp lệ. Chỉ chấp nhận: ${VALID_ROLES.join(', ')}.` });
+    }
+
+    await queryRun(`UPDATE Users SET role = ? WHERE id = ?`, [cleanRole, id]);
+    res.status(200).json({ message: `Cập nhật quyền người dùng thành ${cleanRole}.` });
   } catch (error) {
     console.error('Update user role error:', error);
     res.status(500).json({ message: 'Có lỗi khi cập nhật quyền.' });

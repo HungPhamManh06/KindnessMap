@@ -1,6 +1,22 @@
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'kindness_map_super_secret_jwt_2026';
+// ============================================================
+// JWT Secret – KHÔNG dùng fallback hardcoded trong production
+// ============================================================
+let JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  if (isProduction) {
+    console.error('❌ FATAL: Biến môi trường JWT_SECRET chưa được cấu hình! Server không thể khởi động an toàn trong production.');
+    process.exit(1);
+  }
+  // Dev mode: tự sinh secret ngẫu nhiên mỗi lần restart (token cũ sẽ invalid – chấp nhận được khi dev)
+  JWT_SECRET = crypto.randomBytes(32).toString('hex');
+  console.warn('⚠️  [DEV] JWT_SECRET chưa được cấu hình. Đang dùng secret ngẫu nhiên tạm thời.');
+  console.warn('   → Thiết lập JWT_SECRET trong backend/.env để token không bị mất khi restart server.');
+}
 
 const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;

@@ -371,10 +371,81 @@ const commentPost = async (req, res) => {
 };
 
 
+// Chỉ cho phép proxy ảnh từ các tên miền ảnh phổ biến (chống SSRF)
+const ALLOWED_IMAGE_HOSTS = [
+  'images.unsplash.com',
+  'plus.unsplash.com',
+  'api.dicebear.com',
+  'avatars.githubusercontent.com',
+  'lh3.googleusercontent.com',
+  'graph.facebook.com',
+  'platform-lookaside.fbsbx.com',
+];
+
+// Cho phép subdomain động của các host phổ biến
+const ALLOWED_IMAGE_HOST_SUFFIXES = [
+  '.unsplash.com',
+  '.dicebear.com',
+  '.googleusercontent.com',
+  '.fbcdn.net',
+];
+
+const isAllowedImageHost = (hostname) => {
+  const lower = hostname.toLowerCase();
+  if (ALLOWED_IMAGE_HOSTS.includes(lower)) return true;
+  return ALLOWED_IMAGE_HOST_SUFFIXES.some((suffix) => lower.endsWith(suffix));
+};
+
 const proxyImage = async (req, res) => {
   try {
     const rawUrl = String(req.query.url || '').trim();
     if (!/^https?:\/\//i.test(rawUrl)) {
+      res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return res.send(decodeURIComponent(FALLBACK_IMAGE_URL.split(',')[1]));
+    }
+
+    // Kiểm tra tên miền để chống SSRF
+    let parsedUrl;
+    try {
+      parsedUrl = new URL(rawUrl);
+    } catch {
+      res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return res.send(decodeURIComponent(FALLBACK_IMAGE_URL.split(',')[1]));
+    }
+
+    // Chặn IP nội bộ (localhost, private ranges)
+    const hostname = parsedUrl.hostname;
+    if (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '0.0.0.0' ||
+      hostname === '::1' ||
+      hostname.startsWith('10.') ||
+      hostname.startsWith('172.') ||
+      hostname.startsWith('192.168.') ||
+      hostname.endsWith('.local') ||
+      hostname.endsWith('.internal')
+    ) {
+      console.warn(`⚠️ SSRF attempt blocked: ${rawUrl}`);
+      res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return res.send(decodeURIComponent(FALLBACK_IMAGE_URL.split(',')[1]));
+    }
+
+    // Giới hạn cổng (chỉ cho phép cổng 80 và 443)
+    const port = parsedUrl.port;
+    if (port && port !== '80' && port !== '443') {
+      console.warn(`⚠️ SSRF attempt blocked (non-standard port): ${rawUrl}`);
+      res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return res.send(decodeURIComponent(FALLBACK_IMAGE_URL.split(',')[1]));
+    }
+
+    // Kiểm tra domain trong danh sách cho phép (chống SSRF lớp cuối)
+    if (!isAllowedImageHost(hostname)) {
+      console.warn(`⚠️ SSRF attempt blocked (host not allowed): ${rawUrl}`);
       res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
       res.setHeader('Cache-Control', 'public, max-age=86400');
       return res.send(decodeURIComponent(FALLBACK_IMAGE_URL.split(',')[1]));
@@ -397,10 +468,21 @@ const proxyImage = async (req, res) => {
         'Referer': new URL(rawUrl).origin,
       },
       redirect: 'follow',
+      // Chỉ fetch với timeout để tránh treo server
+      signal: AbortSignal.timeout(10000),
     });
 
     const contentType = response.headers.get('content-type') || '';
     if (!response.ok || !contentType.toLowerCase().startsWith('image/')) {
+      res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      return res.send(decodeURIComponent(FALLBACK_IMAGE_URL.split(',')[1]));
+    }
+
+    // Giới hạn kích thước ảnh tối đa 10MB
+    const contentLength = response.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > 10 * 1024 * 1024) {
+      console.warn(`⚠️ Image too large (${contentLength} bytes): ${rawUrl}`);
       res.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
       res.setHeader('Cache-Control', 'public, max-age=86400');
       return res.send(decodeURIComponent(FALLBACK_IMAGE_URL.split(',')[1]));

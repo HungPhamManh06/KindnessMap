@@ -6,10 +6,16 @@ const { queryGet, queryRun, queryAll } = require('../config/db');
 const { JWT_SECRET } = require('../middleware/authMiddleware');
 const { isMailerConfigured, sendPasswordResetEmail } = require('../utils/mailer');
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '739741002165-6t4c64ucbr1re1n4a0gslc86gh52gdoc.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
+if (!GOOGLE_CLIENT_ID) {
+  console.warn('⚠️  GOOGLE_CLIENT_ID chưa được cấu hình trong .env. Đăng nhập Google sẽ không hoạt động.');
+}
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
-const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID || '1568316161683442';
+const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID || '';
+if (!FACEBOOK_APP_ID) {
+  console.warn('⚠️  FACEBOOK_APP_ID chưa được cấu hình trong .env. Đăng nhập Facebook sẽ không hoạt động.');
+}
 
 const createAuthToken = (user) => jwt.sign(
   {
@@ -269,7 +275,31 @@ const getMe = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { fullName, avatar } = req.body;
+    let { fullName, avatar } = req.body;
+
+    // Validate fullName: must be a non-empty string
+    if (fullName !== undefined) {
+      fullName = String(fullName).trim();
+      if (!fullName) {
+        return res.status(400).json({ message: 'Họ tên không được để trống.' });
+      }
+      if (fullName.length > 100) {
+        return res.status(400).json({ message: 'Họ tên không được quá 100 ký tự.' });
+      }
+    } else {
+      fullName = req.user.fullName;
+    }
+
+    // Validate avatar: must be a valid URL or empty
+    if (avatar !== undefined && avatar !== null) {
+      avatar = String(avatar).trim();
+      if (avatar && !/^https?:\/\//i.test(avatar) && !avatar.startsWith('data:image/')) {
+        return res.status(400).json({ message: 'Avatar phải là đường dẫn URL hợp lệ hoặc dữ liệu ảnh.' });
+      }
+    } else {
+      avatar = req.user.avatar || '';
+    }
+
     await queryRun(
       `UPDATE Users SET fullName = ?, avatar = ? WHERE id = ?`,
       [fullName, avatar, req.user.id]
